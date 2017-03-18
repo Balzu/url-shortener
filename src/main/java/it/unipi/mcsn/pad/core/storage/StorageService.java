@@ -1,13 +1,16 @@
 package it.unipi.mcsn.pad.core.storage;
 
 import it.unipi.mcsn.pad.core.Service;
+import voldemort.versioning.VectorClock;
 
 public class StorageService implements Service{
 	
 	private StorageManager storageManager;
+	private VectorClock vectorClock;
 	
-	public StorageService(){
+	public StorageService(VectorClock vc){
 		
+		vectorClock = vc;
 	}
 	
 	public void store(){

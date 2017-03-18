@@ -1,6 +1,18 @@
 package it.unipi.mcsn.pad.core.message;
 
-public class RemoveMessage extends Message{
+public class RemoveMessage implements Message{
+	
+	protected MessageStatus messageStatus;
+	protected MessageType messageType;
+
+	
+	public MessageStatus getMessageStatus() {	
+		return messageStatus;
+	}
+
+	public MessageType getMessageType() {
+		return messageType;
+	}
 	
 	public RemoveMessage (){
 		messageType=MessageType.REMOVE;

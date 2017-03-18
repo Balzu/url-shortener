@@ -49,5 +49,10 @@
       <artifactId>json</artifactId>
       <version>20080701</version>
     </dependency>
+    <dependency>
+      <groupId>it.cnr.isti.hpclab</groupId>
+      <artifactId>versioning</artifactId>
+      <version>0.0.1</version>
+    </dependency>
   </dependencies>
 </project>

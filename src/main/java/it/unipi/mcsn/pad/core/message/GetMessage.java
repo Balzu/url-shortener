@@ -1,9 +1,20 @@
 package it.unipi.mcsn.pad.core.message;
 
-public class GetMessage extends Message{
+public class GetMessage implements Message{
 	
 	//TODO: solo un primo abbozzo
 	private String shortUrl;
+	protected MessageStatus messageStatus;
+	protected MessageType messageType;
+
+	
+	public MessageStatus getMessageStatus() {	
+		return messageStatus;
+	}
+
+	public MessageType getMessageType() {
+		return messageType;
+	}
 	
 	public GetMessage (String url){
 		messageType=MessageType.GET;

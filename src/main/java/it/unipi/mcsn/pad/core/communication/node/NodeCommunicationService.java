@@ -9,20 +9,24 @@ import com.google.code.gossip.GossipSettings;
 import com.google.code.gossip.event.GossipListener;
 
 import it.unipi.mcsn.pad.core.Service;
+import voldemort.versioning.VectorClock;
 
 public class NodeCommunicationService implements Service{
 	
 	private GossipService gossipService;
 	private ReplicaManager replicaManager;
 	private RequestManager requestManager;
+	private VectorClock vectorClock;
 	
 	public NodeCommunicationService(String ipAddress, int port, String id, int logLevel, 
-			 List<GossipMember> gossipMembers, GossipSettings settings, GossipListener listener) throws UnknownHostException, InterruptedException {
+			 List<GossipMember> gossipMembers, GossipSettings settings,
+			 GossipListener listener, VectorClock vc) throws UnknownHostException, InterruptedException {
 		
 		gossipService = new GossipService(ipAddress, port, id, logLevel, gossipMembers, settings, listener);
 		gossipService.start();
 		replicaManager = new ReplicaManager();
 		requestManager = new RequestManager();
+		vectorClock = vc;
 	}
 
 	public GossipService getGossipService() {

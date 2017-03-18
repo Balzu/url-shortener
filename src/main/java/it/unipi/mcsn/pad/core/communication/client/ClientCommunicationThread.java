@@ -14,9 +14,11 @@ import it.unipi.mcsn.pad.core.message.ReplyMessage;
 public class ClientCommunicationThread implements Runnable{
 	
 	private Socket socket;
+	private ClientCommunicationManager manager;
 	
-	public ClientCommunicationThread(Socket sck){		
+	public ClientCommunicationThread(Socket sck, ClientCommunicationManager mgr){		
 		socket = sck;
+		manager = mgr;
 	}
 
 	public void run() {		
