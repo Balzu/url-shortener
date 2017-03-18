@@ -8,7 +8,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import it.unipi.mcsn.pad.core.Node;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
+import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.utils.Partitioner;
 import voldemort.versioning.VectorClock;
 
@@ -49,11 +51,18 @@ public class ClientCommunicationManager extends Thread{
 		}		
 	}
 	
+	/**
+	 * Processes the message: finds the primary node and sends the message to it
+	 * if primary node is different from this node.
+	 *  Returns a message containing the reply for the operation.
+	 */
 	public Message processMessage(Message msg) {
 		//when receive something, update the vector clock
-		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());
+		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());		
 		ClientMessage<String> clmsg = (ClientMessage<String>) msg;
-		Partitioner.findPrimary(clmsg.getKey());
+		//TODO: insert list of nodes as parameter, check what the method returns
+		Node primary = Partitioner.findPrimary(clmsg.getKey());  
+		
 	}
 	
 
