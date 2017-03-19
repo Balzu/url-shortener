@@ -8,6 +8,5 @@
 \contentsline {subsection}{\numberline {2.3}Data Partitioning}{2}
 \contentsline {subsection}{\numberline {2.4}Data Replication}{2}
 \contentsline {subsection}{\numberline {2.5}Primary Failure}{2}
-\contentsline {subsection}{\numberline {2.6}}{2}
-\contentsline {subsection}{\numberline {2.7}}{2}
-\contentsline {subsection}{\numberline {2.8}}{2}
+\contentsline {subsection}{\numberline {2.6}Consistency Model}{2}
+\contentsline {subsection}{\numberline {2.7}Conflicts Resolution}{3}
