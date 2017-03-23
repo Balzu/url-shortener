@@ -25,9 +25,10 @@ public class NodeRunner
 
     		List<Node> nodes = new ArrayList<>();
     		for (int i = 1; i < seedNodes+1; ++i) {
-
+    			
+    			//TODO: use IP address as ID, in order it to be unique for each node
     			Node node = new Node(2001, 50, "127.0.0." + i, 2000, i + "", LogLevel.DEBUG,
-    					startupMembers, settings, null);
+    					startupMembers, settings, null, i);
     			node.start();
     			nodes.add(node);    				   
     		}   	

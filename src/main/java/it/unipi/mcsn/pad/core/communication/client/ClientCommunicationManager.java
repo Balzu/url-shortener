@@ -61,8 +61,8 @@ public class ClientCommunicationManager extends Thread{
 		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());		
 		ClientMessage<String> clmsg = (ClientMessage<String>) msg;
 		//TODO: insert list of nodes as parameter, check what the method returns
-		Node primary = Partitioner.findPrimary(clmsg.getKey());  
-		
+		//	Node primary = Partitioner.findPrimary(clmsg.getKey());  
+		return null;
 	}
 	
 

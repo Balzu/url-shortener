@@ -54,5 +54,10 @@
       <artifactId>versioning</artifactId>
       <version>0.0.1</version>
     </dependency>
+    <dependency>
+      <groupId>it.unipi.mcsn.pad</groupId>
+      <artifactId>consistent-hashing</artifactId>
+      <version>0.0.2</version>
+    </dependency>
   </dependencies>
 </project>

@@ -29,24 +29,7 @@ public class ClientCommunicationThread implements Runnable{
 		{
 			Message message = (Message)ois.readObject();
 			Message reply = null;
-			switch(message.getMessageType())
-			{
-			  case GET:
-				  reply = processGetMessage(message);
-				  break;
-			  case PUT:
-				  reply = processPutMessage(message);
-				  break;
-			  case LIST:
-				  reply = processListMessage(message);
-				  break;
-			  case REMOVE:
-				  reply = processRemoveMessage(message);
-				  break;
-			  default:
-				  reply = new ReplyMessage(null,null, MessageStatus.ERROR);
-			}	
-			
+			reply = manager.processMessage(message);
 			oos.writeObject(reply);
 		} 
 		
