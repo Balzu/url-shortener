@@ -14,32 +14,28 @@ import voldemort.versioning.VectorClock;
 public class NodeCommunicationService implements Service{
 	
 	private GossipService gossipService;
-	private ReplicaManager replicaManager;
-	private RequestManager requestManager;
-	private VectorClock vectorClock;
+	private NodeCommunicationManager nodeCommManager;
+
 	
 	public NodeCommunicationService(String ipAddress, int port, String id, int logLevel, 
 			 List<GossipMember> gossipMembers, GossipSettings settings,
-			 GossipListener listener, VectorClock vc) throws UnknownHostException, InterruptedException {
+			 GossipListener listener, VectorClock vc, int nid)
+					 throws UnknownHostException, InterruptedException {
 		
 		gossipService = new GossipService(ipAddress, port, id, logLevel, gossipMembers, settings, listener);
 		gossipService.start();
-		replicaManager = new ReplicaManager();
-		requestManager = new RequestManager();
-		vectorClock = vc;
+		nodeCommManager = new NodeCommunicationManager(vc, nid, this);	
 	}
 
 	public GossipService getGossipService() {
 		return gossipService;
 	}
 
-	public ReplicaManager getReplicaManager() {
-		return replicaManager;
+	public NodeCommunicationManager getCommunicationManager() {
+		return nodeCommManager;
 	}
 
-	public RequestManager getRequestManager() {
-		return requestManager;
-	}
+	
 
 	@Override
 	public void start() {

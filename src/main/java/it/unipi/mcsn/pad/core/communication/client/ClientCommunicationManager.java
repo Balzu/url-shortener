@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.unipi.mcsn.pad.core.Node;
+import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
 import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.utils.Partitioner;
@@ -21,16 +22,18 @@ public class ClientCommunicationManager extends Thread{
 	private final ExecutorService threadPool;
 	//Usato per gestire richieste concorrenti da client (è lock-free), ma va bene il nome??
 	private final AtomicBoolean clientServiceRunning; 
-	private VectorClock vectorClock;
-	private int nodeId;
 	
-	public ClientCommunicationManager( int port, int backlog, InetAddress bindAddr
-			, VectorClock vc, int nid){
+	private final int nodeId;
+	private NodeCommunicationManager nodeCommManager;
+	
+	public ClientCommunicationManager( int port, int backlog, InetAddress bindAddr,
+			int nid, NodeCommunicationManager ncm){
 		
 		clientServiceRunning = new AtomicBoolean(true);
 		threadPool = Executors.newCachedThreadPool();
-		vectorClock = vc;
+		
 		nodeId = nid;
+		nodeCommManager = ncm;
 		try { //TODO: Have to close ServerSocket somewhere?
 			serverSocket = new ServerSocket(port, backlog, bindAddr);			
 		} catch (IOException e) {			
@@ -52,17 +55,14 @@ public class ClientCommunicationManager extends Thread{
 	}
 	
 	/**
-	 * Processes the message: finds the primary node and sends the message to it
-	 * if primary node is different from this node.
+	 * Delegates the processing of the message to the NodeCommunicationManager.
 	 *  Returns a message containing the reply for the operation.
 	 */
 	public Message processMessage(Message msg) {
-		//when receive something, update the vector clock
-		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());		
-		ClientMessage<String> clmsg = (ClientMessage<String>) msg;
-		//TODO: insert list of nodes as parameter, check what the method returns
-		//	Node primary = Partitioner.findPrimary(clmsg.getKey());  
-		return null;
+		
+		Message response = nodeCommManager.processClientMessage(msg);
+		
+		return response;
 	}
 	
 

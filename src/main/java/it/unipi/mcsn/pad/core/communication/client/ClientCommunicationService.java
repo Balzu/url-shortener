@@ -3,16 +3,18 @@ package it.unipi.mcsn.pad.core.communication.client;
 import java.net.InetAddress;
 
 import it.unipi.mcsn.pad.core.Service;
+import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager;
 import voldemort.versioning.VectorClock;
 
 public class ClientCommunicationService implements Service{
 	
 	private ClientCommunicationManager clientCommManager;
-	private VectorClock vectorClock;
 	
-	public ClientCommunicationService(int port, int backlog, InetAddress bindAddr, VectorClock vc, int nodeId){
-		clientCommManager = new ClientCommunicationManager(port, backlog, bindAddr, vc, nodeId);
-		vectorClock = vc;
+	
+	public ClientCommunicationService(int port, int backlog, InetAddress bindAddr,
+			int nodeId, NodeCommunicationManager ncm){
+		clientCommManager = new ClientCommunicationManager(port, backlog, bindAddr, nodeId, ncm);
+
 	}
 
 	public ClientCommunicationManager getClientCommManager() {

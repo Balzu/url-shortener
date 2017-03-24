@@ -28,9 +28,10 @@ public class Node {
 			GossipSettings settings, GossipListener listener, int nid) throws UnknownHostException, InterruptedException 
 	{		
 		nodeCommService = new NodeCommunicationService(
-				ipAddress, nodePort, id, logLevel, gossipMembers, settings, listener, vectorClock);
+				ipAddress, nodePort, id, logLevel, gossipMembers, settings, listener, vectorClock, nid);
 		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
-		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, vectorClock, nid);
+		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
+				nid, nodeCommService.getCommunicationManager());
 		storageService = new StorageService(vectorClock);	
 		nodeId = nid; //TODO: forse puoi ricavere un id unico dalla stringa 'id'
 		vectorClock = new VectorClock(); //TODO: ok this constructor?
