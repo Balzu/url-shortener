@@ -26,7 +26,8 @@ public class NodeRunner
     		List<Node> nodes = new ArrayList<>();
     		for (int i = 1; i < seedNodes+1; ++i) {
     			
-    			//TODO: use IP address as ID, in order it to be unique for each node
+    			//TODO: use IP address as ID, in order it to be unique for each node. 
+    			// Better to use InetClass instead of string for the ip address!
     			Node node = new Node(2001, 50, "127.0.0." + i, 2000, i + "", LogLevel.DEBUG,
     					startupMembers, settings, null, i);
     			node.start();

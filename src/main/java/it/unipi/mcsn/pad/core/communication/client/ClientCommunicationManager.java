@@ -34,7 +34,7 @@ public class ClientCommunicationManager extends Thread{
 		
 		nodeId = nid;
 		nodeCommManager = ncm;
-		try { //TODO: Have to close ServerSocket somewhere?
+		try { //TODO: Have to close ServerSocket somewhere? Think only on shutdown!!
 			serverSocket = new ServerSocket(port, backlog, bindAddr);			
 		} catch (IOException e) {			
 			e.printStackTrace();

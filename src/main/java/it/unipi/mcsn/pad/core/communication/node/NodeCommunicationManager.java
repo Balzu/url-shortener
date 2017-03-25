@@ -1,5 +1,6 @@
 package it.unipi.mcsn.pad.core.communication.node;
 
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,23 +29,28 @@ public class NodeCommunicationManager {
 	private int nodeId;
 	
 	
-	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService) 
+	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService, int nodePort) 
 	{
-		this(vt, nid, nodeCommService,700, ConsistentHasher.SHA1);
+		this(vt, nid, nodeCommService,700, ConsistentHasher.SHA1, nodePort);
 	}
 	
 	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService, 
-			final int virtualInstancesPerBucket, final HashFunction hashFunction)
+			final int virtualInstancesPerBucket, final HashFunction hashFunction, int nodePort)
 	{
-		nodeCommunicationService = nodeCommService;
 		nodeServiceRunning = new AtomicBoolean(true);
+		nodeCommunicationService = nodeCommService;		
 		replicaManager = new ReplicaManager();
-		requestManager = new RequestManager();
 		partitioner = new Partitioner<>(virtualInstancesPerBucket,
 				ConsistentHasher.getIntegerToBytesConverter(), 
 				ConsistentHasher.getStringToBytesConverter(), hashFunction);
 		vectorClock = vt;
 		nodeId = nid;
+		try {
+			requestManager = new RequestManager(nodeServiceRunning, nodePort);
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	

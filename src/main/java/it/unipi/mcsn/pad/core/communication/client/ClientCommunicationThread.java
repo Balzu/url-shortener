@@ -40,26 +40,5 @@ public class ClientCommunicationThread implements Runnable{
 		}
 		
 	}
-	
-	//TODO spostare i seguenti metodi in classi nuove, che hanno la responsabilità di gestire i messaggi
-	private Message processGetMessage(Message msg){
-		return null;
-	}
-	
-    private Message processPutMessage(Message msg){
-    	PutMessage pmsg = (PutMessage)msg;
-    	System.out.println("Processing put message...");
-    	Message reply = new ReplyMessage(pmsg.getLongUrl(), "short_url", MessageStatus.SUCCESS);
-		return reply;
-	}
-    
-    private Message processListMessage(Message msg){
-    	return null;
-	}
-    
-    private Message processRemoveMessage(Message msg){
-    	return null;
-	}
-	
 
 }

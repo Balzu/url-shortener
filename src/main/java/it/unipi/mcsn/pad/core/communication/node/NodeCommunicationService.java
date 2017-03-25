@@ -17,14 +17,14 @@ public class NodeCommunicationService implements Service{
 	private NodeCommunicationManager nodeCommManager;
 
 	
-	public NodeCommunicationService(String ipAddress, int port, String id, int logLevel, 
+	public NodeCommunicationService(String ipAddress, int nodePort, String id, int logLevel, 
 			 List<GossipMember> gossipMembers, GossipSettings settings,
 			 GossipListener listener, VectorClock vc, int nid)
 					 throws UnknownHostException, InterruptedException {
 		
-		gossipService = new GossipService(ipAddress, port, id, logLevel, gossipMembers, settings, listener);
+		gossipService = new GossipService(ipAddress, nodePort, id, logLevel, gossipMembers, settings, listener);
 		gossipService.start();
-		nodeCommManager = new NodeCommunicationManager(vc, nid, this);	
+		nodeCommManager = new NodeCommunicationManager(vc, nid, this, nodePort);	
 	}
 
 	public GossipService getGossipService() {
