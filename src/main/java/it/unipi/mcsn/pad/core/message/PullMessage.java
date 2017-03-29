@@ -2,6 +2,7 @@ package it.unipi.mcsn.pad.core.message;
 
 public class PullMessage implements Message{
 	
+	private static final long serialVersionUID = 1L;
 	protected MessageStatus messageStatus;
 	protected MessageType messageType;
 

@@ -3,6 +3,7 @@ package it.unipi.mcsn.pad.core.message;
 public class ReplyMessage implements Message{
 	
 	//TODO: solo un primo abbozzo
+	private static final long serialVersionUID = 1L;
 	private String longUrl;
 	private String shortUrl;
 	

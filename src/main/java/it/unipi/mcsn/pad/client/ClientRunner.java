@@ -13,6 +13,7 @@ import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.PutMessage;
 import it.unipi.mcsn.pad.core.message.RemoveMessage;
 import it.unipi.mcsn.pad.core.message.ReplyMessage;
+import it.unipi.mcsn.pad.core.utils.Utils;
 
 public class ClientRunner {
 	
@@ -20,6 +21,8 @@ public class ClientRunner {
 		
 		
 		try {
+			
+			System.out.println(Utils.generateShortUrl("www.Rsd6.com"));
 			
 			//TODO: Manage configuration also through command line arguments
 			File configFile = new File ("src/main/resources/client.conf");

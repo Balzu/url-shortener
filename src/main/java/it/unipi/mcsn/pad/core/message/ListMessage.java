@@ -2,6 +2,8 @@ package it.unipi.mcsn.pad.core.message;
 
 public class ListMessage implements Message{
 	
+	
+	private static final long serialVersionUID = 1L;
 	protected MessageStatus messageStatus;
 	protected MessageType messageType;
 

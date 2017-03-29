@@ -11,6 +11,8 @@ import it.unipi.mcsn.pad.consistent.ConsistentHasher;
 import it.unipi.mcsn.pad.consistent.ConsistentHasher.HashFunction;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
 import it.unipi.mcsn.pad.core.message.Message;
+import it.unipi.mcsn.pad.core.message.NodeMessage;
+import it.unipi.mcsn.pad.core.message.VersionedMessage;
 import it.unipi.mcsn.pad.core.utils.Partitioner;
 import it.unipi.mcsn.pad.core.utils.Utils;
 import voldemort.versioning.VectorClock;
@@ -64,13 +66,16 @@ public class NodeCommunicationManager {
 		// when receive something, update the vector clock 
 		// TODO: (When I receive a msg, should I also merge the vt?)
 		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());		
-		ClientMessage<String> clmsg = (ClientMessage<String>) msg;
-		int primaryId = findPrimary(clmsg.getKey());
+		ClientMessage clmsg = (ClientMessage) msg;
+		String surl = Utils.generateShortUrl(clmsg.getLongUrl());		
+		int primaryId = findPrimary(surl); 
 		if (primaryId == nodeId){
 			//TODO: call HandleMessage and maybe switch on REMOVE, PUT, GET
 		}
 		else {
 			// TODO Version message and send it to primary (PROBLEM: retrieve it from nodeId)
+			NodeMessage nmsg = new VersionedMessage(clmsg.getLongUrl(), surl, vectorClock);
+			Message reply = requestManager.forwardMessage(nmsg, ipAddr, port);
 		}
 		
 		return null;

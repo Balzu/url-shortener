@@ -21,7 +21,7 @@ public class RandomClient implements Client{
 	}
 	
 	/*
-	 *  Randomly chooses a node to send the request
+	 *  Randomly chooses a node to send the request to
 	 * */
 	private InetSocketAddress chooseRandomNode() {
 		
@@ -35,6 +35,7 @@ public class RandomClient implements Client{
 	public Message sendRequest(Message msg) {
 		
 		InetSocketAddress ipAddr = chooseRandomNode();
+		//TODO: togli try-with-resources, se poi chiudi ois e oos a mano (e metti chiusure in un blocco finally)
 		try (
 			Socket socket = new Socket(ipAddr.getHostName(), ipAddr.getPort());			
 					

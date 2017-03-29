@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import it.unipi.mcsn.pad.core.message.Message;
+
 public class RequestManager extends Thread{
 	
 	private DatagramSocket socket = null;
@@ -28,10 +30,11 @@ public class RequestManager extends Thread{
 		while (isRunning.get())
 		{
 			try {
+				// In questo caso do' dimensione massima, ma meglio se lo dico io quanto allocare (?)
 				byte[] buf = new byte[socket.getReceiveBufferSize()];
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 	            socket.receive(packet);
-	            threadPool.submit(new RequestServerThread(port));				
+	            threadPool.submit(new RequestServerThread(packet, this, socket));				
 			} catch (SocketException e) {			
 				e.printStackTrace();
 			} catch (IOException e) {			
@@ -40,5 +43,8 @@ public class RequestManager extends Thread{
 		}
 		
 	}
+	
+	
+	
 
 }
