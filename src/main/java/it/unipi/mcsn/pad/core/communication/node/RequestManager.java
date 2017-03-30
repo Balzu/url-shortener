@@ -3,9 +3,13 @@ package it.unipi.mcsn.pad.core.communication.node;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.unipi.mcsn.pad.core.message.Message;
@@ -46,9 +50,11 @@ public class RequestManager extends Thread{
 	
 	
 	//TODO check that putting this method here is ok
-	public Message sendMessage(Message msg, String ipAddr, int port)
-	{
-		
+	public Message sendMessage(Message msg, String ipAddr, int port) throws UnknownHostException, InterruptedException, ExecutionException
+	{		
+		Future <Message> future = threadPool.submit(new RequestClientThread(msg, 
+				InetAddress.getByName(ipAddr), port));
+		return future.get();
 		
 	}
 	

@@ -1,8 +1,10 @@
 package it.unipi.mcsn.pad.core.communication.node;
 
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.code.gossip.GossipMember;
@@ -72,6 +74,7 @@ public class NodeCommunicationManager {
 		int primaryId = findPrimary(surl); 
 		if (primaryId == nodeId){
 			//TODO: call HandleMessage and maybe switch on REMOVE, PUT, GET
+			
 		}
 		else {
 			// TODO Version message and send it to primary (PROBLEM: retrieve it from nodeId)
@@ -79,7 +82,13 @@ public class NodeCommunicationManager {
 			GossipMember member = getMemberFromId(primaryId);
 			String ipAddr = member.getHost();
 			int port = member.getPort();			
-			Message reply = requestManager.sendMessage(nmsg, ipAddr, port);
+			Message reply=null;
+			try {
+				reply = requestManager.sendMessage(nmsg, ipAddr, port);
+			} catch (UnknownHostException | InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return reply;
 		}
 		
