@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.LocalGossipMember;
 
 import it.unipi.mcsn.pad.consistent.ConsistentHasher;
@@ -75,10 +76,14 @@ public class NodeCommunicationManager {
 		else {
 			// TODO Version message and send it to primary (PROBLEM: retrieve it from nodeId)
 			NodeMessage nmsg = new VersionedMessage(clmsg.getLongUrl(), surl, vectorClock);
-			Message reply = requestManager.forwardMessage(nmsg, ipAddr, port);
+			GossipMember member = getMemberFromId(primaryId);
+			String ipAddr = member.getHost();
+			int port = member.getPort();			
+			Message reply = requestManager.sendMessage(nmsg, ipAddr, port);
+			return reply;
 		}
 		
-		return null;
+		
 	}
 	
 	
@@ -90,20 +95,37 @@ public class NodeCommunicationManager {
 	 *  Gets an updated list of active nodes in the cluster, then uses Consistent Hashing
 	 *  to discover which is the primary node for the provided key
 	 */
-	public int findPrimary(String key){
+	private int findPrimary(String key){
 		
 		List<LocalGossipMember> members = new ArrayList<>();
-		// Each GossipMember has a String id = ip address of that node. I give an integer representation
-		// of the ids, and then I use the int ids to identify the corresponding buckets in the ring.
+		// NO MORE TRUE: I create nodes s.t. String id = Ip address of the node without dots.
+		// (Each GossipMember has a String id = ip address of that node. I give an integer representation
+		// of the ids, and then I use the int ids to identify the corresponding buckets in the ring.)
 		members = nodeCommunicationService.getGossipService().get_gossipManager().getMemberList();
 		List<Integer> buckets = new ArrayList<>();
 		for (LocalGossipMember member : members){
-			int id = Utils.getIntegerIpAddress(member.getId());
+			//int id = Utils.getIntegerIpAddress(member.getId());
+			int id = Integer.parseInt(member.getId());
 			buckets.add(id);			
 		}
 		
 		return partitioner.findPrimary(key, buckets);
 		
+	}
+	
+	/**
+	 * Given the id of the node, returns the corresponding IP address. 
+	 */
+	private GossipMember getMemberFromId (int id)
+	{
+		List<LocalGossipMember> members = new ArrayList<>();
+		members = nodeCommunicationService.getGossipService().get_gossipManager().getMemberList();
+		for (LocalGossipMember member : members){
+			if (Integer.parseInt(member.getId()) == id)
+				return member;							
+		}
+		//TODO: raise an exception instead
+		return null;			
 	}
 
 }

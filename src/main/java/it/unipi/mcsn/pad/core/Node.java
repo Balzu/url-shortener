@@ -24,16 +24,16 @@ public class Node {
 	
 	
 	public Node (int clientPort, int backlog,	String ipAddress,
-			int nodePort, String id, int logLevel, List<GossipMember> gossipMembers,
-			GossipSettings settings, GossipListener listener, int nid) throws UnknownHostException, InterruptedException 
+			int nodePort, String sid, int logLevel, List<GossipMember> gossipMembers,
+			GossipSettings settings, GossipListener listener, int iid) throws UnknownHostException, InterruptedException 
 	{		
 		nodeCommService = new NodeCommunicationService(
-				ipAddress, nodePort, id, logLevel, gossipMembers, settings, listener, vectorClock, nid);
+				ipAddress, nodePort, sid, logLevel, gossipMembers, settings, listener, vectorClock, iid);
 		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
 		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
-				nid, nodeCommService.getCommunicationManager());
+				iid, nodeCommService.getCommunicationManager());
 		storageService = new StorageService(vectorClock);	
-		nodeId = nid; //TODO: forse puoi ricavere un id unico dalla stringa 'id'
+		nodeId = iid; 
 		vectorClock = new VectorClock(); //TODO: ok this constructor?
 		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());
 	}

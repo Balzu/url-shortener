@@ -28,8 +28,9 @@ public class NodeRunner
     			
     			//TODO: use IP address as ID, in order it to be unique for each node. 
     			// Better to use InetClass instead of string for the ip address!
-    			Node node = new Node(2001, 50, "127.0.0." + i, 2000, i + "", LogLevel.DEBUG,
-    					startupMembers, settings, null, i);
+    			String id = "12700" + i;
+    			Node node = new Node(2001, 50, "127.0.0." + i, 2000, id, LogLevel.DEBUG,
+    					startupMembers, settings, null, Integer.parseInt(id));
     			node.start();
     			nodes.add(node);    				   
     		}   	

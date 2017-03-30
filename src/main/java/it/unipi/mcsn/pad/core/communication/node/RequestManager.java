@@ -45,6 +45,14 @@ public class RequestManager extends Thread{
 	}
 	
 	
+	//TODO check that putting this method here is ok
+	public Message sendMessage(Message msg, String ipAddr, int port)
+	{
+		
+		
+	}
+	
+	
 	
 
 }
