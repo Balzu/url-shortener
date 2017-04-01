@@ -27,15 +27,17 @@ public class Node {
 			int nodePort, String sid, int logLevel, List<GossipMember> gossipMembers,
 			GossipSettings settings, GossipListener listener, int iid) throws UnknownHostException, InterruptedException 
 	{		
+		nodeId = iid; 
+		vectorClock = new VectorClock(); //TODO: ok this constructor?
+		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());
+		storageService = new StorageService(vectorClock);	
 		nodeCommService = new NodeCommunicationService(
 				ipAddress, nodePort, sid, logLevel, gossipMembers, settings, listener, vectorClock, iid);
 		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
 		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
 				iid, nodeCommService.getCommunicationManager());
-		storageService = new StorageService(vectorClock);	
-		nodeId = iid; 
-		vectorClock = new VectorClock(); //TODO: ok this constructor?
-		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());
+	
+		
 	}
 
 

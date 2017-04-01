@@ -26,7 +26,7 @@ public class RequestClientThread implements Callable{
 		port = p;
 		try {
 			clientSocket = new DatagramSocket();
-			clientSocket.setSoTimeout(5000); //Wait at most 5 seconds for the response
+			//clientSocket.setSoTimeout(5000); //Wait at most 5 seconds for the response
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
@@ -57,7 +57,7 @@ public class RequestClientThread implements Callable{
 		byte[] incomingBuffer = new byte [clientSocket.getSendBufferSize()];
 		packet = new DatagramPacket(incomingBuffer, incomingBuffer.length);
 	    clientSocket.receive(packet);
-	    NodeMessage msg = (NodeMessage) Utils.deserialize(packet.getData());
+	    Message msg = (Message) Utils.deserialize(packet.getData());
 		return msg;		
 	}
 

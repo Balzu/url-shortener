@@ -34,13 +34,13 @@ public class NodeCommunicationManager {
 	private int nodeId;
 	
 	
-	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService, int nodePort) 
+	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService, int nodePort, String ipAddress) 
 	{
-		this(vt, nid, nodeCommService,700, ConsistentHasher.SHA1, nodePort);
+		this(vt, nid, nodeCommService,700, ConsistentHasher.SHA1, nodePort, ipAddress);
 	}
 	
 	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService, 
-			final int virtualInstancesPerBucket, final HashFunction hashFunction, int nodePort)
+			final int virtualInstancesPerBucket, final HashFunction hashFunction, int nodePort, String ipAddress)
 	{
 		nodeServiceRunning = new AtomicBoolean(true);
 		nodeCommunicationService = nodeCommService;		
@@ -51,11 +51,19 @@ public class NodeCommunicationManager {
 		vectorClock = vt;
 		nodeId = nid;
 		try {
-			requestManager = new RequestManager(nodeServiceRunning, nodePort);
+			requestManager = new RequestManager(nodeServiceRunning, nodePort, ipAddress);
 		} catch (SocketException e) {
+			e.printStackTrace();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public void start(){
+		requestManager.start();
+		replicaManager.start();
 	}
 	
 	
@@ -74,14 +82,14 @@ public class NodeCommunicationManager {
 		int primaryId = findPrimary(surl); 
 		if (primaryId == nodeId){
 			//TODO: call HandleMessage and maybe switch on REMOVE, PUT, GET
-			
+			return null; //TODO return the message
 		}
 		else {
 			// TODO Version message and send it to primary (PROBLEM: retrieve it from nodeId)
 			NodeMessage nmsg = new VersionedMessage(clmsg.getLongUrl(), surl, vectorClock);
 			GossipMember member = getMemberFromId(primaryId);
 			String ipAddr = member.getHost();
-			int port = member.getPort();			
+			int port = requestManager.getPort();			
 			Message reply=null;
 			try {
 				reply = requestManager.sendMessage(nmsg, ipAddr, port);
@@ -90,12 +98,8 @@ public class NodeCommunicationManager {
 				e.printStackTrace();
 			}
 			return reply;
-		}
-		
-		
-	}
-	
-	
+		}		
+	}	
 	
 	
 	

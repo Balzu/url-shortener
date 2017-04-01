@@ -21,8 +21,8 @@ public class RequestManager extends Thread{
 	private final ExecutorService threadPool;
 	private int port;
 	
-	public RequestManager (AtomicBoolean isRunning, int port) throws SocketException{
-		socket = new DatagramSocket(port);
+	public RequestManager (AtomicBoolean isRunning, int port, String ipAddress) throws SocketException, UnknownHostException{
+		socket = new DatagramSocket(port, InetAddress.getByName(ipAddress));
 		this.isRunning = isRunning;
 		this.port = port;
 		threadPool = Executors.newCachedThreadPool();
@@ -49,6 +49,10 @@ public class RequestManager extends Thread{
 	}
 	
 	
+	public int getPort() {
+		return port;
+	}
+
 	//TODO check that putting this method here is ok
 	public Message sendMessage(Message msg, String ipAddr, int port) throws UnknownHostException, InterruptedException, ExecutionException
 	{		

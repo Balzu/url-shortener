@@ -15,16 +15,17 @@ public class NodeCommunicationService implements Service{
 	
 	private GossipService gossipService;
 	private NodeCommunicationManager nodeCommManager;
+	private int managerPort;
 
 	
 	public NodeCommunicationService(String ipAddress, int nodePort, String id, int logLevel, 
 			 List<GossipMember> gossipMembers, GossipSettings settings,
 			 GossipListener listener, VectorClock vc, int nid)
-					 throws UnknownHostException, InterruptedException {
-		
+					 throws UnknownHostException, InterruptedException {		
 		gossipService = new GossipService(ipAddress, nodePort, id, logLevel, gossipMembers, settings, listener);
-		gossipService.start();
-		nodeCommManager = new NodeCommunicationManager(vc, nid, this, nodePort);	
+		
+		managerPort=3000;
+		nodeCommManager = new NodeCommunicationManager(vc, nid, this, managerPort, ipAddress);	
 	}
 
 	public GossipService getGossipService() {
@@ -39,8 +40,8 @@ public class NodeCommunicationService implements Service{
 
 	@Override
 	public void start() {
-		// TODO Auto-generated method stub
-		
+		gossipService.start();
+		nodeCommManager.start();		
 	}
 
 	@Override

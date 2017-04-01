@@ -13,7 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/*
+/**
  * A configuration object that holds configuration parameters for the client.
  */
 public class ClientConfig {
