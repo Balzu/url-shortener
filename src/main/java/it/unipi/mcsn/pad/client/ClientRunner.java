@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import org.json.JSONException;
 
 import it.unipi.mcsn.pad.core.message.GetMessage;
-import it.unipi.mcsn.pad.core.message.ListMessage;
+//import it.unipi.mcsn.pad.core.message.ListMessage;
 import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.PutMessage;
 import it.unipi.mcsn.pad.core.message.RemoveMessage;
@@ -44,9 +44,9 @@ public class ClientRunner {
 	    	case "get":
 	    		msg = new GetMessage(url);
 	    		break;
-	    	case "list":
+	    	/*case "list":
 	    		msg = new ListMessage();
-	    		break;
+	    		break;*/
 	    	case "remove":
 	    		msg = new RemoveMessage();
 	    		break;

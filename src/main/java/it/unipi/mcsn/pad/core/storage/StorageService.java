@@ -1,6 +1,7 @@
 package it.unipi.mcsn.pad.core.storage;
 
 import it.unipi.mcsn.pad.core.Service;
+import it.unipi.mcsn.pad.core.message.NodeMessage;
 import voldemort.versioning.VectorClock;
 
 public class StorageService implements Service{
@@ -13,8 +14,8 @@ public class StorageService implements Service{
 		vectorClock = vc;
 	}
 	
-	public void store(){
-		storageManager.store();
+	public void store(NodeMessage msg){
+		storageManager.store(msg);
 	}
 
 	@Override

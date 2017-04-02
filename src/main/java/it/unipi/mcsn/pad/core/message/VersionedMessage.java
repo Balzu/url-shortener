@@ -1,6 +1,6 @@
 package it.unipi.mcsn.pad.core.message;
 
-import voldemort.versioning.VectorClock;
+
 import voldemort.versioning.Version;
 import voldemort.versioning.Versioned;
 
@@ -10,7 +10,7 @@ public class VersionedMessage implements NodeMessage{
 	protected MessageStatus messageStatus;
 	protected MessageType messageType;
 	private String shortUrl;
-	private Versioned versioned;
+	private Versioned<String> versioned;
 	
 	public  VersionedMessage(String lUrl, String sUrl, Version vectorClock) {
 		versioned = new Versioned<String>(lUrl, vectorClock);	
@@ -45,6 +45,10 @@ public class VersionedMessage implements NodeMessage{
 	public String getLongUrl() {
 		
 		return ((String )versioned.getValue());
+	}
+
+	public Versioned<String> getVersioned() {
+		return versioned;
 	}
 	
 	
