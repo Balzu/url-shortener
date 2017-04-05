@@ -177,15 +177,15 @@ public class NodeCommunicationManager {
 		return null;			
 	}
 	
-	// RemoveMessage contains the shortened url; the other kinds of messages contain long url	
-	// and so in that case the shortened url has to be generated
+	// REMOVE and GET message contains the short url, so we only have to retrieve it.
+	// PUT message instead contains the long url: in this case, the short url has to be generated
 	private String getShortUrl(ClientMessage clmsg)
 	{
 		String surl = null;
-		if (clmsg.getMessageType() == MessageType.REMOVE)
-			surl = clmsg.getUrl();
+		if (clmsg.getMessageType() == MessageType.PUT)			
+		    surl=Utils.generateShortUrl(clmsg.getUrl());	
 		else
-			surl=Utils.generateShortUrl(clmsg.getUrl());	
+			surl = clmsg.getUrl();
 		return surl;
 	}
 

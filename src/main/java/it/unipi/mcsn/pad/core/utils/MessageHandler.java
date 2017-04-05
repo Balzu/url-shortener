@@ -61,6 +61,8 @@ public class MessageHandler {
 		// by creating a msg with ERROR status
 		String surl = nmsg.getShortUrl();
 		Versioned<String> vlurl = storageService.getStorageManager().read(surl);	
+		if (vlurl == null)
+			return (new VersionedMessage(null, null, null, MessageType.REPLY, MessageStatus.ERROR));
 		String lurl = vlurl.getValue();
 		Version vc = vlurl.getVersion();
 		return (new VersionedMessage(lurl, surl, vc, MessageType.REPLY, MessageStatus.SUCCESS));
@@ -83,15 +85,17 @@ public class MessageHandler {
     private static NodeMessage processRemoveMessage(
     		NodeMessage nmsg, StorageService storageService){
     	
-    	boolean removed = storageService.getStorageManager().remove(nmsg);
-    	if (removed){    	
+    	Versioned<String> vlurl = storageService.getStorageManager().remove(nmsg);
+    	if (vlurl == null){    	
     		return (new VersionedMessage(
-				nmsg.getLongUrl(), nmsg.getShortUrl(), nmsg.getVectorClock(),
+    				null, null, null,
+    				MessageType.REPLY, MessageStatus.ERROR));
+    	}    	
+    	String surl = nmsg.getShortUrl();
+    	String lurl = vlurl.getValue();
+		Version vc = vlurl.getVersion();
+    	return (new VersionedMessage(lurl, surl, vc,
 				MessageType.REPLY, MessageStatus.SUCCESS));
-    	}
-    	return (new VersionedMessage(
-				null, null, null,
-				MessageType.REPLY, MessageStatus.ERROR));
 	}
 
 }

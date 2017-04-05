@@ -40,13 +40,16 @@ public class Utils {
 			return is.readObject();
 	 }
 	 
-	 //TODO: returns the ASCII representation of the bytes, possibly including also
-	 // invalid characters for a url
+	 //TODO: uses an hash function that maps to a 32 bit space, thus allowing (only)
+	 // 2^32 distinct shortened urls. If lots of urls have to be generated, better to use
+	 // the 128-bit MurmurHash function. In that case, a custom mapping should be defined to 
+	 // generate a String defined in the whole [a-zA-Z0-9] space, in order to reduce the number
+	 // of characters of the shortened url.
 	 public static String generateShortUrl (String longUrl){
 		 String prefix = "pad.ly/";
-		 byte [] bid = Hashing.murmur3_32().hashString(longUrl, 
-				 StandardCharsets.US_ASCII).asBytes();
-		 String id = new String(bid, StandardCharsets.US_ASCII);
+		 String id = Hashing.murmur3_32().hashString(longUrl, StandardCharsets.UTF_8).toString();
+		//byte [] bid = StandardCharsets.US_ASCII).asBytes();
+		// String id = new String(bid, StandardCharsets.US_ASCII);
 		 return prefix + id;
 	 }
 

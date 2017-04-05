@@ -49,7 +49,7 @@ public class ClientRunner {
 	    		msg = new ListMessage();
 	    		break;*/
 	    	case "remove":
-	    		msg = new RemoveMessage();
+	    		msg = new RemoveMessage(url);
 	    		break;
 	    	default:
 	    		System.err.println("invalid operation");

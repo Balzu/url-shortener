@@ -30,6 +30,8 @@ public class StorageManager extends Thread{
 			String surl = nmsg.getShortUrl();
 			Versioned<String> versioned = nmsg.getVersioned();
 			map.put(surl, versioned);
+			for (String s: map.keySet())
+				System.out.println(s);
 			db.commit();
 			return true;
 		}
@@ -43,9 +45,11 @@ public class StorageManager extends Thread{
 	public Versioned<String> read(String surl)
 	{
 		try{
-			Versioned<String> response = map.get(surl);
+			Versioned<String> read = map.get(surl);
+			for (String s: map.keySet())
+				System.out.println(s);
 			db.commit();
-			return response; 		
+			return read; 		
 		}
 		catch (Exception e) {
 			db.rollback();
@@ -55,16 +59,16 @@ public class StorageManager extends Thread{
 	}
 	
 	
-	public boolean remove(NodeMessage nmsg){
+	public Versioned<String> remove(NodeMessage nmsg){
 		try{
 			String surl = nmsg.getShortUrl();
-			map.remove(surl);
+			Versioned<String> removed = map.remove(surl);
 			db.commit();
-			return true;
+			return removed;
 		}
 		catch (Exception e){
-			db.commit();
-			return false;
+			db.rollback();
+			return null;
 		}		
 	}
 	
