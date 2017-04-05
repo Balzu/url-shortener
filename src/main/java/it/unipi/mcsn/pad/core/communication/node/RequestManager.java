@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.unipi.mcsn.pad.core.message.Message;
+import it.unipi.mcsn.pad.core.storage.StorageService;
 
 public class RequestManager extends Thread{
 	
@@ -20,11 +21,14 @@ public class RequestManager extends Thread{
 	private AtomicBoolean isRunning;
 	private final ExecutorService threadPool;
 	private int port;
+	private StorageService storageService;
 	
-	public RequestManager (AtomicBoolean isRunning, int port, String ipAddress) throws SocketException, UnknownHostException{
+	public RequestManager (AtomicBoolean isRunning, int port,
+			String ipAddress, StorageService ss) throws SocketException, UnknownHostException{
 		socket = new DatagramSocket(port, InetAddress.getByName(ipAddress));
 		this.isRunning = isRunning;
 		this.port = port;
+		storageService = ss;
 		threadPool = Executors.newCachedThreadPool();
 	}
 	
@@ -38,7 +42,7 @@ public class RequestManager extends Thread{
 				byte[] buf = new byte[socket.getReceiveBufferSize()];
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 	            socket.receive(packet);
-	            threadPool.submit(new RequestServerThread(packet, this, socket));				
+	            threadPool.submit(new RequestServerThread(packet, this, socket, storageService));				
 			} catch (SocketException e) {			
 				e.printStackTrace();
 			} catch (IOException e) {			

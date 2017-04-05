@@ -1,13 +1,22 @@
 package it.unipi.mcsn.pad.core.message;
 
-public class GetMessage implements Message{
+public class GetMessage implements ClientMessage{
 	
 	//TODO: solo un primo abbozzo
 	private static final long serialVersionUID = 1L;
 	private String shortUrl;
-	protected MessageStatus messageStatus;
-	protected MessageType messageType;
+	private MessageStatus messageStatus;
+	private MessageType messageType;
 
+	public GetMessage(String url){
+		this(url,null);
+	}
+	
+	public GetMessage (String url, MessageStatus ms){
+		messageType=MessageType.GET;
+		shortUrl = url;
+		messageStatus = ms;
+	}
 	
 	public MessageStatus getMessageStatus() {	
 		return messageStatus;
@@ -16,10 +25,13 @@ public class GetMessage implements Message{
 	public MessageType getMessageType() {
 		return messageType;
 	}
-	
-	public GetMessage (String url){
-		messageType=MessageType.GET;
-		shortUrl = url;
+
+	@Override
+	public String getUrl()
+	{
+		return shortUrl;
 	}
+	
+	
 
 }

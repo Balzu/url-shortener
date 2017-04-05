@@ -1,15 +1,24 @@
 package it.unipi.mcsn.pad.core.message;
 
-public class PutMessage<K> implements ClientMessage{
+public class PutMessage implements ClientMessage{
 	
 	//TODO: solo un primo abbozzo: va bene così o va specificato che ritorni
 	// long_url e non una key?
 	private static final long serialVersionUID = 1L;
 	private String longUrl;
-	protected MessageStatus messageStatus;
-	protected MessageType messageType;
+	private MessageStatus messageStatus;
+	private MessageType messageType;
 
+	public PutMessage(String url){
+		this(url,null);
+	}
 
+	public PutMessage (String url, MessageStatus ms){
+		messageType=MessageType.PUT;
+		longUrl = url;
+		messageStatus = ms;
+	}
+	
 	@Override
 	public MessageStatus getMessageStatus() {	
 		return messageStatus;
@@ -19,20 +28,9 @@ public class PutMessage<K> implements ClientMessage{
 	public MessageType getMessageType() {
 		return messageType;
 	}
-	
-	public PutMessage (String url){
-		messageType=MessageType.PUT;
-		longUrl = url;
-	}
-	
-
+		
 	@Override
-	public String getShortUrl() {		
-		return null;
-	}
-
-	
-	public String getLongUrl() {		
+	public String getUrl() {		
 		return longUrl;
 	}
 

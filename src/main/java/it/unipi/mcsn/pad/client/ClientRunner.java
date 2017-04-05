@@ -10,6 +10,7 @@ import org.json.JSONException;
 import it.unipi.mcsn.pad.core.message.GetMessage;
 //import it.unipi.mcsn.pad.core.message.ListMessage;
 import it.unipi.mcsn.pad.core.message.Message;
+import it.unipi.mcsn.pad.core.message.NodeMessage;
 import it.unipi.mcsn.pad.core.message.PutMessage;
 import it.unipi.mcsn.pad.core.message.RemoveMessage;
 import it.unipi.mcsn.pad.core.message.ReplyMessage;
@@ -55,7 +56,7 @@ public class ClientRunner {
 	    		System.exit(1);
 	    	}
 			
-			ReplyMessage reply = (ReplyMessage)c.sendRequest(msg);			
+			NodeMessage reply = (NodeMessage)c.sendRequest(msg);			
 			System.out.println("Request response:");
 			System.out.println(reply.getMessageStatus());
 			System.out.println(reply.toString());

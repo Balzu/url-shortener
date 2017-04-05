@@ -7,8 +7,8 @@ public class ReplyMessage implements Message{
 	private String longUrl;
 	private String shortUrl;
 	
-	protected MessageStatus messageStatus;
-	protected MessageType messageType;
+	private MessageStatus messageStatus;
+	private MessageType messageType;
 
 	public ReplyMessage (String lu, String su, MessageStatus ms){
 		messageType=MessageType.REPLY;
@@ -23,8 +23,7 @@ public class ReplyMessage implements Message{
 
 	public MessageType getMessageType() {
 		return messageType;
-	}
-	
+	}	
 	
 	
 	@Override

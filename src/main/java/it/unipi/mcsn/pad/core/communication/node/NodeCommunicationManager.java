@@ -14,11 +14,17 @@ import it.unipi.mcsn.pad.consistent.ConsistentHasher;
 import it.unipi.mcsn.pad.consistent.ConsistentHasher.HashFunction;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
 import it.unipi.mcsn.pad.core.message.Message;
+import it.unipi.mcsn.pad.core.message.MessageStatus;
+import it.unipi.mcsn.pad.core.message.MessageType;
 import it.unipi.mcsn.pad.core.message.NodeMessage;
+import it.unipi.mcsn.pad.core.message.ReplyMessage;
 import it.unipi.mcsn.pad.core.message.VersionedMessage;
+import it.unipi.mcsn.pad.core.storage.StorageService;
+import it.unipi.mcsn.pad.core.utils.MessageHandler;
 import it.unipi.mcsn.pad.core.utils.Partitioner;
 import it.unipi.mcsn.pad.core.utils.Utils;
 import voldemort.versioning.VectorClock;
+import voldemort.versioning.Version;
 
 
 public class NodeCommunicationManager {
@@ -32,15 +38,19 @@ public class NodeCommunicationManager {
 	private Partitioner<Integer, String> partitioner;
 	private VectorClock vectorClock;
 	private int nodeId;
+	private StorageService storageService;
 	
 	
-	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService, int nodePort, String ipAddress) 
+	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService,
+			int nodePort, String ipAddress, StorageService ss) 
 	{
-		this(vt, nid, nodeCommService,700, ConsistentHasher.SHA1, nodePort, ipAddress);
+		this(vt, nid, nodeCommService,700, ConsistentHasher.SHA1, nodePort,
+				ipAddress, ss);
 	}
 	
 	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService, 
-			final int virtualInstancesPerBucket, final HashFunction hashFunction, int nodePort, String ipAddress)
+			final int virtualInstancesPerBucket, final HashFunction hashFunction, int nodePort,
+			String ipAddress, StorageService ss)
 	{
 		nodeServiceRunning = new AtomicBoolean(true);
 		nodeCommunicationService = nodeCommService;		
@@ -50,8 +60,10 @@ public class NodeCommunicationManager {
 				ConsistentHasher.getStringToBytesConverter(), hashFunction);
 		vectorClock = vt;
 		nodeId = nid;
+		storageService = ss;
 		try {
-			requestManager = new RequestManager(nodeServiceRunning, nodePort, ipAddress);
+			requestManager = new RequestManager(nodeServiceRunning, nodePort,
+					ipAddress, storageService);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
@@ -76,17 +88,18 @@ public class NodeCommunicationManager {
 	public Message processClientMessage(Message msg) {
 		// when receive something, update the vector clock 
 		// TODO: (When I receive a msg, should I also merge the vt?)
-		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());		
-		ClientMessage clmsg = (ClientMessage) msg;
-		String surl = Utils.generateShortUrl(clmsg.getLongUrl());		
+		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());			
+		ClientMessage clmsg = (ClientMessage) msg;		
+		String surl = getShortUrl(clmsg);		
 		int primaryId = findPrimary(surl); 
 		if (primaryId == nodeId){
 			//TODO: call HandleMessage and maybe switch on REMOVE, PUT, GET
+			MessageHandler.handleMessage(createNodeMessage(clmsg, surl), storageService);
 			return null; //TODO return the message
 		}
 		else {
-			// TODO Version message and send it to primary (PROBLEM: retrieve it from nodeId)
-			NodeMessage nmsg = new VersionedMessage(clmsg.getLongUrl(), surl, vectorClock);
+			// TODO Version message and send it to primary
+			NodeMessage nmsg = createNodeMessage(clmsg, surl);
 			GossipMember member = getMemberFromId(primaryId);
 			String ipAddr = member.getHost();
 			int port = requestManager.getPort();			
@@ -101,6 +114,29 @@ public class NodeCommunicationManager {
 		}		
 	}	
 	
+	
+	private NodeMessage createNodeMessage(ClientMessage clmsg, String surl)
+	{
+		String lurl = null;
+		MessageType mt = null;
+		
+		//Only PUT message has long_url != null. In any case, have to specify the MessageType
+		switch(clmsg.getMessageType())
+		{
+		  case PUT:
+			  lurl = clmsg.getUrl();
+			  mt = MessageType.PUT;
+			  break;
+		  case GET:
+			  mt = MessageType.GET;
+			  break;		  
+		  case REMOVE:
+			  mt = MessageType.REMOVE;
+			  break;				 
+		}	//TODO: handle default case with exception?		
+		
+		return (new VersionedMessage(lurl, surl, vectorClock, mt));
+	}
 	
 	
 	// TODO: forse da spostare in RequestManager
@@ -139,6 +175,18 @@ public class NodeCommunicationManager {
 		}
 		//TODO: raise an exception instead
 		return null;			
+	}
+	
+	// RemoveMessage contains the shortened url; the other kinds of messages contain long url	
+	// and so in that case the shortened url has to be generated
+	private String getShortUrl(ClientMessage clmsg)
+	{
+		String surl = null;
+		if (clmsg.getMessageType() == MessageType.REMOVE)
+			surl = clmsg.getUrl();
+		else
+			surl=Utils.generateShortUrl(clmsg.getUrl());	
+		return surl;
 	}
 
 }

@@ -15,29 +15,58 @@ public class StorageManager extends Thread{
 	private DB db;
 	
 	
-	public StorageManager() {
-		db = DBMaker.fileDB("file.db").fileMmapEnable().make();
+	public StorageManager(String id) {
+		db = DBMaker.fileDB("file" + id + ".db").fileMmapEnable().make();
 		map = (ConcurrentMap<String, Versioned<String>>) db.hashMap("map").createOrOpen();
 		
 	}
 	
 	
 	
-	
-	public void store(NodeMessage msg)
+	//TODO Deve ritornare qualcosa, anche un booleano..
+	public boolean store(NodeMessage nmsg)
 	{
-		String surl = msg.getShortUrl();
-		Versioned<String> versioned = msg.getVersioned();
-		map.put(surl, versioned);
-		db.commit();
+		try{
+			String surl = nmsg.getShortUrl();
+			Versioned<String> versioned = nmsg.getVersioned();
+			map.put(surl, versioned);
+			db.commit();
+			return true;
+		}
+		catch(Exception e){
+			db.rollback();
+			return false;
+		}
+		
 	}
 	
 	public Versioned<String> read(String surl)
 	{
-		return map.get(surl);
+		try{
+			Versioned<String> response = map.get(surl);
+			db.commit();
+			return response; 		
+		}
+		catch (Exception e) {
+			db.rollback();
+			return null;
+		}
 		
 	}
 	
+	
+	public boolean remove(NodeMessage nmsg){
+		try{
+			String surl = nmsg.getShortUrl();
+			map.remove(surl);
+			db.commit();
+			return true;
+		}
+		catch (Exception e){
+			db.commit();
+			return false;
+		}		
+	}
 	
 	
 	@Override

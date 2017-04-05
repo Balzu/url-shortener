@@ -25,14 +25,15 @@ public class Node {
 	
 	public Node (int clientPort, int backlog,	String ipAddress,
 			int nodePort, String sid, int logLevel, List<GossipMember> gossipMembers,
-			GossipSettings settings, GossipListener listener, int iid) throws UnknownHostException, InterruptedException 
+			GossipSettings settings, GossipListener listener, int iid) 
+					throws UnknownHostException, InterruptedException 
 	{		
 		nodeId = iid; 
 		vectorClock = new VectorClock(); //TODO: ok this constructor?
 		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());
-		storageService = new StorageService(vectorClock);	
-		nodeCommService = new NodeCommunicationService(
-				ipAddress, nodePort, sid, logLevel, gossipMembers, settings, listener, vectorClock, iid);
+		storageService = new StorageService(vectorClock, sid);	
+		nodeCommService = new NodeCommunicationService(ipAddress, nodePort, sid,
+				logLevel, gossipMembers, settings, listener, vectorClock, iid, storageService);
 		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
 		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
 				iid, nodeCommService.getCommunicationManager());

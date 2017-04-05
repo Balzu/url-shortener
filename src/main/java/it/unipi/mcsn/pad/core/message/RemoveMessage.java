@@ -1,11 +1,21 @@
 package it.unipi.mcsn.pad.core.message;
 
-public class RemoveMessage implements Message{
+public class RemoveMessage implements ClientMessage{
 	
 	private static final long serialVersionUID = 1L;
-	protected MessageStatus messageStatus;
-	protected MessageType messageType;
+	private MessageStatus messageStatus;
+	private MessageType messageType;
+	private String shortUrl;
 
+	public RemoveMessage(String url){
+		this(url,null);
+	}
+	
+	public RemoveMessage (String url, MessageStatus ms){
+		messageType=MessageType.REMOVE;
+		shortUrl = url;
+		messageStatus = ms;
+	}
 	
 	public MessageStatus getMessageStatus() {	
 		return messageStatus;
@@ -17,6 +27,12 @@ public class RemoveMessage implements Message{
 	
 	public RemoveMessage (){
 		messageType=MessageType.REMOVE;
+	}
+
+	@Override
+	public String getUrl() 
+	{
+		return shortUrl;
 	}
 
 }

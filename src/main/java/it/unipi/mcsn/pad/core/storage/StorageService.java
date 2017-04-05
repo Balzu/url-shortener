@@ -9,13 +9,15 @@ public class StorageService implements Service{
 	private StorageManager storageManager;
 	private VectorClock vectorClock;
 	
-	public StorageService(VectorClock vc){
-		
+	public StorageService(VectorClock vc, String id)
+	{
+		storageManager = new StorageManager(id);
 		vectorClock = vc;
 	}
 	
-	public void store(NodeMessage msg){
-		storageManager.store(msg);
+	public StorageManager getStorageManager() 
+	{
+		return storageManager;
 	}
 
 	@Override
