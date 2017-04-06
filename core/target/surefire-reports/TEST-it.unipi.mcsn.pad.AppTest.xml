@@ -58,5 +58,5 @@
     <property name="sun.desktop" value="gnome"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase classname="it.unipi.mcsn.pad.AppTest" name="testApp" time="0.001"/>
+  <testcase classname="it.unipi.mcsn.pad.AppTest" name="testApp" time="0.002"/>
 </testsuite>
