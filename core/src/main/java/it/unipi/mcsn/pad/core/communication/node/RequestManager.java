@@ -52,6 +52,10 @@ public class RequestManager extends Thread{
 		
 	}
 	
+	public void shutdown(){
+		isRunning.set(false);
+	}
+	
 	
 	public int getPort() {
 		return port;

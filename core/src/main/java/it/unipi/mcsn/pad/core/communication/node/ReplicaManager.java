@@ -7,5 +7,9 @@ public class ReplicaManager extends Thread{
 	public void run(){
 		
 	}
+	
+	public void shutdown(){
+		
+	}
 
 }

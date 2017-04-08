@@ -78,6 +78,11 @@ public class NodeCommunicationManager {
 		replicaManager.start();
 	}
 	
+	public void shutdown() {
+		requestManager.shutdown();
+		replicaManager.shutdown();
+	}
+	
 	
 	
 	/**

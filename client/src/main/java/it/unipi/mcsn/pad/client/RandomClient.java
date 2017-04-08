@@ -38,15 +38,16 @@ public class RandomClient implements Client{
 		//TODO: togli try-with-resources, se poi chiudi ois e oos a mano (e metti chiusure in un blocco finally)
 		try (
 			Socket socket = new Socket(ipAddr.getHostName(), ipAddr.getPort());			
-					
+			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());	
+			ObjectInputStream ois= new ObjectInputStream(socket.getInputStream());	
 			)
 		{
-			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());	
+			
 			oos.writeObject(msg);			
-			ObjectInputStream ois= new ObjectInputStream(socket.getInputStream());
+			
 			Message receivedMsg = (Message) ois.readObject();
-			ois.close();
-			oos.close();
+			//ois.close();
+			//oos.close();
 			return receivedMsg;
 			
 			

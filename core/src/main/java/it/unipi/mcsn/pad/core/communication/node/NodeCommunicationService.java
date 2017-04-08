@@ -23,8 +23,7 @@ public class NodeCommunicationService implements Service{
 			 List<GossipMember> gossipMembers, GossipSettings settings,
 			 GossipListener listener, VectorClock vc, int nid, StorageService storageService)
 					 throws UnknownHostException, InterruptedException {		
-		gossipService = new GossipService(ipAddress, nodePort, id, logLevel, gossipMembers, settings, listener);
-		
+		gossipService = new GossipService(ipAddress, nodePort, id, logLevel, gossipMembers, settings, listener);		
 		managerPort=3000; //TODO: crea due costruttori, di cui uno con porta di default(3000) e uno in cui la passi da commandline
 		nodeCommManager = new NodeCommunicationManager(vc, nid, this, managerPort, 
 				ipAddress, storageService);	
@@ -48,8 +47,8 @@ public class NodeCommunicationService implements Service{
 
 	@Override
 	public void shutdown() {
-		// TODO Auto-generated method stub
-		
+		gossipService.shutdown();
+		nodeCommManager.shutdown();		
 	}
 	
 	

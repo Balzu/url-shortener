@@ -1,11 +1,21 @@
 package it.unipi.mcsn.pad.core;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.google.code.gossip.GossipMember;
-import com.google.code.gossip.GossipService;
 import com.google.code.gossip.GossipSettings;
 import com.google.code.gossip.LogLevel;
 import com.google.code.gossip.RemoteGossipMember;
@@ -24,39 +34,13 @@ public class NodeRunner
     			startupMembers.add(new RemoteGossipMember("127.0.0." + i, port, i + "")); //TODO: fix the id
     		}
     		
-    		/*
-    		  List<GossipService> clients = new ArrayList<>();
-    		  int clusterMembers = 5;
-    		  for (int i = 1; i < clusterMembers+1; ++i) {
-    		    GossipService gossipService = new GossipService("127.0.0." + i, 2000, i + "",
-    		      LogLevel.DEBUG, startupMembers, settings, null);
-    		    clients.add(gossipService);
-    		    gossipService.start();
-    		  }
-    		 */
-    		
-    		
-    		
-
-    	//	/*
     		List<Node> nodes = new ArrayList<>();
-    		for (int i = 1; i < seedNodes+1; ++i) {
-    			
-    			//TODO: use IP address as ID, in order it to be unique for each node. 
-    			// Better to use InetClass instead of string for the ip address!
-    			//TODO: oblige int id and String ipAddress to change together (maybe using Utils function..)
-    			String id = "1900" + i; //TODO il node Id non va bene, deve essere rappresentabile con uno short
-    			Node node = new Node(2001, 50, "127.0.0." + i, 2000, i+""  /*id*/, LogLevel.DEBUG,
-    					startupMembers, settings, null,  i   /*Integer.parseInt(id)*/);
+    		for (int i = 1; i < seedNodes+1; ++i) {	    			
+    			Node node = new Node(2001, 50, "127.0.0." + i, port, i+"" , LogLevel.DEBUG,
+    					startupMembers, settings, null,  i);
     			node.start();
     			nodes.add(node);    				   
-    		}   	    		
-
-    		Thread.sleep(5000);
-    		System.out.println("Size of membership list of node 2: " + nodes.get(2).
-    				getNodeCommService().getGossipService().get_gossipManager().getMemberList().size());   	 	
-    		
-    		//		 */
+    		}       		
 
     	}catch (UnknownHostException e) {			
     		e.printStackTrace();
@@ -64,5 +48,47 @@ public class NodeRunner
     		e.printStackTrace();
     	}
 
+    }
+    
+    private List<String> getAddressesFromFile(File configFile) throws IOException, JSONException {		
+		
+    	List<String> addresses = new ArrayList<>();
+		BufferedReader br = new BufferedReader(new FileReader(configFile));
+		StringBuffer buffer = new StringBuffer();
+		String line;
+		while ((line = br.readLine()) != null)
+			buffer.append(line.trim());
+		br.close();
+		
+		JSONObject jsonObject = new JSONArray(buffer.toString()).getJSONObject(0);
+		JSONArray seeds = jsonObject.getJSONArray("members");
+		
+		String ipAddr;			
+		for (int i = 0; i < seeds.length(); i++){
+			ipAddr = seeds.getJSONObject(i).getString("host");			
+			addresses.add(ipAddr);
+		}
+		return addresses;
+    }
+    
+    private Map<String, Integer> getPortsFromFile(File configFile) throws IOException, JSONException{
+    	
+    	Map<String, Integer> map = new HashMap<String, Integer>();
+		BufferedReader br = new BufferedReader(new FileReader(configFile));
+		StringBuffer buffer = new StringBuffer();
+		String line;
+		while ((line = br.readLine()) != null)
+			buffer.append(line.trim());
+		br.close();
+		
+		JSONObject jsonObject = new JSONArray(buffer.toString()).getJSONObject(0);
+		int gossipPort = jsonObject.getInt("gossip_port");
+		int clientPort = jsonObject.getInt("client_port");
+		int nodePort = jsonObject.getInt("node_port");
+		map.put("gossip_port", gossipPort);
+		map.put("client_port", clientPort);
+		map.put("node_port", nodePort);
+		
+		return map;
     }
 }
