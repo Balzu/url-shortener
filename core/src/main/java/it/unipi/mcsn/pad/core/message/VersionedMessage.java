@@ -63,7 +63,8 @@ public class VersionedMessage implements NodeMessage{
 	
 	@Override
 	public String toString() {
-		return "Original url = " + versioned.getValue() + ", \nShortened url = " + shortUrl; 
+		return " Original url = " + versioned.getValue() + 
+				", \n               Shortened url = " + shortUrl; 
 	}
 	
 	

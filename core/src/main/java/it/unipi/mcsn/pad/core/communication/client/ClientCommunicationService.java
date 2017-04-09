@@ -28,7 +28,7 @@ public class ClientCommunicationService implements Service{
 	@Override
 	public void shutdown() {
 		// TODO Auto-generated method stub
-		
+	
 	}
 	
 

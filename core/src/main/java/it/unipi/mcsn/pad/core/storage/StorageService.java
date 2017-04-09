@@ -21,15 +21,13 @@ public class StorageService implements Service{
 	}
 
 	@Override
-	public void start() {
-		// TODO Auto-generated method stub
-		
+	public void start() {		
+		// StorageManager already inizialized by the costructor
 	}
 
 	@Override
 	public void shutdown() {
-		// TODO Auto-generated method stub
-		
+		storageManager.shutdown();		
 	}
 
 }

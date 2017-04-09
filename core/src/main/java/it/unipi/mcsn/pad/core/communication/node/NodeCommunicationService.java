@@ -16,16 +16,17 @@ public class NodeCommunicationService implements Service{
 	
 	private GossipService gossipService;
 	private NodeCommunicationManager nodeCommManager;
-	private int managerPort;
+	//private int nodePort;
 
 	
-	public NodeCommunicationService(String ipAddress, int nodePort, String id, int logLevel, 
+	public NodeCommunicationService(String ipAddress, int gossipPort, String id, int logLevel, 
 			 List<GossipMember> gossipMembers, GossipSettings settings,
-			 GossipListener listener, VectorClock vc, int nid, StorageService storageService)
+			 GossipListener listener, VectorClock vc, int nid,
+			 StorageService storageService , int nodePort)
 					 throws UnknownHostException, InterruptedException {		
-		gossipService = new GossipService(ipAddress, nodePort, id, logLevel, gossipMembers, settings, listener);		
-		managerPort=3000; //TODO: crea due costruttori, di cui uno con porta di default(3000) e uno in cui la passi da commandline
-		nodeCommManager = new NodeCommunicationManager(vc, nid, this, managerPort, 
+		gossipService = new GossipService(ipAddress, gossipPort, id, logLevel, gossipMembers, settings, listener);		
+	//	this.nodePort=nodePort; 
+		nodeCommManager = new NodeCommunicationManager(vc, nid, this, nodePort, 
 				ipAddress, storageService);	
 	}
 

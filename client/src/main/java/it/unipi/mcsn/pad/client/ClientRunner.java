@@ -59,9 +59,9 @@ public class ClientRunner {
 			String url;
 			
 			//Interactive or non interactive session
-			 if (clm.isInteractive()) {
-				 //boolean isInteractive = true;
-				 System.out.println("Started interactive session"); 
+			Option operation = clm.getOperation();
+			if (operation.getOpt().equals(clm.getInteractive())){
+				System.out.println("Started interactive session"); 
 				 displayInteractiveMessage();
 				 BufferedReader stdIn = new BufferedReader(
 					new InputStreamReader(System.in));	
@@ -78,12 +78,12 @@ public class ClientRunner {
 				    	msg = new PutMessage(url);	    		
 				    	break;
 				    case "get":
-				    	System.out.println( "Enter url" );
+				    	System.out.println( "Enter shortened url" );
 						url = stdIn.readLine();
 				    	msg = new GetMessage(url);
 				    	break;				   
 				    case "remove":
-				    	System.out.println( "Enter url" );
+				    	System.out.println( "Enter shortened url" );
 						url = stdIn.readLine();
 				    	msg = new RemoveMessage(url);
 				    	break;
@@ -91,27 +91,29 @@ public class ClientRunner {
 				    	System.out.println( "Quitting interactive session..." );
 				    	System.exit(0);
 				    default:
-				    	System.err.println("Invalid operation! \n");
+				    	System.err.println("\nInvalid operation! \n");
 				    	displayInteractiveMessage();
 				    }	
 					if (msg != null){
-						NodeMessage reply = (NodeMessage)c.sendRequest(msg);						 
-						if (clm.hasOutputFile())				 
-							writeOutputFile(clm, msg, reply);				 
-						else				 
-						    System.out.println(formatReply(msg, reply));
+						NodeMessage reply = (NodeMessage)c.sendRequest(msg);	
+						if (reply != null) {
+							if (clm.hasOutputFile())				 
+								writeOutputFile(clm, msg, reply);				 
+							else				 
+							    System.out.println(formatReply(msg, reply));							
+						}
+						else
+							System.out.println("No reply has been received from the service");						
 					}					 
-				 }	 				  
+				 }
 			}
-			 else
-			 {				 
-				 Option operation = clm.getOperation();
-				 url = operation.getValue();
-				 if (operation.getOpt() == clm.getPut())
+			else {
+				url = operation.getValue();
+				if (operation.getOpt().equals(clm.getPut()))
 					 msg = new PutMessage(url);
-				 if (operation.getOpt() == clm.getGet())
+				 else if (operation.getOpt().equals(clm.getGet()))
 					 msg = new GetMessage(url);
-				 if (operation.getOpt() == clm.getRemove())
+				 else if (operation.getOpt().equals(clm.getRemove()))
 					 msg = new RemoveMessage(url);
 				 else{
 					 clm.printHelp();
@@ -120,11 +122,21 @@ public class ClientRunner {
 				
 				 NodeMessage reply = (NodeMessage)c.sendRequest(msg);					
 				 
-				 if (clm.hasOutputFile())				 
-					 writeOutputFile(clm, msg, reply);				 
-				 else				 
-					System.out.println(formatReply(msg, reply)); 		 
-			 } 		
+				 if (reply != null) {
+						if (clm.hasOutputFile())				 
+							writeOutputFile(clm, msg, reply);				 
+						else				 
+						    System.out.println(formatReply(msg, reply));							
+					}
+					else
+						System.out.println("No reply has been received");
+			}
+			
+			 
+			 	
+			
+			
+			
 			
 			
 		} catch (IOException e) {
@@ -135,16 +147,17 @@ public class ClientRunner {
 			e.printStackTrace();
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println(e.getMessage());
 			System.out.println("Use \"--help\" to show general usage information about client's command line");
 		}
     	
 	}
 	
 	private static String formatReply (Message msg, NodeMessage reply){
-		return  "Response for the " + msg.getMessageType() + " request: \n"+
+		return  "\nResponse for the " + msg.getMessageType() + " request: \n"+
 				 "Reply status: " + reply.getMessageStatus() + "\n" +
-				 "Reply content: " + reply.toString();
+				 "Reply content:" + reply.toString() + "\n";
 	}
 	
 	private static void writeOutputFile(CommandLineManager clm, Message msg, NodeMessage reply) throws IOException{

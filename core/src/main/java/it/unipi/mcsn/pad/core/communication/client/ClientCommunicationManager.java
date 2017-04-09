@@ -45,13 +45,18 @@ public class ClientCommunicationManager extends Thread{
 	public void run() {
 		while (clientServiceRunning.get()) {
 			try {
-				Socket clientSocket = serverSocket.accept();
+				Socket clientSocket = serverSocket.accept(); //TODO maybe it stops here. Is it ok (or hould add a timeout to the socket)?
 				threadPool.submit(new ClientCommunicationThread(clientSocket, this));				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
 		}		
+	}
+	
+	public void shutdown() throws IOException {
+		clientServiceRunning.set(false);
+		serverSocket.close();
 	}
 	
 	/**

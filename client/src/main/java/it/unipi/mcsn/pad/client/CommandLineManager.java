@@ -107,7 +107,8 @@ public class CommandLineManager {
 		int count = 0;
 		Option option = null;
 		for (int i=0; i< opts.length; i++){
-		   if (opts[i].getOpt() == put.getOpt() |
+		   if (opts[i].getOpt() == interactive.getOpt() |
+		     opts[i].getOpt() == put.getOpt() |
 			 opts[i].getOpt() == get.getOpt() |
 			 opts[i].getOpt() == remove.getOpt()){
 			 count ++;
@@ -115,7 +116,8 @@ public class CommandLineManager {
 		   }
 		 }		 
 		 if (count != 1)
-			 throw  new ParseException("Should specify one and only one operation among put, get and remove");
+			 throw  new ParseException("Should specify one and only one option"
+			 		+ " among put, get, remove and interactive");
 		 else
 			 return option;
 	}
@@ -132,9 +134,13 @@ public class CommandLineManager {
 		return put.getOpt();
 	}
 	
+	public String getInteractive(){
+		return interactive.getOpt();
+	}
+	
 	public void printHelp(){
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( "{ i | [ p <long_url>| g <short_url> | r <short_url>] }"
+		formatter.printHelp( "{ i | [ p <long_url> | g <short_url> | r <short_url>] }"
 				+ " [ c <path_to_config>] [ o <output_file>]", options );
 	}
 	

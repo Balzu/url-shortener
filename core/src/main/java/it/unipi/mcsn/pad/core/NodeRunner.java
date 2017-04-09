@@ -2,15 +2,16 @@ package it.unipi.mcsn.pad.core;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.cli.ParseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,34 +24,82 @@ import com.google.code.gossip.RemoteGossipMember;
 
 public class NodeRunner 
 {
-    public static void main( String[] args )
+    public static void main( String[] args ) throws ParseException
     {     	
     	try {
+    		CoreCommandLineManager clm = new CoreCommandLineManager(args); 
+			
+			// If asked help, show help message and quit
+			if (clm.needHelp()){
+				clm.printHelp();
+				System.exit(0);
+			}
+    		
+			File configFile;
+			if (clm.hasConfigFile()){
+				String path = clm.getConfigurationPath();
+				configFile = new File ( path + "/client.conf");
+			}
+			else{
+				configFile = new File ("src/main/resources/core.conf");
+			}
+			System.out.println("Configuration file exists? " + configFile.exists()); // TODO throw exception if config file does not exist?
+			
+    		List<String> addresses = new ArrayList<>();     		
+    		addresses = getAddressesFromFile(configFile);
+    		Map<String, Integer> ports = getPortsFromFile(configFile);
+    		int gossipPort = ports.get("gossip_port");
+    		int clientPort = ports.get("client_port");
+    		int nodePort = ports.get("node_port");
+    		
+    		    		
     		GossipSettings settings = new GossipSettings();
-    		int seedNodes = 5;
-    		int port = 2000;
+    		
+    		
     		List<GossipMember> startupMembers = new ArrayList<>();
-    		for (int i = 1; i < seedNodes+1; ++i) {
-    			startupMembers.add(new RemoteGossipMember("127.0.0." + i, port, i + "")); //TODO: fix the id
+    		for (int i = 0; i < addresses.size(); ++i) {
+    			startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); //TODO: fix the id
     		}
     		
     		List<Node> nodes = new ArrayList<>();
-    		for (int i = 1; i < seedNodes+1; ++i) {	    			
-    			Node node = new Node(2001, 50, "127.0.0." + i, port, i+"" , LogLevel.DEBUG,
-    					startupMembers, settings, null,  i);
+    		for (int i = 0; i < addresses.size(); ++i) {	    			
+    			Node node = new Node(clientPort, 50, addresses.get(i), gossipPort, i+"" , LogLevel.DEBUG,
+    					startupMembers, settings, null,  i, nodePort);
     			node.start();
     			nodes.add(node);    				   
-    		}       		
+    		}       	
+    		
+    		System.out.println("url-shortener service is running... ");
+    		BufferedReader stdIn = new BufferedReader(
+					new InputStreamReader(System.in));	
+		    String input;
+    		while (true) {    			
+    			displayUsageMessage();
+    			input = stdIn.readLine();
+    			if (input.equals("quit")){
+    				System.out.println("Shutting down the service... ");
+    				for (Node node : nodes){
+    					node.shutdown();
+    				}
+    				System.exit(0);
+    			}
+    		}
 
     	}catch (UnknownHostException e) {			
     		e.printStackTrace();
     	} catch (InterruptedException e) {		
     		e.printStackTrace();
-    	}
+    	} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
     }
     
-    private List<String> getAddressesFromFile(File configFile) throws IOException, JSONException {		
+    private static List<String> getAddressesFromFile(File configFile) throws IOException, JSONException {		
 		
     	List<String> addresses = new ArrayList<>();
 		BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -71,7 +120,7 @@ public class NodeRunner
 		return addresses;
     }
     
-    private Map<String, Integer> getPortsFromFile(File configFile) throws IOException, JSONException{
+    private static Map<String, Integer> getPortsFromFile(File configFile) throws IOException, JSONException{
     	
     	Map<String, Integer> map = new HashMap<String, Integer>();
 		BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -91,4 +140,9 @@ public class NodeRunner
 		
 		return map;
     }
+    
+    private static void displayUsageMessage(){
+		System.out.println("Usage: \n" +
+				"- quit                 to quit the service \n");
+	}
 }

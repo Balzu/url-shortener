@@ -9,7 +9,7 @@ import org.mapdb.DBMaker;
 import it.unipi.mcsn.pad.core.message.NodeMessage;
 import voldemort.versioning.Versioned;
 
-public class StorageManager extends Thread{
+public class StorageManager {
 	
 	private ConcurrentMap <String, Versioned<String>> map ;
 	private DB db;
@@ -17,13 +17,10 @@ public class StorageManager extends Thread{
 	
 	public StorageManager(String id) {
 		db = DBMaker.fileDB("file" + id + ".db").fileMmapEnable().make();
-		map = (ConcurrentMap<String, Versioned<String>>) db.hashMap("map").createOrOpen();
-		
+		map = (ConcurrentMap<String, Versioned<String>>) db.hashMap("map").createOrOpen();		
 	}
 	
 	
-	
-	//TODO Deve ritornare qualcosa, anche un booleano..
 	public boolean store(NodeMessage nmsg)
 	{
 		try{
@@ -72,11 +69,6 @@ public class StorageManager extends Thread{
 		}		
 	}
 	
-	
-	@Override
-	public void run(){
-		
-	}
 	
 	public void shutdown(){
 		db.close();

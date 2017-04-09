@@ -54,7 +54,7 @@ public class RandomClient implements Client{
 		} catch (UnknownHostException e) {			
 			e.printStackTrace();
 		} catch (IOException e) {			
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		} catch (ClassNotFoundException e) {			
 			e.printStackTrace();
 		}		
