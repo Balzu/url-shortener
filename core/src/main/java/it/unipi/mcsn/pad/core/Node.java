@@ -19,21 +19,23 @@ public class Node {
 	private NodeCommunicationService nodeCommService;
 	private ClientCommunicationService clientCommService;
 	private StorageService storageService;
-	private VectorClock vectorClock;
-	private int nodeId;
+	//private VectorClock vectorClock;
+	//private int nodeId;
 	
 	
 	public Node (int clientPort, int backlog,	String ipAddress,
 			int gossipPort, String sid, int logLevel, List<GossipMember> gossipMembers,
-			GossipSettings settings, GossipListener listener, int iid, int nodePort) 
+			GossipSettings settings, GossipListener listener, int iid, int nodePort,
+			int virtualInstances, int backupInterval) 
 					throws UnknownHostException, InterruptedException 
 	{		
-		nodeId = iid; 
-		vectorClock = new VectorClock(); //TODO: ok this constructor?
-		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());
-		storageService = new StorageService(vectorClock, sid);	
+		//nodeId = iid; 
+		VectorClock vc = new VectorClock(); //TODO: ok this constructor?
+		vc.incrementVersion(/*nodeId*/ iid, System.currentTimeMillis());
+		storageService = new StorageService(vc, sid);	
 		nodeCommService = new NodeCommunicationService(ipAddress, gossipPort, sid,
-				logLevel, gossipMembers, settings, listener, vectorClock, iid, storageService, nodePort);
+				logLevel, gossipMembers, settings, listener, vc, iid,
+				storageService, nodePort, virtualInstances, backupInterval);
 		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
 		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
 				iid, nodeCommService.getCommunicationManager());

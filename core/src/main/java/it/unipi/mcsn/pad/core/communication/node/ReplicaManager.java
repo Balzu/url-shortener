@@ -28,11 +28,12 @@ public class ReplicaManager extends Thread{
 	private int nodePort;
 	private NodeCommunicationManager nodeCommManager;
 	private int nodeId;
+	private int backupInterval;
 	
 	
 	public ReplicaManager(StorageService ss, int nodePort,
 			String ipAddress, NodeCommunicationManager ncm
-			, int nid) throws SocketException, UnknownHostException{
+			, int nid, int backupInterval) throws SocketException, UnknownHostException{
 		storageService = ss;
 		socket = new DatagramSocket(nodePort, InetAddress.getByName(ipAddress));
 		isRunning = new AtomicBoolean(true);
@@ -40,14 +41,14 @@ public class ReplicaManager extends Thread{
 		threadPool = Executors.newCachedThreadPool();
 		nodeCommManager = ncm;
 		nodeId = nid;
+		this.backupInterval = backupInterval;
 	}
 	
 	@Override
 	public void run(){
-		//sendUpdates();
 		while (isRunning.get()) {
 			try {
-				Thread.sleep(10000);
+				Thread.sleep(backupInterval);
 				Map<String,Versioned<String>> dump = storageService.getStorageManager().getDump();				
 				List<UpdateMessage> updates = new ArrayList<>();
 				createUpdates(updates, dump);
@@ -70,7 +71,7 @@ public class ReplicaManager extends Thread{
 	}
 	
 	/**
-	 * Periodically send updates to the proper Replica 
+	 * Send updates to a replica 
 	 * @throws ExecutionException 
 	 * @throws InterruptedException 
 	 * @throws UnknownHostException 

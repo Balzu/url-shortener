@@ -9,17 +9,20 @@ import org.mapdb.DB;
 import org.mapdb.DBMaker;
 
 import it.unipi.mcsn.pad.core.message.NodeMessage;
+import voldemort.versioning.VectorClock;
 import voldemort.versioning.Versioned;
 
 public class StorageManager {
 	
 	private ConcurrentMap <String, Versioned<String>> map ;
 	private DB db;
+	private VectorClock vc;
 	
 	
-	public StorageManager(String id) {
+	public StorageManager(String id, VectorClock vc) {
 		db = DBMaker.fileDB("file" + id + ".db").fileMmapEnable().make();
-		map = (ConcurrentMap<String, Versioned<String>>) db.hashMap("map").createOrOpen();		
+		map = (ConcurrentMap<String, Versioned<String>>) db.hashMap("map").createOrOpen();
+		this.vc = vc;		
 	}
 	
 	

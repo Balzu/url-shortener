@@ -22,12 +22,12 @@ public class NodeCommunicationService implements Service{
 	public NodeCommunicationService(String ipAddress, int gossipPort, String id, int logLevel, 
 			 List<GossipMember> gossipMembers, GossipSettings settings,
 			 GossipListener listener, VectorClock vc, int nid,
-			 StorageService storageService , int nodePort)
+			 StorageService storageService , int nodePort, int virtualInstances, int backupInterval)
 					 throws UnknownHostException, InterruptedException {		
 		gossipService = new GossipService(ipAddress, gossipPort, id, logLevel, gossipMembers, settings, listener);		
 	//	this.nodePort=nodePort; 
-		nodeCommManager = new NodeCommunicationManager(vc, nid, this, nodePort, 
-				ipAddress, storageService);	
+		nodeCommManager = new NodeCommunicationManager(vc, nid, this, virtualInstances, 
+				nodePort,ipAddress, storageService, backupInterval);	
 	}
 
 	public GossipService getGossipService() {

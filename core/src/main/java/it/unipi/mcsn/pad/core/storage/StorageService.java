@@ -7,12 +7,12 @@ import voldemort.versioning.VectorClock;
 public class StorageService implements Service{
 	
 	private StorageManager storageManager;
-	private VectorClock vectorClock;
+	//private VectorClock vectorClock;
 	
 	public StorageService(VectorClock vc, String id)
 	{
-		storageManager = new StorageManager(id);
-		vectorClock = vc;
+		storageManager = new StorageManager(id, vc);
+	//	vectorClock = vc;
 	}
 	
 	public StorageManager getStorageManager() 

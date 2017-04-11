@@ -47,8 +47,9 @@ public class NodeRunner
 			}
 			System.out.println("Configuration file exists? " + configFile.exists()); // TODO throw exception if config file does not exist?
 			
-    		List<String> addresses = new ArrayList<>();     		
-    		addresses = getAddressesFromFile(configFile);
+    		List<String> addresses =  getAddressesFromFile(configFile);
+    		List<Integer> virtualInstances = getVirtualInstancesFromFile(configFile);
+    		List<Integer> backupIntervals =  getBackupIntervalsFromFile(configFile);
     		Map<String, Integer> ports = getPortsFromFile(configFile);
     		int gossipPort = ports.get("gossip_port");
     		int clientPort = ports.get("client_port");
@@ -65,8 +66,9 @@ public class NodeRunner
     		
     		List<Node> nodes = new ArrayList<>();
     		for (int i = 0; i < addresses.size(); ++i) {	    			
-    			Node node = new Node(clientPort, 50, addresses.get(i), gossipPort, i+"" , LogLevel.DEBUG,
-    					startupMembers, settings, null,  i, nodePort);
+    			Node node = new Node(clientPort, 50, addresses.get(i), gossipPort, i+"" , 
+    					LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
+    					virtualInstances.get(i), backupIntervals.get(i));
     			node.start();
     			nodes.add(node);    				   
     		}       	
@@ -123,6 +125,50 @@ public class NodeRunner
 		}
 		return addresses;
     }
+    
+ private static List<Integer> getVirtualInstancesFromFile(File configFile) throws IOException, JSONException {		
+		
+    	List<Integer> virtualInstances = new ArrayList<>();
+		BufferedReader br = new BufferedReader(new FileReader(configFile));
+		StringBuffer buffer = new StringBuffer();
+		String line;
+		while ((line = br.readLine()) != null)
+			buffer.append(line.trim());
+		br.close();
+		
+		JSONObject jsonObject = new JSONArray(buffer.toString()).getJSONObject(0);
+		JSONArray seeds = jsonObject.getJSONArray("members");
+		
+		String virtInst;			
+		for (int i = 0; i < seeds.length(); i++){
+			virtInst = seeds.getJSONObject(i).getString("virtual_instances");			
+			virtualInstances.add(Integer.parseInt(virtInst));
+		}
+		return virtualInstances;
+    }
+ 
+ private static List<Integer> getBackupIntervalsFromFile(File configFile) throws IOException, JSONException {		
+		
+ 	List<Integer> backupIntervals = new ArrayList<>();
+		BufferedReader br = new BufferedReader(new FileReader(configFile));
+		StringBuffer buffer = new StringBuffer();
+		String line;
+		while ((line = br.readLine()) != null)
+			buffer.append(line.trim());
+		br.close();
+		
+		JSONObject jsonObject = new JSONArray(buffer.toString()).getJSONObject(0);
+		JSONArray seeds = jsonObject.getJSONArray("members");
+		
+		String backInt;			
+		for (int i = 0; i < seeds.length(); i++){
+			backInt = seeds.getJSONObject(i).getString("backup_interval");			
+			backupIntervals.add(Integer.parseInt(backInt));
+		}
+		return backupIntervals;
+ }
+ 
+ 
     
     private static Map<String, Integer> getPortsFromFile(File configFile) throws IOException, JSONException{
     	

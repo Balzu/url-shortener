@@ -41,15 +41,15 @@ public class NodeCommunicationManager {
 	
 	
 	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService,
-			int nodePort, String ipAddress, StorageService ss) 
+			int virtualInstances, int nodePort, String ipAddress, StorageService ss, int backupInterval) 
 	{
-		this(vt, nid, nodeCommService,700, ConsistentHasher.SHA1, nodePort,
-				ipAddress, ss);
+		this(vt, nid, nodeCommService,virtualInstances, ConsistentHasher.SHA1, nodePort,
+				ipAddress, ss, backupInterval);
 	}
 	
 	public NodeCommunicationManager(VectorClock vt, int nid, NodeCommunicationService nodeCommService, 
 			final int virtualInstancesPerBucket, final HashFunction hashFunction, int nodePort,
-			String ipAddress, StorageService ss)
+			String ipAddress, StorageService ss, int backupInterval)
 	{
 		nodeServiceRunning = new AtomicBoolean(true);
 		nodeCommunicationService = nodeCommService;				
@@ -63,7 +63,7 @@ public class NodeCommunicationManager {
 		try {
 			requestManager = new RequestManager(nodeServiceRunning, nodePort,
 					ipAddress, storageService);
-			replicaManager = new ReplicaManager(storageService, 3000, ipAddress, this, nid);
+			replicaManager = new ReplicaManager(storageService, 3000, ipAddress, this, nid, backupInterval);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
@@ -195,7 +195,7 @@ public class NodeCommunicationManager {
 	}
 	
 	public int getClusterSize(){
-		return nodeCommunicationService.getGossipService().get_gossipManager().getMemberList().size();
+		return nodeCommunicationService.getGossipService().get_gossipManager().getMemberList().size()+1;
 	}
 	
 	public RequestManager getRequestManager(){
