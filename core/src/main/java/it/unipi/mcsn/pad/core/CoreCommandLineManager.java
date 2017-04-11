@@ -24,9 +24,10 @@ public class CoreCommandLineManager {
                 .hasArg()
                 .withDescription( "path to the custom configuration file 'core.conf'" )
                 .create( "c" );
-		help = OptionBuilder.withLongOpt("help").create('h');		
+		help = OptionBuilder.withLongOpt("help").withDescription("Display usage information").create('h');		
 		options = new Options();
 		options.addOption(config);
+		options.addOption(help);
 		parser = new DefaultParser();
 	    line = parser.parse( options, args );
 	}

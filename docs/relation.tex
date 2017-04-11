@@ -40,8 +40,8 @@ Removes the couple \texttt{<shortened url, original url>}.\\
 
 
 \subsection{Passive Replication}
-Clients can communicate with every node. In case of WRITE operations, the node forwards the request to the primary, which executes it and sends back the response to the sending node, which in turn hands it back to the client. \\
-In case of READ operation, the node that receives the request firstly checks its local store: if possible it directly answers the client (running the risk of providing inconsistent information, but answering more quickly), otherwise it forwards the READ request to the primary. \\
+Clients can communicate with every node. If the contacted node is the primary for that request, it will execute the request and directly return the result to the client; otherwise it will forward the request to the primary, which will execute it and send back the response to the sending node, which in turn will hand it back to the client. \\
+
 I have chosen the Passive Replication strategy because I think it should keep lower the number of version conflicts.
 
 \subsection{Data Partitioning}

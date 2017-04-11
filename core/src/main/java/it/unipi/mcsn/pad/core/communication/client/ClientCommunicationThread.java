@@ -9,7 +9,7 @@ import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.MessageStatus;
 import it.unipi.mcsn.pad.core.message.MessageType;
 import it.unipi.mcsn.pad.core.message.PutMessage;
-import it.unipi.mcsn.pad.core.message.ReplyMessage;
+
 
 public class ClientCommunicationThread implements Runnable{
 	

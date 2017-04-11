@@ -12,12 +12,11 @@ public class VersionedMessage implements NodeMessage{
 	private String shortUrl;
 	private Versioned<String> versioned;
 	
+	
 	public  VersionedMessage(String lUrl, String sUrl, Version vectorClock, 
 			MessageType mt){
 		this(lUrl,sUrl,vectorClock,mt, null);
-	}
-	
-		
+	}		
 	
 	public  VersionedMessage(String lUrl, String sUrl, Version vectorClock, 
 			MessageType mt, MessageStatus ms) {

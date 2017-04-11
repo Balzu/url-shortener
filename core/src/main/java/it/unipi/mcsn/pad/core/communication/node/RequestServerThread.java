@@ -1,18 +1,13 @@
 package it.unipi.mcsn.pad.core.communication.node;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-import it.unipi.mcsn.pad.core.message.MessageStatus;
+import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.NodeMessage;
-import it.unipi.mcsn.pad.core.message.ReplyMessage;
+import it.unipi.mcsn.pad.core.message.UpdateMessage;
 import it.unipi.mcsn.pad.core.storage.StorageService;
 import it.unipi.mcsn.pad.core.utils.MessageHandler;
 import it.unipi.mcsn.pad.core.utils.Utils;
@@ -35,32 +30,29 @@ public class RequestServerThread implements Runnable{
 	@Override
 	public void run() {
 		
-		NodeMessage nmsg = null;
 		try {
-			nmsg = (NodeMessage) Utils.deserialize(packet.getData());
-		} catch (ClassNotFoundException | IOException e2) {			
-			e2.printStackTrace();
-		}
-		
-		//TODO: The received message must be processed before Reply can be issued
-		
-		
-		
-		NodeMessage reply = MessageHandler.handleMessage(nmsg, storageService);
-		//TODO: different message generated based upon outcome of request (SUCCESS, ERROR, ...)
-		byte[] serializedReply = null;
-		try {
+			Message msg = (Message)Utils.deserialize(packet.getData());
+			Message reply = null;
+			if (msg instanceof NodeMessage){
+				NodeMessage nmsg = (NodeMessage) msg;
+				reply = MessageHandler.handleMessage(nmsg, storageService);
+			}
+			else if (msg instanceof UpdateMessage){
+				UpdateMessage umsg = (UpdateMessage) msg;
+				reply = MessageHandler.handleMessage(umsg, storageService);
+			}
+			byte[] serializedReply = null;
 			serializedReply = Utils.serialize(reply);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		InetAddress IPAddress = packet.getAddress();
-		int port = packet.getPort();
-		packet = new DatagramPacket(serializedReply, serializedReply.length, IPAddress, port);
-		try {
+			InetAddress IPAddress = packet.getAddress();
+			int port = packet.getPort();
+			packet = new DatagramPacket(serializedReply, serializedReply.length, IPAddress, port);
 			socket.send(packet);
-		} catch (IOException e) {
+			
+		} 
+		catch (ClassNotFoundException e) {			
+			e.printStackTrace();
+		}		
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		

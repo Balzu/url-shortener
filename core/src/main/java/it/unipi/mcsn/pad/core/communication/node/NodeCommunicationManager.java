@@ -14,17 +14,16 @@ import it.unipi.mcsn.pad.consistent.ConsistentHasher;
 import it.unipi.mcsn.pad.consistent.ConsistentHasher.HashFunction;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
 import it.unipi.mcsn.pad.core.message.Message;
-import it.unipi.mcsn.pad.core.message.MessageStatus;
 import it.unipi.mcsn.pad.core.message.MessageType;
 import it.unipi.mcsn.pad.core.message.NodeMessage;
-import it.unipi.mcsn.pad.core.message.ReplyMessage;
+
 import it.unipi.mcsn.pad.core.message.VersionedMessage;
 import it.unipi.mcsn.pad.core.storage.StorageService;
 import it.unipi.mcsn.pad.core.utils.MessageHandler;
 import it.unipi.mcsn.pad.core.utils.Partitioner;
 import it.unipi.mcsn.pad.core.utils.Utils;
 import voldemort.versioning.VectorClock;
-import voldemort.versioning.Version;
+
 
 
 public class NodeCommunicationManager {
@@ -53,17 +52,18 @@ public class NodeCommunicationManager {
 			String ipAddress, StorageService ss)
 	{
 		nodeServiceRunning = new AtomicBoolean(true);
-		nodeCommunicationService = nodeCommService;		
-		replicaManager = new ReplicaManager();
+		nodeCommunicationService = nodeCommService;				
 		partitioner = new Partitioner<>(virtualInstancesPerBucket,
 				ConsistentHasher.getIntegerToBytesConverter(), 
 				ConsistentHasher.getStringToBytesConverter(), hashFunction);
 		vectorClock = vt;
 		nodeId = nid;
 		storageService = ss;
+		
 		try {
 			requestManager = new RequestManager(nodeServiceRunning, nodePort,
 					ipAddress, storageService);
+			replicaManager = new ReplicaManager(storageService, 3000, ipAddress, this, nid);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
@@ -87,8 +87,9 @@ public class NodeCommunicationManager {
 	
 	/**
 	 * Processes the message: finds the primary node and sends the message to it
-	 * if primary node is different from this node.
-	 *  Returns a message containing the reply for the operation.
+	 * if primary node is different from this node. 
+	 * @param  The message received from client
+	 * @return A message containing the reply for the operation  
 	 */
 	public Message processClientMessage(Message msg) {
 		// when receive something, update the vector clock 
@@ -97,13 +98,12 @@ public class NodeCommunicationManager {
 		ClientMessage clmsg = (ClientMessage) msg;		
 		String surl = getShortUrl(clmsg);		
 		int primaryId = findPrimary(surl); 
-		if (primaryId == nodeId){
-			//TODO: call HandleMessage and maybe switch on REMOVE, PUT, GET
-			MessageHandler.handleMessage(createNodeMessage(clmsg, surl), storageService);
-			return null; //TODO return the message
+		if (primaryId == nodeId){			
+			NodeMessage reply = (NodeMessage)MessageHandler.handleMessage(createNodeMessage(clmsg, surl), storageService);
+			return reply; 
 		}
 		else {
-			// TODO Version message and send it to primary
+			// TODO Version message and send it to primary			
 			NodeMessage nmsg = createNodeMessage(clmsg, surl);
 			GossipMember member = getMemberFromId(primaryId);
 			String ipAddr = member.getHost();
@@ -170,7 +170,7 @@ public class NodeCommunicationManager {
 	/**
 	 * Given the id of the node, returns the corresponding IP address. 
 	 */
-	private GossipMember getMemberFromId (int id)
+	public GossipMember getMemberFromId (int id)
 	{
 		List<LocalGossipMember> members = new ArrayList<>();
 		members = nodeCommunicationService.getGossipService().get_gossipManager().getMemberList();
@@ -192,6 +192,14 @@ public class NodeCommunicationManager {
 		else
 			surl = clmsg.getUrl();
 		return surl;
+	}
+	
+	public int getClusterSize(){
+		return nodeCommunicationService.getGossipService().get_gossipManager().getMemberList().size();
+	}
+	
+	public RequestManager getRequestManager(){
+	 	return requestManager;
 	}
 
 }

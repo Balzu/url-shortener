@@ -24,13 +24,15 @@ import com.google.code.gossip.RemoteGossipMember;
 
 public class NodeRunner 
 {
-    public static void main( String[] args ) throws ParseException
+    public static void main( String[] args )
     {     	
     	try {
     		CoreCommandLineManager clm = new CoreCommandLineManager(args); 
 			
 			// If asked help, show help message and quit
-			if (clm.needHelp()){
+    		//TODO if --help and other options are present it does not return usage error message, 
+    		// but just prints help message and quit - think it's ok, maven too behaves so
+			if (clm.needHelp()){ 
 				clm.printHelp();
 				System.exit(0);
 			}
@@ -95,8 +97,10 @@ public class NodeRunner
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ParseException e) {			
+    		System.err.println(e.getMessage());
+    		System.out.println("Run with \"--help\" to get usage information about command line");
 		}
-
     }
     
     private static List<String> getAddressesFromFile(File configFile) throws IOException, JSONException {		

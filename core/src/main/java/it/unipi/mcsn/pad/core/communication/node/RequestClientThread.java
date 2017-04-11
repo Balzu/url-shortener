@@ -46,14 +46,7 @@ public class RequestClientThread implements Callable{
 	    	//TODO: se receive eccede timeout, ritorna messaggio di errore.
 	    	// Problema: discriminare il caso in cui è la receive a sollevare questa eccezione,
 	    	// e non altri metodi!
-	    }
-		/*
-		catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+	    }		
 		byte[] incomingBuffer = new byte [clientSocket.getSendBufferSize()];
 		packet = new DatagramPacket(incomingBuffer, incomingBuffer.length);
 	    clientSocket.receive(packet);
