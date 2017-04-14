@@ -61,9 +61,10 @@ public class NodeCommunicationManager {
 		storageService = ss;
 		
 		try {
-			requestManager = new RequestManager(nodeServiceRunning, nodePort,
-					ipAddress, storageService);
 			replicaManager = new ReplicaManager(storageService, 3000, ipAddress, this, nid, backupInterval);
+			requestManager = new RequestManager(nodeServiceRunning, nodePort,
+					ipAddress, storageService, replicaManager);
+			
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
@@ -99,7 +100,8 @@ public class NodeCommunicationManager {
 		String surl = getShortUrl(clmsg);		
 		int primaryId = findPrimary(surl); 
 		if (primaryId == nodeId){			
-			NodeMessage reply = (NodeMessage)MessageHandler.handleMessage(createNodeMessage(clmsg, surl), storageService);
+			NodeMessage reply = (NodeMessage)MessageHandler.handleMessage(createNodeMessage(clmsg, surl),
+					storageService, replicaManager);
 			return reply; 
 		}
 		else {

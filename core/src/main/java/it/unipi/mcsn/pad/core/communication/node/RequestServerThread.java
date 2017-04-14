@@ -15,14 +15,15 @@ import it.unipi.mcsn.pad.core.utils.Utils;
 public class RequestServerThread implements Runnable{
 	
 	 private DatagramPacket packet;
-	 private RequestManager manager;
+	// private RequestManager requestManager;
 	 private DatagramSocket socket;
 	 private StorageService storageService;
+	 private ReplicaManager manager;
 	 
-	 public  RequestServerThread(DatagramPacket packet, RequestManager rm, 
+	 public  RequestServerThread(DatagramPacket packet, ReplicaManager rm,
 			  DatagramSocket socket, StorageService ss) {
 		this.packet = packet;
-		this.manager = rm;
+	    manager = rm;
 		this.socket = socket;
 		storageService = ss;
 	}
@@ -35,11 +36,11 @@ public class RequestServerThread implements Runnable{
 			Message reply = null;
 			if (msg instanceof NodeMessage){
 				NodeMessage nmsg = (NodeMessage) msg;
-				reply = MessageHandler.handleMessage(nmsg, storageService);
+				reply = MessageHandler.handleMessage(nmsg, storageService, manager);
 			}
 			else if (msg instanceof UpdateMessage){
 				UpdateMessage umsg = (UpdateMessage) msg;
-				reply = MessageHandler.handleMessage(umsg, storageService);
+				reply = MessageHandler.handleMessage(umsg, storageService, manager);
 			}
 			byte[] serializedReply = null;
 			serializedReply = Utils.serialize(reply);

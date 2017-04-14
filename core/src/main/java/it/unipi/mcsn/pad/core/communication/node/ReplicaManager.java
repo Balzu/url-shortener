@@ -28,6 +28,7 @@ public class ReplicaManager extends Thread{
 	private int nodePort;
 	private NodeCommunicationManager nodeCommManager;
 	private int nodeId;
+	private int backupId;
 	private int backupInterval;
 	
 	
@@ -42,6 +43,9 @@ public class ReplicaManager extends Thread{
 		nodeCommManager = ncm;
 		nodeId = nid;
 		this.backupInterval = backupInterval;
+		// Assign a negative value, meaning that current node has not received the backup database from any node
+		// yet (recall that node id can only be positive)
+		backupId = -1; 
 	}
 	
 	@Override
@@ -54,22 +58,27 @@ public class ReplicaManager extends Thread{
 				createUpdates(updates, dump);
 				int clusterSize = nodeCommManager.getClusterSize();
 				int replica1 = ((nodeId+1) % clusterSize);
-				int replica2 = ((nodeId+2) % clusterSize);
+			//	int replica2 = ((nodeId+2) % clusterSize);
 				sendUpdates(replica1, updates);
-				sendUpdates(replica2, updates);				
+		   //  sendUpdates(replica2, updates);				
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}			
 		}		
 	}
 	
+	public int getBackupId() {
+		return backupId;
+	}
+
+	public void setBackupId(int backupId) {
+		this.backupId = backupId;
+	}
+
 	/**
 	 * Send updates to a replica 
 	 * @throws ExecutionException 
@@ -80,7 +89,7 @@ public class ReplicaManager extends Thread{
 	{
 		String replicaAddress = nodeCommManager.getMemberFromId(replica).getHost();
 		int replicaPort = nodeCommManager.getRequestManager().getPort();
-		for (UpdateMessage umsg : updates){ // TODO: remove reply and print message, only put to do a check
+		for (UpdateMessage umsg : updates){ 
 			/*Message reply =*/ nodeCommManager.getRequestManager().sendMessage(
 					umsg, replicaAddress, replicaPort);
 			/*System.out.println("The response status of the update message sent by node " +
@@ -94,12 +103,14 @@ public class ReplicaManager extends Thread{
 	
 	
 	public void createUpdates(List<UpdateMessage> updates, Map<String,Versioned<String>> dump){		
-		UpdateMessage umsg = new SizedBackupMessage();
+		// It is the first update message of a possible sequence of updates, so the flag is set to true.
+		// Following messages (if any) will have the flag set to false.
+		UpdateMessage umsg = new SizedBackupMessage(nodeId, true);
 		for (Entry<String, Versioned<String>> e : dump.entrySet()){
 			umsg.put(e.getKey(), e.getValue());
 			if (umsg.isFull()){
 				updates.add(umsg);
-				umsg = new SizedBackupMessage();
+				umsg = new SizedBackupMessage(nodeId, false);
 			}
 		}
 		if (!umsg.isEmpty())

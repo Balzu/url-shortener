@@ -14,24 +14,28 @@ public class SizedBackupMessage implements UpdateMessage{
 	
 	private int size;
 	private int capacity;
+	private int senderId;
+	private boolean first;
 	private Map<String,Versioned<String>> items;
 	private MessageStatus messageStatus;
 	private MessageType messageType;
 	
-	public SizedBackupMessage () {
-		this(50, MessageStatus.SUCCESS);
+	public SizedBackupMessage (int senderId, boolean first) {
+		this(50,  senderId, first, MessageStatus.SUCCESS);
 	}
 	
-	public SizedBackupMessage (int capacity) {
-		this(capacity, MessageStatus.SUCCESS);
+	public SizedBackupMessage (int capacity, int senderId, boolean first) {
+		this(capacity, senderId, first, MessageStatus.SUCCESS);
 	}
 
-	public SizedBackupMessage (int capacity, MessageStatus ms)
+	public SizedBackupMessage (int capacity, int senderId, boolean first, MessageStatus ms)
 	{
 		messageType=MessageType.UPDATE;		
 		messageStatus = ms;
 		this.capacity = capacity;
 		size = 0;
+		this.senderId = senderId;
+		this.first = first;
 		items = new HashMap<>(capacity);
 	}
 	
@@ -59,6 +63,18 @@ public class SizedBackupMessage implements UpdateMessage{
 	
 	public boolean isEmpty() {
 		return (size == 0);
+	}
+
+	@Override
+	public int getSenderId()
+	{
+		return senderId;
+	}
+
+	@Override
+	
+	public boolean isFirst() {
+		return first;
 	}
 	
 	

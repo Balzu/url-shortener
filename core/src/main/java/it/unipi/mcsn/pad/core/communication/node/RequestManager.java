@@ -22,14 +22,16 @@ public class RequestManager extends Thread{
 	private final ExecutorService threadPool;
 	private int nodePort;
 	private StorageService storageService;
+	private ReplicaManager repMan;
 	
 	public RequestManager (AtomicBoolean isRunning, int nodePort,
-			String ipAddress, StorageService ss) throws SocketException, UnknownHostException{
+			String ipAddress, StorageService ss, ReplicaManager rm) throws SocketException, UnknownHostException{
 		socket = new DatagramSocket(nodePort, InetAddress.getByName(ipAddress));
 		this.isRunning = isRunning;
 		this.nodePort = nodePort;
 		storageService = ss;
 		threadPool = Executors.newCachedThreadPool();
+		repMan = rm;
 	}
 	
 	@Override
@@ -42,7 +44,7 @@ public class RequestManager extends Thread{
 				byte[] buf = new byte[socket.getReceiveBufferSize()];
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 	            socket.receive(packet);
-	            threadPool.submit(new RequestServerThread(packet, this, socket, storageService));				
+	            threadPool.submit(new RequestServerThread(packet, repMan, socket, storageService));				
 			} catch (SocketException e) {			
 				//e.printStackTrace();  arises only when we close the socket, so it is ok
 			} catch (IOException e) {			

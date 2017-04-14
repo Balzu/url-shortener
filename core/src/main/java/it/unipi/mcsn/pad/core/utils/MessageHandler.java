@@ -1,5 +1,6 @@
 package it.unipi.mcsn.pad.core.utils;
 
+import it.unipi.mcsn.pad.core.communication.node.ReplicaManager;
 import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.MessageStatus;
 import it.unipi.mcsn.pad.core.message.MessageType;
@@ -13,7 +14,7 @@ import voldemort.versioning.Versioned;
 public class MessageHandler {
 	
 	
-	public static Message handleMessage(Message msg, StorageService storageService){
+	public static Message handleMessage(Message msg, StorageService storageService, ReplicaManager rm){
 		//TODO merge received vector clock with node's vector clock?
 		if (msg instanceof NodeMessage){
 			NodeMessage nmsg = (NodeMessage) msg;
@@ -33,7 +34,7 @@ public class MessageHandler {
 		}
 		else if(msg instanceof UpdateMessage ){
 			UpdateMessage umsg = (UpdateMessage) msg;
-			return processUpdateMessage(umsg, storageService);
+			return processUpdateMessage(umsg, storageService, rm);
 		}
 		return null; //Should never end up returning null
 	}
@@ -83,8 +84,26 @@ public class MessageHandler {
 	}
     
     private static NodeMessage processUpdateMessage(
-    		UpdateMessage umsg, StorageService storageService)
+    		UpdateMessage umsg, StorageService storageService, ReplicaManager rm)
     {
+    	// If the replica manager never received a backup before, we store the id of the sending node in the
+    	// replica manager to mean that from now on the replica manager expects update messages from that node
+    	if (rm.getBackupId() == -1)
+    		rm.setBackupId(umsg.getSenderId());
+    	// If the id of the sender is different from the id stored in the replica manager it means that either
+    	// a node crashed or a node has recovered from crashing. In both cases the replica manager must prepare 
+    	// to receive the following messages from a different node: so it updates its backupId to account for the
+    	// new sender, and merges the backup DB into the primary DB (indeed in case the old sender crashed, from
+    	// now on this node should answer also the queries concerning the crashed node)
+    	else if (umsg.getSenderId() != rm.getBackupId()){
+    		rm.setBackupId(umsg.getSenderId());
+    		storageService.getStorageManager().mergeDB();
+    	}
+    	// The backup database is emptied every time a sequence of updates is started in order to keep it 
+    	// updated.
+    	if (umsg.isFirst())
+    		storageService.getStorageManager().emptyBackup();    	
+    	
     	boolean stored = storageService.getStorageManager().storeBackup(umsg.getitems());
     	if (!stored)
     		return new VersionedMessage(null, null, null, MessageType.REPLY, MessageStatus.ERROR);
