@@ -4,14 +4,14 @@ A distributed url-shortener service that focuses on availability and partition t
 ## Usage
 First of all, you have to download and build the project:
 
-`git clone https://github.com/Balzu/url-shortener.git`
-`cd url-shortener`
-`mvn clean package`
+`git clone https://github.com/Balzu/url-shortener.git`  
+`cd url-shortener`  
+`mvn clean package`  
 
 Then you have to run the url-shortener service. This setups a cluster of nodes that all implement the url-shortener service. It is possible to tweak the system by providing a custom configuration file, otherwise the default one will be used. To start the service:
 
-`cd core`
-`java -jar target/core-1.0-SNAPSHOT-jar-with-dependencies.jar [-c <configuration_file>] `
+`cd core`  
+`java -jar target/core-1.0-SNAPSHOT-jar-with-dependencies.jar [-c <configuration_file>] `  
 
 where
 
@@ -25,8 +25,8 @@ Finally you can run the client to actually use the service. Three APIs are provi
 
 It is possible to run the client either in interactive or batch mode. To run the client:
 
-`cd client`
-`java -jar target/client-1.0-SNAPSHOT-jar-with-dependencies.jar {-p <original_url> | -g <shortened_url> | -r <shortened_url> | -i} [-c <configuration_file>] [-o <output_file>]`
+`cd client`  
+`java -jar target/client-1.0-SNAPSHOT-jar-with-dependencies.jar {-p <original_url> | -g <shortened_url> | -r <shortened_url> | -i} [-c <configuration_file>] [-o <output_file>]`  
 
 where
 
