@@ -29,7 +29,13 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
+        <configuration> 
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>it.unipi.mcsn.pad.client.ClientRunner</mainClass>
+            </manifest>
+          </archive>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>

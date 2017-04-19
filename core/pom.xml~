@@ -53,6 +53,10 @@
       <artifactId>consistent-hashing</artifactId>
       <version>0.0.2</version>
     </dependency>
-    
+    <dependency>
+      <groupId>org.mapdb</groupId>
+      <artifactId>mapdb</artifactId>
+      <version>3.0.3</version>
+    </dependency>
   </dependencies>
 </project>

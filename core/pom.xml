@@ -30,6 +30,12 @@
           </execution>
         </executions>
         <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>it.unipi.mcsn.pad.core.NodeRunner</mainClass>
+            </manifest>
+          </archive>
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
