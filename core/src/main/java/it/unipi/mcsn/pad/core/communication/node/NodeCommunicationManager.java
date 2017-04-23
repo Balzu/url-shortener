@@ -74,6 +74,8 @@ public class NodeCommunicationManager {
 		
 	}
 	
+	
+
 	public void start(){
 		requestManager.start();
 		replicaManager.start();
@@ -153,10 +155,7 @@ public class NodeCommunicationManager {
 	 */
 	private int findPrimary(String key){
 		
-		List<LocalGossipMember> members = new ArrayList<>();
-		// NO MORE TRUE: I create nodes s.t. String id = Ip address of the node without dots.
-		// (Each GossipMember has a String id = ip address of that node. I give an integer representation
-		// of the ids, and then I use the int ids to identify the corresponding buckets in the ring.)
+		List<LocalGossipMember> members = new ArrayList<>();		
 		members = nodeCommunicationService.getGossipService().get_gossipManager().getMemberList();
 		List<Integer> buckets = new ArrayList<>();
 		for (LocalGossipMember member : members){
@@ -164,6 +163,8 @@ public class NodeCommunicationManager {
 			int id = Integer.parseInt(member.getId());
 			buckets.add(id);			
 		}
+		
+		
 		
 		return partitioner.findPrimary(key, buckets);
 		
@@ -203,5 +204,10 @@ public class NodeCommunicationManager {
 	public RequestManager getRequestManager(){
 	 	return requestManager;
 	}
+	
+	// Only for test purposes
+		public Partitioner<Integer, String> getPartitioner() {
+			return partitioner;
+		}
 
 }

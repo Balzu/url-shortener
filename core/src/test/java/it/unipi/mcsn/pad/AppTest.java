@@ -1,5 +1,24 @@
 package it.unipi.mcsn.pad;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONException;
+
+import com.google.code.gossip.GossipMember;
+import com.google.code.gossip.GossipSettings;
+import com.google.code.gossip.LocalGossipMember;
+import com.google.code.gossip.LogLevel;
+import com.google.code.gossip.RemoteGossipMember;
+
+import it.unipi.mcsn.pad.consistent.ConsistentHasher;
+import it.unipi.mcsn.pad.consistent.ConsistentHasherImpl;
+import it.unipi.mcsn.pad.core.Node;
+import it.unipi.mcsn.pad.core.NodeRunner;
+import it.unipi.mcsn.pad.core.utils.Partitioner;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -30,9 +49,89 @@ public class AppTest
 
     /**
      * Rigourous Test :-)
+     * @param <B>
+     * @param <M>
      */
-    public void testApp()
+    public <B, M> void testApp()
     {
-        assertTrue( true );
+    	//NodeRunner nr = new NodeRunner();
+    	
+		try {
+			List<Integer> virtualInstances=null;
+	    	List<Integer> backupIntervals=null;
+	    	Map<String, Integer> ports= null;
+	    	File configFile = new File ("src/main/resources/core.conf");
+	    	List<String> addresses;
+			addresses = NodeRunner.getAddressesFromFile(configFile);
+			virtualInstances = NodeRunner.getVirtualInstancesFromFile(configFile);
+			backupIntervals =  NodeRunner.getBackupIntervalsFromFile(configFile);
+			ports = NodeRunner.getPortsFromFile(configFile);
+			int gossipPort = ports.get("gossip_port");
+			int clientPort = ports.get("client_port");
+			int nodePort = ports.get("node_port");
+			
+			    		
+			GossipSettings settings = new GossipSettings();
+			
+			
+			List<GossipMember> startupMembers = new ArrayList<>();
+			for (int i = 0; i < addresses.size(); ++i) {
+				startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); //TODO: fix the id
+			}
+			
+			List<Node> nodes = new ArrayList<>();
+			for (int i = 0; i < addresses.size(); ++i) {	    			
+				Node node = new Node(clientPort, 50, addresses.get(i), gossipPort, i+"" , 
+						LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
+						virtualInstances.get(i), backupIntervals.get(i));
+				node.start();
+				nodes.add(node);    				   
+			} 
+			
+			Partitioner p =nodes.get(0).getNodeCommService().getCommunicationManager().getPartitioner();
+			
+			List<LocalGossipMember> members = new ArrayList<>();
+			members = nodes.get(0).getNodeCommService().getGossipService().get_gossipManager().getMemberList();
+			List<Integer> buckets = new ArrayList<>();
+			for (LocalGossipMember member : members){
+				//int id = Utils.getIntegerIpAddress(member.getId());
+				int id = Integer.parseInt(member.getId());
+				buckets.add(id);			
+			}
+			
+			ConsistentHasher<B, M> ch = p.getConsistentHasher();
+			
+			List<B> oldBuckets = ch.getAllBuckets();
+			// If the active nodes are different than the previous nodes in the bucket,
+			// I remove all the old nodes and insert the new ones
+			if (!p.areEqual(oldBuckets, buckets)){
+				for (B bucket : oldBuckets)
+					try {
+						ch.removeBucket(bucket);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				for (Integer bucket : buckets)
+					ch.addBucket((B) bucket);					
+			}
+			
+			
+			B result = ch.findBucket((M) "pad.ly/f5103c51");
+			
+			assertEquals(2, (int)result);
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		     
     }
 }

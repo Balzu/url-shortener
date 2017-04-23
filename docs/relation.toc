@@ -5,22 +5,22 @@
 \contentsline {paragraph}{put}{1}
 \contentsline {paragraph}{remove}{1}
 \contentsline {subsection}{\numberline {2.2}Passive Replication}{1}
-\contentsline {subsection}{\numberline {2.3}Data Partitioning}{2}
+\contentsline {subsection}{\numberline {2.3}Data Partitioning}{1}
 \contentsline {subsection}{\numberline {2.4}Data Replication}{2}
 \contentsline {subsection}{\numberline {2.5}Primary Failure}{2}
 \contentsline {subsection}{\numberline {2.6}Consistency Model}{2}
-\contentsline {subsection}{\numberline {2.7}Conflicts Resolution}{3}
-\contentsline {section}{\numberline {3}Implementation}{3}
+\contentsline {subsection}{\numberline {2.7}Conflicts Resolution}{2}
+\contentsline {section}{\numberline {3}Implementation}{2}
 \contentsline {subsection}{\numberline {3.1}Architecture}{3}
-\contentsline {subsection}{\numberline {3.2}The project classes}{4}
-\contentsline {subsubsection}{\numberline {3.2.1}The core module}{5}
-\contentsline {subsubsection}{\numberline {3.2.2}The client module}{5}
-\contentsline {subsection}{\numberline {3.3}Use cases}{5}
-\contentsline {subsubsection}{\numberline {3.3.1}Management of a client request}{5}
-\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{5}
-\contentsline {section}{\numberline {4}Test}{5}
-\contentsline {subsubsection}{\numberline {4.0.1}Correct behaviour of put, get, remove}{5}
-\contentsline {subsubsection}{\numberline {4.0.2}Self-healing }{5}
+\contentsline {subsection}{\numberline {3.2}The project classes}{3}
+\contentsline {subsubsection}{\numberline {3.2.1}The core module}{3}
+\contentsline {subsubsection}{\numberline {3.2.2}The client module}{4}
+\contentsline {subsection}{\numberline {3.3}Use cases}{4}
+\contentsline {subsubsection}{\numberline {3.3.1}Management of a client request}{4}
+\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{4}
+\contentsline {section}{\numberline {4}Test}{4}
+\contentsline {subsubsection}{\numberline {4.0.1}Correct behaviour of put, get, remove}{4}
+\contentsline {subsubsection}{\numberline {4.0.2}Self-healing }{4}
 \contentsline {subsubsection}{\numberline {4.0.3}Conflict Resolution}{5}
 \contentsline {subsubsection}{\numberline {4.0.4}Load Balancing}{5}
 \contentsline {section}{\numberline {5}Future work}{5}

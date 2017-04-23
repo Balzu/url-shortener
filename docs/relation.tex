@@ -1,6 +1,7 @@
 \documentclass{article} 
 \usepackage{todonotes}
 \usepackage{graphicx}
+\usepackage[bottom=1.3in]{geometry}
 \graphicspath{ {images/} }
 
 
@@ -81,18 +82,33 @@ Each node has to do three main jobs, so I created a node as a container of three
 \begin{itemize}
 \item \textit{client communication service}: each node must be able to communicate with the client, to accept requests from it and return responses;
 \item \textit{node communication service}: each node must be able to communicate with the other nodes. Indeed, it could have to forward the client request to the primary node, or to send the content of its own database to the backup node, or even only to check that the other nodes of the cluster are alive;
-\item \textit{storage service}: each node must have a database, to store and retrieve urls on client's behalf. Actually, it has two databases: its own database, used to handle requests, and the backup database, used to replicate the data of another node+.
+\item \textit{storage service}: each node must have a database, to store and retrieve urls on client's behalf. Actually, it has two databases: its own database, used to handle requests, and the backup database, used to replicate the data of another node. The reason for the use of two distinct databases is explained in \textit{``The core module''} paragraph. 
 \end{itemize}
+Figure \ref{fig:architecture} shows the architecture of the service.
 
 \begin{figure}[h]
-\includegraphics[scale=0.35]{architecture}
+\includegraphics[scale=0.4]{architecture}
 \caption{General architecture. There is a client and a cluster, which is made of more nodes. Each node is made of a node communication service, a client communication service and a storage service. The letter ``P'' under the database stays for ``primary'' , the letter ``B'' for ``backup''.}
+\label{fig:architecture}
 \end{figure}
 
 \subsection{The project classes} 
-The structure of the project is the following. The node is the building block of the cluster and, as we already said, it is made of three main \textit{services}. Each of these services provides a high level view of the functionalities it has to implement. For the actual implementation the managers rely on proper \textit{managers}, which have the responsability to setup things and handle lower level details. The following figure shows a simplified UML class diagram, in which the relationships among classes are highlighted (but not the methods).
+The structure of the project is the following. The node is the building block of the cluster and, as we already said, it is made of three main \textit{services}. Each of these services provides a high level view of the functionalities it has to implement. For the actual implementation these services rely on proper \textit{managers}, which have the responsability to setup things and handle lower level details. Figure \ref{fig:class_diag} shows a simplified UML class diagram, in which the relationships among classes are highlighted (but not the methods). In particular, this diagram only shows the classes of the \textit{core} module, because it is this module that implements the logic of the service. Instead the \textit{client} module only parses the user's request and sends it to proper classes of the core module to be processed. \\
+
+\begin{figure}[t]
+\centering
+\includegraphics[scale=0.43]{core_diagram}
+\caption{Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.}
+\label{fig:class_diag}
+\end{figure}
+
 
 \subsubsection{The core module} 
+The core module contains all the classes that implement the logic of the project. The Node class is the main class and the building block of the cluster. This module contains classes and methods to receive and process client requests, find the primary node for any request, handle the partition and replication of data, cope with node failure and resolve conflicts. Classes inside this module are organized into the following packages: \textit{communication, message, storage} and \textit{utils}. Some classes belong to the \textit{core} package but not to any of the mentioned subpackages. I start describing these classes, and then I pass to the classes in the subpackages. \\
+\begin{itemize}
+\item \textit{NodeRunner}
+\end{itemize}
+
 
 \subsubsection{The client module} 
 

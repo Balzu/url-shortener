@@ -57,8 +57,11 @@ public class Partitioner <B,M>{
 		return consistentHasher.findBucket(key);
 	}
 	
+	
+
 	// Check this method: it's naif, but should work because in practice B = int
-	private boolean areEqual (List<B> oldB,List<B> newB){
+	//set public only to test, should be private
+	public boolean areEqual (List<B> oldB,List<B> newB){
 		if (oldB.size() != newB.size())
 			return false;
 		for (int i=0; i< newB.size(); i++){
@@ -66,6 +69,11 @@ public class Partitioner <B,M>{
 				return false;
 		}
 		return true;		
+	}
+	
+	// Only for test purposes
+	public ConsistentHasher<B, M> getConsistentHasher() {
+		return consistentHasher;
 	}
 
 }

@@ -105,7 +105,7 @@ public class NodeRunner
 		}
     }
     
-    private static List<String> getAddressesFromFile(File configFile) throws IOException, JSONException {		
+    public static List<String> getAddressesFromFile(File configFile) throws IOException, JSONException {		
 		
     	List<String> addresses = new ArrayList<>();
 		BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -126,7 +126,7 @@ public class NodeRunner
 		return addresses;
     }
     
- private static List<Integer> getVirtualInstancesFromFile(File configFile) throws IOException, JSONException {		
+ public static List<Integer> getVirtualInstancesFromFile(File configFile) throws IOException, JSONException {		
 		
     	List<Integer> virtualInstances = new ArrayList<>();
 		BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -147,7 +147,7 @@ public class NodeRunner
 		return virtualInstances;
     }
  
- private static List<Integer> getBackupIntervalsFromFile(File configFile) throws IOException, JSONException {		
+ public static List<Integer> getBackupIntervalsFromFile(File configFile) throws IOException, JSONException {		
 		
  	List<Integer> backupIntervals = new ArrayList<>();
 		BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -170,7 +170,7 @@ public class NodeRunner
  
  
     
-    private static Map<String, Integer> getPortsFromFile(File configFile) throws IOException, JSONException{
+    public static Map<String, Integer> getPortsFromFile(File configFile) throws IOException, JSONException{
     	
     	Map<String, Integer> map = new HashMap<String, Integer>();
 		BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -191,7 +191,7 @@ public class NodeRunner
 		return map;
     }
     
-    private static void displayUsageMessage(){
+    public static void displayUsageMessage(){
 		System.out.println("Usage: \n" +
 				"- quit                 to quit the service \n");
 	}
