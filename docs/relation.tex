@@ -106,7 +106,18 @@ The structure of the project is the following. The node is the building block of
 \subsubsection{The core module} 
 The core module contains all the classes that implement the logic of the project. The Node class is the main class and the building block of the cluster. This module contains classes and methods to receive and process client requests, find the primary node for any request, handle the partition and replication of data, cope with node failure and resolve conflicts. Classes inside this module are organized into the following packages: \textit{communication, message, storage} and \textit{utils}. Some classes belong to the \textit{core} package but not to any of the mentioned subpackages. I start describing these classes, and then I pass to the classes in the subpackages. \\
 \begin{itemize}
-\item \textit{NodeRunner}
+\item \textit{NodeRunner} It is the class that actually runs the url-shortener service. Indeed it setups the cluster by setting the configurations specified in the configuration file. The \textit{main} method of the core package is in this class.
+\item \textit{CoreCommandLineManager} Parses the command-line input and provides methods to deal with the options that can be specified from command-line.
+\item \textit{Node} It is the building block of the whole cluster. A cluster is a collection of interacting nodes. In turn, each node is made of three services: a \textit{ClientCommunicationService} to handle the communication with the client, a \textit{NodeCommunicationService} to handle the communication with other nodes and a \textit{StorageService} to deal with database operations internal to each node. 
+\item \textit{Service} A simple \textit{Interface} for the various services, that only states that each service must provide a \textit{start()} and a \textit{shutdown()} method.
+\end{itemize}
+
+\paragraph{Communication} The Communication package gathers classes that are involved in the communication either with clients or with other nodes. For this reason, the classes inside this package are organized in two further subpackages \textit{client} and \textit{core}. 
+\subparagraph{Client} 
+\begin{itemize}
+\item \textit{ClientCommunicationService} One of the three fundamental services a node is made of. It starts and shuts down the \textit{ClientCommunicationManager}.
+\item \textit{ClientCommunicationManager} It listens on a TCP ServerSocket to accept client requests. As soon as a request is received, a \textit{ClientCommunicationThread} is created and run to handle it. Then, the ClientCommunicationManager continues to listen on the socket for further requests.
+\item \textit{ClientCommunicationThread}
 \end{itemize}
 
 
