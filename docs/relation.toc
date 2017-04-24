@@ -21,8 +21,8 @@
 \contentsline {subsubsection}{\numberline {3.3.1}Management of a client request}{5}
 \contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{5}
 \contentsline {section}{\numberline {4}Test}{5}
-\contentsline {subsubsection}{\numberline {4.0.1}Correct behaviour of put, get, remove}{5}
-\contentsline {subsubsection}{\numberline {4.0.2}Self-healing }{5}
-\contentsline {subsubsection}{\numberline {4.0.3}Conflict Resolution}{5}
-\contentsline {subsubsection}{\numberline {4.0.4}Load Balancing}{5}
+\contentsline {subsubsection}{\numberline {4.0.3}Correct behaviour of put, get, remove}{5}
+\contentsline {subsubsection}{\numberline {4.0.4}Self-healing }{5}
+\contentsline {subsubsection}{\numberline {4.0.5}Conflict Resolution}{5}
+\contentsline {subsubsection}{\numberline {4.0.6}Load Balancing}{5}
 \contentsline {section}{\numberline {5}Future work}{5}

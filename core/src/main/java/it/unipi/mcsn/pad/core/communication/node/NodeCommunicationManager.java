@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.LocalGossipMember;
+import com.google.code.gossip.manager.GossipManager;
 
 import it.unipi.mcsn.pad.consistent.ConsistentHasher;
 import it.unipi.mcsn.pad.consistent.ConsistentHasher.HashFunction;
@@ -16,7 +17,6 @@ import it.unipi.mcsn.pad.core.message.ClientMessage;
 import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.MessageType;
 import it.unipi.mcsn.pad.core.message.NodeMessage;
-
 import it.unipi.mcsn.pad.core.message.VersionedMessage;
 import it.unipi.mcsn.pad.core.storage.StorageService;
 import it.unipi.mcsn.pad.core.utils.MessageHandler;
@@ -155,11 +155,13 @@ public class NodeCommunicationManager {
 	 */
 	private int findPrimary(String key){
 		
-		List<LocalGossipMember> members = new ArrayList<>();		
-		members = nodeCommunicationService.getGossipService().get_gossipManager().getMemberList();
+		
+		GossipManager gManager = nodeCommunicationService.getGossipService().get_gossipManager();
+		List<LocalGossipMember> members = new ArrayList<>(gManager.getMemberList());
+		// Put also myself in the member list, because I can be the primary too
+		members.add(gManager.getMyself());
 		List<Integer> buckets = new ArrayList<>();
 		for (LocalGossipMember member : members){
-			//int id = Utils.getIntegerIpAddress(member.getId());
 			int id = Integer.parseInt(member.getId());
 			buckets.add(id);			
 		}
@@ -175,8 +177,8 @@ public class NodeCommunicationManager {
 	 */
 	public GossipMember getMemberFromId (int id)
 	{
-		List<LocalGossipMember> members = new ArrayList<>();
-		members = nodeCommunicationService.getGossipService().get_gossipManager().getMemberList();
+		GossipManager gManager = nodeCommunicationService.getGossipService().get_gossipManager();
+		List<LocalGossipMember> members = new ArrayList<>(gManager.getMemberList());	
 		for (LocalGossipMember member : members){
 			if (Integer.parseInt(member.getId()) == id)
 				return member;							

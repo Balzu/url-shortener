@@ -13,6 +13,7 @@ import com.google.code.gossip.GossipSettings;
 import com.google.code.gossip.LocalGossipMember;
 import com.google.code.gossip.LogLevel;
 import com.google.code.gossip.RemoteGossipMember;
+import com.google.code.gossip.manager.GossipManager;
 
 import it.unipi.mcsn.pad.consistent.ConsistentHasher;
 import it.unipi.mcsn.pad.consistent.ConsistentHasherImpl;
@@ -88,10 +89,11 @@ public class AppTest
 				nodes.add(node);    				   
 			} 
 			
-			Partitioner p =nodes.get(0).getNodeCommService().getCommunicationManager().getPartitioner();
+			Partitioner<Integer, String> p =nodes.get(2).getNodeCommService().getCommunicationManager().getPartitioner();
 			
-			List<LocalGossipMember> members = new ArrayList<>();
-			members = nodes.get(0).getNodeCommService().getGossipService().get_gossipManager().getMemberList();
+			GossipManager gManager = nodes.get(2).getNodeCommService().getGossipService().get_gossipManager();
+			List<LocalGossipMember> members = new ArrayList<>(gManager.getMemberList());
+			members.add(gManager.getMyself());
 			List<Integer> buckets = new ArrayList<>();
 			for (LocalGossipMember member : members){
 				//int id = Utils.getIntegerIpAddress(member.getId());
@@ -99,26 +101,26 @@ public class AppTest
 				buckets.add(id);			
 			}
 			
-			ConsistentHasher<B, M> ch = p.getConsistentHasher();
+			ConsistentHasher<Integer, String> ch = p.getConsistentHasher();
 			
-			List<B> oldBuckets = ch.getAllBuckets();
+			List<Integer> oldBuckets = ch.getAllBuckets();
 			// If the active nodes are different than the previous nodes in the bucket,
 			// I remove all the old nodes and insert the new ones
 			if (!p.areEqual(oldBuckets, buckets)){
-				for (B bucket : oldBuckets)
+				for (Integer bucket : oldBuckets)
 					try {
 						ch.removeBucket(bucket);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				for (Integer bucket : buckets)
-					ch.addBucket((B) bucket);					
+					ch.addBucket( bucket);					
 			}
 			
 			
-			B result = ch.findBucket((M) "pad.ly/f5103c51");
+			int result = ch.findBucket("pad.ly/f5103c51");
 			
-			assertEquals(2, (int)result);
+			assertEquals(2, result);
 			
 			
 		} catch (IOException e) {
