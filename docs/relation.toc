@@ -14,15 +14,17 @@
 \contentsline {subsection}{\numberline {3.1}Architecture}{3}
 \contentsline {subsection}{\numberline {3.2}The project classes}{3}
 \contentsline {subsubsection}{\numberline {3.2.1}The core module}{3}
-\contentsline {paragraph}{Communication}{4}
-\contentsline {subparagraph}{Client}{4}
-\contentsline {subsubsection}{\numberline {3.2.2}The client module}{5}
-\contentsline {subsection}{\numberline {3.3}Use cases}{5}
-\contentsline {subsubsection}{\numberline {3.3.1}Management of a client request}{5}
-\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{5}
-\contentsline {section}{\numberline {4}Test}{5}
-\contentsline {subsubsection}{\numberline {4.0.3}Correct behaviour of put, get, remove}{5}
-\contentsline {subsubsection}{\numberline {4.0.4}Self-healing }{5}
-\contentsline {subsubsection}{\numberline {4.0.5}Conflict Resolution}{5}
-\contentsline {subsubsection}{\numberline {4.0.6}Load Balancing}{5}
-\contentsline {section}{\numberline {5}Future work}{5}
+\contentsline {paragraph}{Communication}{5}
+\contentsline {subparagraph}{Client}{5}
+\contentsline {subparagraph}{Node}{5}
+\contentsline {paragraph}{Message}{6}
+\contentsline {subsubsection}{\numberline {3.2.2}The client module}{7}
+\contentsline {subsection}{\numberline {3.3}Use cases}{7}
+\contentsline {subsubsection}{\numberline {3.3.1}Management of a client request}{7}
+\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{7}
+\contentsline {section}{\numberline {4}Test}{7}
+\contentsline {subsubsection}{\numberline {4.0.3}Correct behaviour of put, get, remove}{7}
+\contentsline {subsubsection}{\numberline {4.0.4}Self-healing }{7}
+\contentsline {subsubsection}{\numberline {4.0.5}Conflict Resolution}{7}
+\contentsline {subsubsection}{\numberline {4.0.6}Load Balancing}{7}
+\contentsline {section}{\numberline {5}Future work}{7}

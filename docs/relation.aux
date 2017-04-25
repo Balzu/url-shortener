@@ -22,30 +22,37 @@
 \@writefile{toc}{\contentsline {section}{\numberline {3}Implementation}{2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Architecture}{3}}
 \@writefile{tdo}{\contentsline {todo}{Molto specifico, inseriscilo negli use cases?}{3}}
-\pgfsyspdfmark {pgfid11}{15022893}{40791620}
-\pgfsyspdfmark {pgfid14}{37054042}{40803908}
-\pgfsyspdfmark {pgfid15}{39167578}{40579994}
+\pgfsyspdfmark {pgfid11}{15022893}{40786359}
+\pgfsyspdfmark {pgfid14}{37054042}{40798647}
+\pgfsyspdfmark {pgfid15}{39167578}{40574733}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}The project classes}{3}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}The core module}{3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces General architecture. There is a client and a cluster, which is made of more nodes. Each node is made of a node communication service, a client communication service and a storage service. The letter ``P'' under the database stays for ``primary'' , the letter ``B'' for ``backup''.}}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces General architecture. There is a client and a cluster, which is made of more nodes. Each node is made of a node communication service, a client communication service and a storage service. The letter ``P'' under the database stays for ``primary'' , the letter ``B'' for ``backup''.\relax }}{4}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:architecture}{{1}{4}}
-\@writefile{toc}{\contentsline {paragraph}{Communication}{4}}
-\@writefile{toc}{\contentsline {subparagraph}{Client}{4}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}The client module}{5}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Use cases}{5}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Management of a client request}{5}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{5}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Test}{5}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.3}Correct behaviour of put, get, remove}{5}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.4}Self-healing }{5}}
-\@writefile{tdo}{\contentsline {todo}{ (Primary failure) Show that in case of primary failure the system still works correctly, without needing any manual intervention}{5}}
-\pgfsyspdfmark {pgfid16}{20112834}{31035613}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.5}Conflict Resolution}{5}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.6}Load Balancing}{5}}
-\@writefile{tdo}{\contentsline {todo}{Tweak the number of virtual nodes to show that more powerful machines can actually be assigned more items}{5}}
-\pgfsyspdfmark {pgfid17}{20112834}{25634816}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Future work}{5}}
-\@writefile{tdo}{\contentsline {todo}{32 bit hash function allows too few urls; and in that case find another method to translate sequence of bytes into allowed charactes [A-Za-z0-9]}{5}}
-\pgfsyspdfmark {pgfid18}{20932035}{19833065}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.}}{6}}
-\newlabel{fig:class_diag}{{2}{6}}
+\@writefile{toc}{\contentsline {paragraph}{Communication}{5}}
+\@writefile{toc}{\contentsline {subparagraph}{Client}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Part of the UML class diagram, showing up relationships among classes in the core.communication.client subpackage\relax }}{5}}
+\newlabel{fig:class_diag_core.communication.client }{{2}{5}}
+\@writefile{toc}{\contentsline {subparagraph}{Node}{5}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Part of the UML class diagram, showing up relationships among classes in the core.communication.node subpackage\relax }}{6}}
+\newlabel{fig:class_diag_core.communication.node }{{3}{6}}
+\@writefile{toc}{\contentsline {paragraph}{Message}{6}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}The client module}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Use cases}{7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Management of a client request}{7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{7}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Test}{7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.3}Correct behaviour of put, get, remove}{7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.4}Self-healing }{7}}
+\@writefile{tdo}{\contentsline {todo}{ (Primary failure) Show that in case of primary failure the system still works correctly, without needing any manual intervention}{7}}
+\pgfsyspdfmark {pgfid16}{20112834}{18858072}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.5}Conflict Resolution}{7}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.6}Load Balancing}{7}}
+\@writefile{tdo}{\contentsline {todo}{Tweak the number of virtual nodes to show that more powerful machines can actually be assigned more items}{7}}
+\pgfsyspdfmark {pgfid17}{20112834}{13468630}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Future work}{7}}
+\@writefile{tdo}{\contentsline {todo}{32 bit hash function allows too few urls; and in that case find another method to translate sequence of bytes into allowed charactes [A-Za-z0-9]}{7}}
+\pgfsyspdfmark {pgfid18}{20932035}{7691421}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.\relax }}{8}}
+\newlabel{fig:class_diag}{{4}{8}}

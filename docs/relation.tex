@@ -1,6 +1,7 @@
 \documentclass{article} 
 \usepackage{todonotes}
 \usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
 \usepackage[bottom=1.3in]{geometry}
 \graphicspath{ {images/} }
 
@@ -84,10 +85,10 @@ Each node has to do three main jobs, so I created a node as a container of three
 \item \textit{node communication service}: each node must be able to communicate with the other nodes. Indeed, it could have to forward the client request to the primary node, or to send the content of its own database to the backup node, or even only to check that the other nodes of the cluster are alive;
 \item \textit{storage service}: each node must have a database, to store and retrieve urls on client's behalf. Actually, it has two databases: its own database, used to handle requests, and the backup database, used to replicate the data of another node. The reason for the use of two distinct databases is explained in \textit{``The core module''} paragraph. 
 \end{itemize}
-Figure \ref{fig:architecture} shows the architecture of the service.
+Figure \ref{fig:architecture} shows the architecture of the service. The communication between client and nodes exploits TCP, both because I assume an unreliable communication channel between them and because of \textit{interactive} sessions. Indeed the possibility of starting an interactive service session between the client and a node amortizes TCP overhead, since the same amount of overhead will be payed (to open and close the connection) no matter how many times the service is invoked by the client. Instead, communication among nodes in the cluster uses UDP for the opposite reasons. First, I assume a much more reliable network inside the cluster (with respect to Internet, for instance). Second, usually single messages are sent from a node to another, and so establishing a TCP connection to send only one message would be too costly.
 
 \begin{figure}[h]
-\includegraphics[scale=0.4]{architecture}
+\includegraphics[scale=0.41]{architecture}
 \caption{General architecture. There is a client and a cluster, which is made of more nodes. Each node is made of a node communication service, a client communication service and a storage service. The letter ``P'' under the database stays for ``primary'' , the letter ``B'' for ``backup''.}
 \label{fig:architecture}
 \end{figure}
@@ -95,12 +96,7 @@ Figure \ref{fig:architecture} shows the architecture of the service.
 \subsection{The project classes} 
 The structure of the project is the following. The node is the building block of the cluster and, as we already said, it is made of three main \textit{services}. Each of these services provides a high level view of the functionalities it has to implement. For the actual implementation these services rely on proper \textit{managers}, which have the responsability to setup things and handle lower level details. Figure \ref{fig:class_diag} shows a simplified UML class diagram, in which the relationships among classes are highlighted (but not the methods). In particular, this diagram only shows the classes of the \textit{core} module, because it is this module that implements the logic of the service. Instead the \textit{client} module only parses the user's request and sends it to proper classes of the core module to be processed. \\
 
-\begin{figure}[t]
-\centering
-\includegraphics[scale=0.43]{core_diagram}
-\caption{Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.}
-\label{fig:class_diag}
-\end{figure}
+
 
 
 \subsubsection{The core module} 
@@ -112,16 +108,57 @@ The core module contains all the classes that implement the logic of the project
 \item \textit{Service} A simple \textit{Interface} for the various services, that only states that each service must provide a \textit{start()} and a \textit{shutdown()} method.
 \end{itemize}
 
-\paragraph{Communication} The Communication package gathers classes that are involved in the communication either with clients or with other nodes. For this reason, the classes inside this package are organized in two further subpackages \textit{client} and \textit{core}. 
+\paragraph{Communication} The Communication package gathers classes that are involved in the communication either with clients or with other nodes. For this reason, the classes inside this package are organized in two further subpackages \textit{client} and \textit{node}. 
 \subparagraph{Client} 
 \begin{itemize}
-\item \textit{ClientCommunicationService} One of the three fundamental services a node is made of. It starts and shuts down the \textit{ClientCommunicationManager}.
-\item \textit{ClientCommunicationManager} It listens on a TCP ServerSocket to accept client requests. As soon as a request is received, a \textit{ClientCommunicationThread} is created and run to handle it. Then, the ClientCommunicationManager continues to listen on the socket for further requests.
-\item \textit{ClientCommunicationThread}
+\item \textit{ClientCommunicationService} One of the three fundamental services a node is made of. It starts and shuts down a ClientCommunicationManager.
+\item \textit{ClientCommunicationManager} It listens on a TCP ServerSocket to accept client requests. As soon as a request is received, a ClientCommunicationThread is created and run to handle it. Then, the ClientCommunicationManager continues to listen on the socket for further requests. It also provides a method to process the client request, by delegating the processing to the NodeCommunicationManager.
+\item \textit{ClientCommunicationThread} It communicates with the client by using the socket received from ClientCommunicationManager. In particular, it receives the client message, asks the ClientCommunicationManager to process it and finally returns the result to the client.
+\end{itemize}
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.35]{classes_client_subpackage}
+\caption{Part of the UML class diagram, showing up relationships among classes in the core.communication.client subpackage}
+\label{fig:class_diag_core.communication.client	}
+\end{figure}
+
+\subparagraph{Node} 
+\begin{itemize}
+\item \textit{NodeCommunicationService} One of the three fundamental services a node is made of. It starts and shuts down a NodeCommunicationManager.
+\item \textit{NodeCommunicationManager} It is the responsible for the communication among nodes. It starts and shuts down the RequestManager and the ReplicaManager, and provides the capability to process the client messages it receives. In particular, if it is the primary for that request it will ask the StorageService of the node to perform the proper operations; otherwise it will discover the primary node and forward the message to it.
+\item \textit{RequestManager} NodeCommunicationManager relies on this class to actually receive and send requests among nodes. A Request is intended as any message that can be received or sent by a node. It can be a client message (the message sent by the client as it is), a node message (a message generated by the nodes that extends the client message with features like vector clocks) or an update message (a message periodically sent from a node to is backup node to update the backup database). The RequestManager acts both as server and client for the request: to manage incoming requests it spawns a RequestServerThread while to make outgoing requests it provides a \textit{sendMessage()} method that spawns a RequestClientThread to do the job. It continously listen on a UDP socket.
+\item \textit{RequestServerThread} It reconstructs the message from a stream of bytes, delegates the MessageHandler to properly process the message, collects the reply and sends it back to the requesting node via UDP.
+\item \textit{RequestClientThread} This class is symmetric with respect to RequestServerThread, in the sense that it is the class that starts the message exchange with another node in the cluster.
+\item \textit{ReplicaManager} Periodically sends the content of the database to the backup node. If we look at nodes in the cluster as points in a ring, the node to whom send the database is the next node clockwise in the ring. To update the backup database the ReplicaManager splits its own database in fixed-size pieces: each of these piece will be encapsulated in an UpdateMessage and sent to the backup node. To send these update messages the ReplicaManager relies on the RequestManager, because an update message is simply seen as a request.
+\end{itemize}
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.35]{core_communication_node}
+\caption{Part of the UML class diagram, showing up relationships among classes in the core.communication.node subpackage}
+\label{fig:class_diag_core.communication.node	}
+\end{figure}
+
+\paragraph{Message} A Message is the base interface for communications. Following the layout of the project, three further interfaces are defined, that inherits from Message: ClientMessage, NodeMessage and UpdateMessage, to deal respectively with client messages, node messages and database backup. 
+\begin{itemize}
+\item \textit{Message} Base interface: inplementing classes must provide methods to return the status (success, error, ...) and the type (put, get, ...) of the message.
+\item \textit{ClientMessage} Interface that allows to retrieve the url inserted by the client.
+\item \textit{GetMessage} Class that implements ClientMessage, it is used when GET requests are invoked by the client.
+\item \textit{PutMessage} Class that implements ClientMessage, it is used when PUT requests are invoked by the client.
+\item \textit{RemoveMessage} Class that implements ClientMessage, it is used when REMOVE requests are invoked by the client.
+\item \textit{NodeMessage} Interface for the messages generated by the nodes from the client messages. Provides methods to retrieve the original url, the associated shortened url and the vector clock associated to those urls.
+\item \textit{VersionedMessage} Class that implements the NodeMessage interface.
+\item \textit{UpdateMessage} Interface used when portions of the database are sent to the backup node. Implementing classes must provide methods to put and get entries of the database in the message, check whether the UpdateMessage is full or empty, return the identifier of the sender node and tell whether this message is the first of a sequence of UpdateMessage. Indeed, the content of a backup is delivered by sending a sequence of UpdateMessages, and te first message may need some special treatment.
+\item \textit{SizedBackupMessage} Class that implements the UpdateMessage interface. Its name means that it is involved in backup operations and that can carry only a limited amount of entries (indeed these messages have to be sent over UDP).
 \end{itemize}
 
-
 \subsubsection{The client module} 
+
+\begin{figure}[t]
+\centering
+\includegraphics[scale=0.43]{core_diagram}
+\caption{Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.}
+\label{fig:class_diag}
+\end{figure}
 
 \subsection{Use cases} 
 
