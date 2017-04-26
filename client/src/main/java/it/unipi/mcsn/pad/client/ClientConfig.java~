@@ -31,9 +31,15 @@ public class ClientConfig {
 			String line;
 			while ((line = br.readLine()) != null)
 				buffer.append(line.trim());
-			br.close();			
+			br.close();
+			
 			JSONObject jsonObject = new JSONArray(buffer.toString()).getJSONObject(0);
 			JSONArray seeds = jsonObject.getJSONArray("members");
+			
+			
+			
+			//JSONObject obj = new JSONObject(configFile);
+			//JSONArray seeds = obj.getJSONArray("members");
 			String ipAddr;
 			int port;
 			InetSocketAddress address;

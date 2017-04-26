@@ -108,8 +108,8 @@ The core module contains all the classes that implement the logic of the project
 \item \textit{Service} A simple \textit{Interface} for the various services, that only states that each service must provide a \textit{start()} and a \textit{shutdown()} method.
 \end{itemize}
 
-\paragraph{Communication} The Communication package gathers classes that are involved in the communication either with clients or with other nodes. For this reason, the classes inside this package are organized in two further subpackages \textit{client} and \textit{node}. 
-\subparagraph{Client} 
+\paragraph{communication} The Communication package gathers classes that are involved in the communication either with clients or with other nodes. For this reason, the classes inside this package are organized in two further subpackages \textit{client} and \textit{node}. 
+\subparagraph{client} 
 \begin{itemize}
 \item \textit{ClientCommunicationService} One of the three fundamental services a node is made of. It starts and shuts down a ClientCommunicationManager.
 \item \textit{ClientCommunicationManager} It listens on a TCP ServerSocket to accept client requests. As soon as a request is received, a ClientCommunicationThread is created and run to handle it. Then, the ClientCommunicationManager continues to listen on the socket for further requests. It also provides a method to process the client request, by delegating the processing to the NodeCommunicationManager.
@@ -122,7 +122,7 @@ The core module contains all the classes that implement the logic of the project
 \label{fig:class_diag_core.communication.client	}
 \end{figure}
 
-\subparagraph{Node} 
+\subparagraph{node} 
 \begin{itemize}
 \item \textit{NodeCommunicationService} One of the three fundamental services a node is made of. It starts and shuts down a NodeCommunicationManager.
 \item \textit{NodeCommunicationManager} It is the responsible for the communication among nodes. It starts and shuts down the RequestManager and the ReplicaManager, and provides the capability to process the client messages it receives. In particular, if it is the primary for that request it will ask the StorageService of the node to perform the proper operations; otherwise it will discover the primary node and forward the message to it.
@@ -138,7 +138,7 @@ The core module contains all the classes that implement the logic of the project
 \label{fig:class_diag_core.communication.node	}
 \end{figure}
 
-\paragraph{Message} A Message is the base interface for communications. Following the layout of the project, three further interfaces are defined, that inherits from Message: ClientMessage, NodeMessage and UpdateMessage, to deal respectively with client messages, node messages and database backup. 
+\paragraph{message} A Message is the base interface for communications. Following the layout of the project, three further interfaces are defined, that inherits from Message: ClientMessage, NodeMessage and UpdateMessage, to deal respectively with client messages, node messages and database backup. 
 \begin{itemize}
 \item \textit{Message} Base interface: inplementing classes must provide methods to return the status (success, error, ...) and the type (put, get, ...) of the message.
 \item \textit{ClientMessage} Interface for client message: implementing classes must provide a method to get the url inserted by the client.
@@ -157,16 +157,32 @@ The core module contains all the classes that implement the logic of the project
 \label{fig:class_diag_core.message}
 \end{figure}
 
-\paragraph{Storage} The classes inside this package deals with database operations.
+\paragraph{storage} The classes inside this package deals with database operations.
 \begin{itemize}
 \item \textit{StorageService} It starts and shuts down the StorageManager. It is not directly involved in any operation concerning the database.
-\item \textit{StorageManager} It is the class that actually manages the database. The database is a Map, whose entries are indexed by \textit{short url} and whose values are \textit{versioned long urls}, that is the original urls paired with a vector clock. Each node has two databases: a primary and a backup database. The primary database is the one that contains the urls for which the node is the primary. So every time the StorageManager is asked to answer to a client request, it looks in the primary database. The backup database instead contains a copy of the primary database of another node. Namely, according to the chosen replication strategy, the backup database of node \textit{i} contains the copy of the primary database of node \textit{(i-1) mod N}, where N is the cluster size. The backup database is never used to answer client's query. The backup database of node \textit{i} is periodically updated by node \textit{(i-1)} through the sending of a sequence of UpdateMessages. Upon receiving this messages, the recipient node checks whether the sending node is the same of the last time (this is possible because the UpdateMessage has a field that stores the id of the sending node). If it the same, the backup database is updated and everything is fine; if it is different, it means that either node  node \textit{(i-1)} crashed or node node \textit{(i-1)} recovered from crashing (I assume that new nodes cannot join the cluster, but obviously crashed or partitioned nodes can re-join it). In this case node \textit{i} merges the backup database into the primary database, because in case of crashing or partitioning of node \textit{(i-1) mod N} it becomes the primary also for the urls of the crashed node. So the system in partition tolerant, because it keeps working despite the failure of a node in the cluster. When node \textit{(i-1) mod N} rejoins the cluster, the situation previous to the failure is re-established, with node \textit{i} storing the backup of node \textit{(i-1) mod N} again. A StorageManager provides methods to read and write single entries of the database, make a dump of the primary database and merge the backup database into the primary. 
+\item \textit{StorageManager} It is the class that actually manages the database. The database is a simple \textit{(key,value)} store, whose keys are \textit{short urls} and whose values are \textit{versioned long urls}, that is the original url paired with a vector clock. Each node has two databases: a primary and a backup database. The primary database is the one that contains the urls for which the node is the primary. So every time the StorageManager is asked to answer to a client request, it looks in the primary database. The backup database instead contains a copy of the primary database of another node. Namely, according to the chosen replication strategy, the backup database of node \textit{i} contains the copy of the primary database of node \textit{(i-1) mod N}, where N is the cluster size. The backup database is never used to answer clients' query. The backup database of node \textit{i} is periodically updated by node \textit{(i-1)} through the sending of a sequence of UpdateMessages. Upon receiving this messages, the recipient node checks whether the sending node is the same of the last time (this is possible because the UpdateMessage has a field that stores the id of the sending node). If it the same, the backup database is updated and everything is fine; if it is different, it means that either node \textit{(i-1)} crashed or recovered from crashing (I assume that new nodes cannot join the cluster, but obviously crashed or partitioned nodes can re-join it). In this case node \textit{i} merges the backup database into the primary database, because in case of crashing or partitioning of node \textit{(i-1)}, it becomes the primary also for the urls of the crashed node. So the system is partition tolerant, because it keeps working despite the failure of a node in the cluster. When node \textit{(i-1)} re-joins the cluster, the situation previous to the failure is re-established, with node \textit{i} storing again the backup database of node \textit{(i-1) mod N}. A StorageManager provides methods to read and write single entries of the database, make a dump of the primary database and merge the backup database into the primary. 
+\end{itemize}
+
+\paragraph{utils} This package contains classes that provide methods that don't fall in one of the previous categories, but may be needed by different classes. 
+\begin{itemize}
+\item \textit{Utils} Provides static methods to serialize and deserialize an Object and to shorten the original url. The url-shortener method exploits the 32 bit MurmurHash3 function.
+\item \textit{MessageHandler} Provides static methods to process the messages. Those methods always require the StorageService to be passed as parameter, because some operation will be done on the database. Which operation depends on the type of message: PUT, GET, REMOVE and UPDATE messages get a different treatment. If MessageHandler receives a PUT message, it stores a pair \textit{(key,value)} in the primary database; if it receives a GET message a pair is read from the primary database; if it receives a REMOVE message a pair is removed from the primary database; if it receives an UPDATE message the backup database is updated with the entries contained in the message.
+\item \textit{Partitioner} The Partitioner uses the ConsistentHasher class to map the urls into a space which is partitioned among nodes, such that each node will manage the urls that follow in its partition. This is what is called ConsistentHashing. The ConsistentHasher class allows us to define a given number of virtual instances per node. This means that if we decide to give 50 virtual instances to a node, that node will be assigned 50 different (and smaller) partitions. Using this approach is good to equally distribute urls among nodes. Another strength point of the use of virtual nodes is that if a node is more powerful than the others we can assign more virtual instances to it, and this will result in an easy but effective kind of load balancing.
 \end{itemize}
 
 
-\subsubsection{The client module} 
 
-\begin{figure}[t]
+\subsubsection{The client module} 
+This module contains the classes that implement the client. The client chooses a node of the cluster and invokes an operation among PUT, GET and REMOVE. The client can establish a connection with a node that only lasts the time needed to carry out the requested operation, or an interactive session can be started, during which the connection is kept alive and the client can make as many requests as it wishes. In the latter case is the client that decides when to close the communication. The exchange of messages between the client and the cluster is done on top of TCP. The classes belonging to this module are the following:
+\paragraph{Client} A simple interface for the client, stating that implementing classes must provide the method \textit{sendRequest(Message msg)} to send the request to a node of the cluster. The policy used to select the node is implementation-dependent.
+\paragraph{RandomClient} A class that implements the ClientInterface. Every time RandomClient has to send a message to a node, the recipient node is randomly selected among the nodes of the cluster. It uses a ClientConfig to get the list of nodes comprising the cluster.
+\paragraph{ClientConfig} This class holds configuration parameters for the client. In particular, it parses the configuration file to retrieve the addresses of the nodes comprising the cluster. Such addresses are stored in a list, which is returned to the client upon request.
+\paragraph{CommandLineManager} It parses the command line arguments, checking that nothing is missing and that the provided options are legal. Provides methods that ClientRunner uses to check the presence of such options and to display help or error messages.
+\paragraph{ClientRunner} Runs the client, either in batch or interactive mode, and returns the result. 
+
+
+
+\begin{figure}[h]
 \centering
 \includegraphics[scale=0.43]{core_diagram}
 \caption{Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.}
@@ -174,8 +190,23 @@ The core module contains all the classes that implement the logic of the project
 \end{figure}
 
 \subsection{Use cases} 
+In this section I show how the objects of the project cooperate in some common use case. Actually there is one general use case, that is the invocation of an API by the client. Indeed, despite all the possible configurations (interactive or batch, use default or custom configuration file, ...), invoking an operation among PUT, GET and REMOVE is the only thing a user can do. All the other things that the system does, like keeping updated the backup database, being partition-tolerant, resolve conflicts and so on, are transparent to the user and so do not fall in the use cases. Instead, they will fall in the \textit{Test} section, because we have to guarantee that those features of the system work as expected.
 
-\subsubsection{Management of a client request} 
+\subsubsection{Processing of a PUT request} 
+We analyze how the objects interact in case of a PUT request from a Client. The choice of PUT is arbitrary, since the pattern of message exchanges and method invocations is almost the same also with GET or REMOVE requests. The only thing that changes is obviously the operation on the database (otherwise we would have three identical operations!).
+Let's refer to figure \ref{fig:sequence_diagram_complete}. Although we are dealing with use cases, I will not use a use case diagram because it is too high level. Instead, I want to show how the objects interact to process a client request, and so I will take advantage of a sequence diagram. We can see that three actors are involved in the requst processing: the client, a first node and a second node. Indeed, we consider the most general case in which the client contacts a node which is not the primary for the given url.
+So let's start reading the diagram. The ClientRunner parses the command-line to get the request together with the original url, wraps them in a ClientMessage and invokes the \textit{sendRquest(cmsg)} method on the Client, which result in opening a socket to send the message to the ClientCommunicationManager of Node 1. The ClientCommunicationManager, which is waiting for connections on a Socket, instantiates and run a ClientCommunicationThread to handle the request, passing it a reference to itself. This reference is exploited for the callback of the method \textit{processMessage(cmsg)}, which in turn results in the invocation of method \textit{processClientMessage(cmsg)} of NodeCommunicationManager. NodeCommunicationManager creates the short url from the original url carried in the ClientMessage, then uses this short url to discover who is the primary node. At this point it discovers that it is not the primary node: so it creates a NodeMessage carrying the original url, the short url and a vector clock. Finally it instantiates a RequestClientThread to send this NodeMessage to the primary node. This message is received by the RequestManager of Node 2 (that is the primary node), which is always listening for NodeMessages (or UpdateMessages) on a socket. The RequestManager instantiates and run a RequestServerThread to process the NodeMessage, which invokes the method \textit{handleMessage(nmsg)} on MessageHandler. This method discovers that it is dealing with a PUT request, and so it invokes the private method \textit{processPutMessage(nmsg)}, which exploits the StorageService to store the pair \textit{(short url, original url)} in the primary database. If the store is successful, a message with type=REPLY and status=SUCCESSFUL will be returned to the client, following back the chain of invocations. \\ The figure \ref{fig:sequence_diagram_complete} is a bit simplified, for instance the signatures of the methods are not complete, the StorageService does not directly provides a \textit{store} method (which is offered by StoreManager), and new threads are not directly created (instead it is used an ExecutorService to improve performances). I thought that these further details would have made more complex the diagram without carrying more benefits, so I have preferred a simpler but clearer diagram.	
+
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.32]{sequence_diagram_complete}
+\caption{Sequence diagram for the processing of a PUT request, when the node contacted by the client is not the primary.}
+\label{fig:sequence_diagram_complete}
+\end{figure}
+
+
 
 \subsubsection{Replication of data} 
 

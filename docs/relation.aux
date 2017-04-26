@@ -30,34 +30,42 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces General architecture. There is a client and a cluster, which is made of more nodes. Each node is made of a node communication service, a client communication service and a storage service. The letter ``P'' under the database stays for ``primary'' , the letter ``B'' for ``backup''.\relax }}{4}}
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:architecture}{{1}{4}}
-\@writefile{toc}{\contentsline {paragraph}{Communication}{5}}
-\@writefile{toc}{\contentsline {subparagraph}{Client}{5}}
+\@writefile{toc}{\contentsline {paragraph}{communication}{5}}
+\@writefile{toc}{\contentsline {subparagraph}{client}{5}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces UML class diagram, showing up relationships among classes in the core.communication.client subpackage\relax }}{5}}
 \newlabel{fig:class_diag_core.communication.client }{{2}{5}}
-\@writefile{toc}{\contentsline {subparagraph}{Node}{5}}
+\@writefile{toc}{\contentsline {subparagraph}{node}{5}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces UML class diagram, showing up relationships among classes in the core.communication.node subpackage\relax }}{6}}
 \newlabel{fig:class_diag_core.communication.node }{{3}{6}}
-\@writefile{toc}{\contentsline {paragraph}{Message}{6}}
+\@writefile{toc}{\contentsline {paragraph}{message}{6}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces UML class diagram, showing up relationships among classes in the core.message subpackage\relax }}{7}}
 \newlabel{fig:class_diag_core.message}{{4}{7}}
-\@writefile{toc}{\contentsline {paragraph}{Storage}{7}}
+\@writefile{toc}{\contentsline {paragraph}{storage}{7}}
+\@writefile{toc}{\contentsline {paragraph}{utils}{8}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}The client module}{8}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Use cases}{8}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Management of a client request}{8}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{8}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Test}{8}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.1}Correct behaviour of put, get, remove}{8}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.2}Self-healing }{8}}
-\@writefile{tdo}{\contentsline {todo}{ (Primary failure) Show that in case of primary failure the system still works correctly, without needing any manual intervention}{8}}
-\pgfsyspdfmark {pgfid16}{20112834}{16617693}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.3}Conflict Resolution}{8}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.4}Load Balancing}{8}}
-\@writefile{tdo}{\contentsline {todo}{Tweak the number of virtual nodes to show that more powerful machines can actually be assigned more items}{8}}
-\pgfsyspdfmark {pgfid17}{20112834}{11216896}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Future work}{8}}
-\@writefile{tdo}{\contentsline {todo}{32 bit hash function allows too few urls; and in that case find another method to translate sequence of bytes into allowed charactes [A-Za-z0-9]}{8}}
-\pgfsyspdfmark {pgfid18}{20932035}{44902381}
-\@writefile{tdo}{\contentsline {todo}{Every time the backup database has to be updated, the whole DB is emptied and then rebuild from scratch. This is a simple approach (the sending node sends all its database and not only the entries that have changed from the last DB delivery) but not very efficient.}{9}}
-\pgfsyspdfmark {pgfid19}{20932035}{40542418}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.\relax }}{10}}
-\newlabel{fig:class_diag}{{5}{10}}
+\@writefile{toc}{\contentsline {paragraph}{Client}{9}}
+\@writefile{toc}{\contentsline {paragraph}{RandomClient}{9}}
+\@writefile{toc}{\contentsline {paragraph}{ClientConfig}{9}}
+\@writefile{toc}{\contentsline {paragraph}{CommandLineManager}{9}}
+\@writefile{toc}{\contentsline {paragraph}{ClientRunner}{9}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Use cases}{9}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Processing of a PUT request}{9}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{10}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Test}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.3}Correct behaviour of put, get, remove}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.4}Self-healing }{10}}
+\@writefile{tdo}{\contentsline {todo}{ (Primary failure) Show that in case of primary failure the system still works correctly, without needing any manual intervention}{10}}
+\pgfsyspdfmark {pgfid16}{20112834}{22737113}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.5}Conflict Resolution}{10}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.6}Load Balancing}{10}}
+\@writefile{tdo}{\contentsline {todo}{Tweak the number of virtual nodes to show that more powerful machines can actually be assigned more items}{10}}
+\pgfsyspdfmark {pgfid17}{20112834}{17336316}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Future work}{10}}
+\@writefile{tdo}{\contentsline {todo}{32 bit hash function allows too few urls; and in that case find another method to translate sequence of bytes into allowed charactes [A-Za-z0-9]}{10}}
+\pgfsyspdfmark {pgfid18}{20932035}{11534565}
+\@writefile{tdo}{\contentsline {todo}{Every time the backup database has to be updated, the whole DB is emptied and then rebuild from scratch. This is a simple approach (the sending node sends all its database and not only the entries that have changed from the last DB delivery) but not very efficient.}{10}}
+\pgfsyspdfmark {pgfid19}{20932035}{44197869}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.\relax }}{12}}
+\newlabel{fig:class_diag}{{5}{12}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Sequence diagram for the processing of a PUT request, when the node contacted by the client is not the primary.\relax }}{13}}
+\newlabel{fig:sequence_diagram_complete}{{6}{13}}
