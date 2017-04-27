@@ -28,10 +28,10 @@
 \contentsline {paragraph}{ClientRunner}{9}
 \contentsline {subsection}{\numberline {3.3}Use cases}{9}
 \contentsline {subsubsection}{\numberline {3.3.1}Processing of a PUT request}{9}
-\contentsline {subsubsection}{\numberline {3.3.2}Replication of data}{10}
 \contentsline {section}{\numberline {4}Test}{10}
-\contentsline {subsubsection}{\numberline {4.0.3}Correct behaviour of put, get, remove}{10}
-\contentsline {subsubsection}{\numberline {4.0.4}Self-healing }{10}
-\contentsline {subsubsection}{\numberline {4.0.5}Conflict Resolution}{10}
-\contentsline {subsubsection}{\numberline {4.0.6}Load Balancing}{10}
+\contentsline {subsubsection}{\numberline {4.0.1}Replication of data}{10}
+\contentsline {subsubsection}{\numberline {4.0.2}Primary failure}{10}
+\contentsline {subsubsection}{\numberline {4.0.3}Primary re-joins cluster after failure}{10}
+\contentsline {subsubsection}{\numberline {4.0.4}Conflict Resolution}{10}
+\contentsline {subsubsection}{\numberline {4.0.5}Load Balancing}{10}
 \contentsline {section}{\numberline {5}Future work}{10}

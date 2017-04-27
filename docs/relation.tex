@@ -6,8 +6,16 @@
 \graphicspath{ {images/} }
 
 
-\title{URL-Shortener}
-\author{Francesco Balzano}
+\title{ \textbf {\vspace{0.5cm}\Huge Distributed URL-Shortener \\}
+ Final Project for the Distributed Enabling Platform course \vspace{15.0cm}\\} 
+
+\date{\vspace{2cm}}
+
+\author{ \Large Francesco Balzano \vspace{0.3cm}\\ 
+%Matricola 541533 \vspace{0.5cm}\\
+\Large Master Degree in Computer Science and Networking \vspace{0.4cm} \\
+\Large A.Y. 2016-2017 
+}
 
 
 \begin{document}
@@ -207,20 +215,24 @@ So let's start reading the diagram. The ClientRunner parses the command-line to 
 \end{figure}
 
 
-
-\subsubsection{Replication of data} 
-
 \section{Test}
 
-\subsubsection{Correct behaviour of put, get, remove} 
+\subsubsection{Replication of data}
 
-\subsubsection{Self-healing } 
+
+\subsubsection{Primary failure} 
+In this test we show that the system reacts correctly in case of primary failure. The situation is analoguos to the case of network partition of the primary, so this test covers two cases. 
+
 \todo[inline]{ (Primary failure) Show that in case of primary failure the system still works correctly, without needing any manual intervention}
 
+
+\subsubsection{Primary re-joins cluster after failure} 
+In this test we show that the system works correctly when the primary node re-joins the cluster after crashing, that is it is assigned the same space of urls that it had before crashing. The situation is analoguos to the case of primary re-joining the network after a partition, so this test covers two cases.
 
 \subsubsection{Conflict Resolution} 
 
 \subsubsection{Load Balancing} 
+
 \todo[inline]{Tweak the number of virtual nodes to show that more powerful machines can actually be assigned more items} 
 
 
