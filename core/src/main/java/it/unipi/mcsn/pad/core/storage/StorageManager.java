@@ -67,6 +67,20 @@ public class StorageManager {
 		}		
 	}
 	
+	//TODO method used only for testing
+	public Versioned<String> readBackup(String surl)
+	{
+		try{
+			Versioned<String> read = backupMap.get(surl);			
+			db.commit();
+			return read; 		
+		}
+		catch (Exception e) {
+			db.rollback();
+			return null;
+		}		
+	}
+	
 	
 	public Versioned<String> remove(NodeMessage nmsg){
 		try{
@@ -144,6 +158,17 @@ public class StorageManager {
 	public boolean emptyBackup(){
 		try{
 			backupMap.clear();
+			return true;
+		}
+		catch (UnsupportedOperationException e){
+			return false;
+		}
+	}
+	
+	// Only used for test purposes
+	public boolean emptyPrimary(){
+		try{
+			primaryMap.clear();
 			return true;
 		}
 		catch (UnsupportedOperationException e){

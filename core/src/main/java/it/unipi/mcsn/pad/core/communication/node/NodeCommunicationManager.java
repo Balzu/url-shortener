@@ -148,12 +148,12 @@ public class NodeCommunicationManager {
 	}
 	
 	
-	// TODO: forse da spostare in RequestManager
+	// TODO: made public only for test purposes
 	/** 
 	 *  Gets an updated list of active nodes in the cluster, then uses Consistent Hashing
 	 *  to discover which is the primary node for the provided key
 	 */
-	private int findPrimary(String key){
+	public int findPrimary(String key){
 		
 		
 		GossipManager gManager = nodeCommunicationService.getGossipService().get_gossipManager();
@@ -164,12 +164,8 @@ public class NodeCommunicationManager {
 		for (LocalGossipMember member : members){
 			int id = Integer.parseInt(member.getId());
 			buckets.add(id);			
-		}
-		
-		
-		
-		return partitioner.findPrimary(key, buckets);
-		
+		}		
+		return partitioner.findPrimary(key, buckets);		
 	}
 	
 	/**
@@ -187,9 +183,10 @@ public class NodeCommunicationManager {
 		return null;			
 	}
 	
+	// TODO: made public only for test purposes
 	// REMOVE and GET message contains the short url, so we only have to retrieve it.
 	// PUT message instead contains the long url: in this case, the short url has to be generated
-	private String getShortUrl(ClientMessage clmsg)
+	public String getShortUrl(ClientMessage clmsg)
 	{
 		String surl = null;
 		if (clmsg.getMessageType() == MessageType.PUT)			
