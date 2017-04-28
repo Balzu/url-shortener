@@ -1,16 +1,17 @@
-package it.unipi.mcsn.pad.core;
+package it.unipi.mcsn.pad;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.json.JSONException;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.google.code.gossip.GossipMember;
@@ -18,20 +19,23 @@ import com.google.code.gossip.GossipSettings;
 import com.google.code.gossip.LogLevel;
 import com.google.code.gossip.RemoteGossipMember;
 
+import it.unipi.mcsn.pad.core.Node;
+import it.unipi.mcsn.pad.core.NodeRunner;
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
+import it.unipi.mcsn.pad.core.message.GetMessage;
+import it.unipi.mcsn.pad.core.message.NodeMessage;
 import it.unipi.mcsn.pad.core.message.PutMessage;
-import junit.framework.TestCase;
 
-public class NodeRunnerTest{
+public class PrimaryFailureTest {
 	
-	private List<Node> nodes;
-	private List<Integer> backupIntervals;
+	private static List<Node> nodes;
+	private static List<Integer> backupIntervals;
 
 	
 	
-	@Before
-	public void setupCluster(){		
+	@BeforeClass
+	public static void setupCluster(){		
 		try {
 			List<Integer> virtualInstances=null;	    	
 	    	Map<String, Integer> ports= null;
@@ -69,41 +73,51 @@ public class NodeRunnerTest{
 			e.printStackTrace();
 		}		
 	}	
-		
-	@After
-	public void tearDownCluster(){
+	
+	@AfterClass
+	public static void tearDownCluster(){
 		for (Node node : nodes){
 			node.getStorageService().getStorageManager().emptyPrimary();
 			node.getStorageService().getStorageManager().emptyBackup();
 			node.shutdown();
 		}
-		System.exit(0);
 	}
 	
 	@Test
-    public void dataShouldBeReplicated(){
-		String url = "www.stringa_di_prova.it";
+	public void  backupShouldReplacePrimary(){
+		
+		String url = "www.stringa_di_prova.it/testaFallimentoPrimario";
 		ClientMessage cmsg = new PutMessage(url, null);
-		NodeCommunicationManager manager = nodes.get(0).getNodeCommService().getCommunicationManager();
+		int random = new Random().nextInt(nodes.size());
+		NodeCommunicationManager manager = nodes.get(random).getNodeCommService().getCommunicationManager();
 		manager.processClientMessage(cmsg);
 		
-		// Now we check who is the primary node for the url		
+		// Now we retrieve the primary node for the url		
 		String surl = manager.getShortUrl(cmsg);
 		int primaryId = manager.findPrimary(surl);
 		// First we check that we found the right primary
 		String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();
 		assertEquals("Primary node must have stored the given url", url, primaryUrl);
-		// Then we check that data have been replicated in the next node clockwise in the ring
-        // (we wait the time for the primary to send its DB to the backup)
+		// Then we wait for the primary to replicate its database into the backup node,
+		// we shut down the primary to simulate a crash and finally we check that the system still
+		// works despite primary failure
 		try {
 			Thread.sleep(backupIntervals.get(primaryId));
+			nodes.get(primaryId).shutdown();
+			nodes.remove(primaryId);
+			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		int backupId = (primaryId + 1) % nodes.size();
-		String backupUrl = nodes.get(backupId).getStorageService().getStorageManager().readBackup(surl).getValue();
-		assertEquals("The Backup node must have a copy of the primary's database", primaryUrl, backupUrl);
-    }
+	
+		cmsg = new GetMessage(surl);
+		random = new Random().nextInt(nodes.size());
+		manager = nodes.get(random).getNodeCommService().getCommunicationManager();
+		NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);
+		assertEquals("In case of primary failure, the system should automatically react"
+				+ "by using the backup node to answer the request", url, reply.getLongUrl());
+	}
+	
 
 }

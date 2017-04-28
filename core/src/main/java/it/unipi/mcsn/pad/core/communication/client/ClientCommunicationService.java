@@ -1,5 +1,6 @@
 package it.unipi.mcsn.pad.core.communication.client;
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 import it.unipi.mcsn.pad.core.Service;
@@ -27,7 +28,12 @@ public class ClientCommunicationService implements Service{
 
 	@Override
 	public void shutdown() {
-		// TODO Auto-generated method stub
+		try {
+			clientCommManager.shutdown();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	
 	}
 	

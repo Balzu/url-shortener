@@ -52,10 +52,12 @@ public class NodeCommunicationManager {
 			String ipAddress, StorageService ss, int backupInterval)
 	{
 		nodeServiceRunning = new AtomicBoolean(true);
-		nodeCommunicationService = nodeCommService;				
-		partitioner = new Partitioner<>(virtualInstancesPerBucket,
+		nodeCommunicationService = nodeCommService;			
+		List<LocalGossipMember> members = nodeCommService.getGossipService().get_gossipManager().getMemberList();
+		partitioner = new Partitioner<Integer, String>(virtualInstancesPerBucket,
 				ConsistentHasher.getIntegerToBytesConverter(), 
-				ConsistentHasher.getStringToBytesConverter(), hashFunction);
+				ConsistentHasher.getStringToBytesConverter(), hashFunction,
+				createBuckets(members));
 		vectorClock = vt;
 		nodeId = nid;
 		storageService = ss;
@@ -153,19 +155,23 @@ public class NodeCommunicationManager {
 	 *  Gets an updated list of active nodes in the cluster, then uses Consistent Hashing
 	 *  to discover which is the primary node for the provided key
 	 */
-	public int findPrimary(String key){
-		
-		
+	public int findPrimary(String key){		
 		GossipManager gManager = nodeCommunicationService.getGossipService().get_gossipManager();
 		List<LocalGossipMember> members = new ArrayList<>(gManager.getMemberList());
 		// Put also myself in the member list, because I can be the primary too
 		members.add(gManager.getMyself());
+		List<Integer> buckets = createBuckets(members);
+		return partitioner.findPrimary(key, buckets);		
+	}
+	
+	
+	private List<Integer> createBuckets(List<LocalGossipMember> members){
 		List<Integer> buckets = new ArrayList<>();
 		for (LocalGossipMember member : members){
 			int id = Integer.parseInt(member.getId());
 			buckets.add(id);			
 		}		
-		return partitioner.findPrimary(key, buckets);		
+		return buckets;
 	}
 	
 	/**

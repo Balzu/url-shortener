@@ -56,6 +56,13 @@ public class ReplicaManager extends Thread{
 				Map<String,Versioned<String>> dump = storageService.getStorageManager().getDump();				
 				List<UpdateMessage> updates = new ArrayList<>();
 				createUpdates(updates, dump);
+				
+				
+				//TODO: backup non con modulo
+				
+				//TODO: backupId a che serve??
+				
+				
 				int clusterSize = nodeCommManager.getClusterSize();
 				int replica1 = ((nodeId+1) % clusterSize);
 			//	int replica2 = ((nodeId+2) % clusterSize);
