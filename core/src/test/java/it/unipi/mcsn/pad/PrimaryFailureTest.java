@@ -88,35 +88,40 @@ public class PrimaryFailureTest {
 		
 		String url = "www.stringa_di_prova.it/testaFallimentoPrimario";
 		ClientMessage cmsg = new PutMessage(url, null);
-		int random = new Random().nextInt(nodes.size());
-		NodeCommunicationManager manager = nodes.get(random).getNodeCommService().getCommunicationManager();
+		int randomId = new Random().nextInt(nodes.size());
+		NodeCommunicationManager manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
 		manager.processClientMessage(cmsg);
 		
 		// Now we retrieve the primary node for the url		
 		String surl = manager.getShortUrl(cmsg);
 		int primaryId = manager.findPrimary(surl);
 		// First we check that we found the right primary
-		String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();
-		assertEquals("Primary node must have stored the given url", url, primaryUrl);
+		//String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();
+		//assertEquals("Primary node must have stored the given url", url, primaryUrl);
 		// Then we wait for the primary to replicate its database into the backup node,
 		// we shut down the primary to simulate a crash and finally we check that the system still
 		// works despite primary failure
 		try {
-			Thread.sleep(backupIntervals.get(primaryId));
+			Thread.sleep(15000);
 			nodes.get(primaryId).shutdown();
 			nodes.remove(primaryId);
-			Thread.sleep(10000);
+			Thread.sleep(20000);
+			cmsg = new GetMessage(surl);
+			do{
+				randomId = new Random().nextInt(nodes.size());
+			} while (randomId == primaryId);
+			manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
+			System.out.println("Arrivato fino al manager di " + randomId);
+			NodeMessage reply = null; 
+			for (int i=0; i<10000; i++)
+				reply = (NodeMessage) manager.processClientMessage(cmsg);
+			System.out.println("primaryId = " + primaryId);
+			assertEquals("In case of primary failure, the system should automatically react"
+					+ "by using the backup node to answer the request", url, reply.getLongUrl());
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-	
-		cmsg = new GetMessage(surl);
-		random = new Random().nextInt(nodes.size());
-		manager = nodes.get(random).getNodeCommService().getCommunicationManager();
-		NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);
-		assertEquals("In case of primary failure, the system should automatically react"
-				+ "by using the backup node to answer the request", url, reply.getLongUrl());
+		}		
 	}
 	
 

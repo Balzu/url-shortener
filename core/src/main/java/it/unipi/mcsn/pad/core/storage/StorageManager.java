@@ -146,7 +146,8 @@ public class StorageManager {
 			   String surl= e.getKey();
 			   // I deliberately create a copy of the object, that I will return
 			   Versioned<String> vlurl = new Versioned<String>(e.getValue().getValue(), e.getValue().getVersion());
-			   primaryMap.put(surl, vlurl);
+			   store(surl,vlurl);
+			  // primaryMap.put(surl, vlurl);
 		   }
 	   	return true;
 		}   		

@@ -215,4 +215,9 @@ public class NodeCommunicationManager {
 			return partitioner;
 		}
 
+		public NodeCommunicationService getNodeCommunicationService() {
+			return nodeCommunicationService;
+		}
+
+		
 }

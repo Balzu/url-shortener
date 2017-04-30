@@ -26,7 +26,7 @@ public class RequestClientThread implements Callable{
 		port = p;
 		try {
 			clientSocket = new DatagramSocket();
-			//clientSocket.setSoTimeout(5000); //Wait at most 5 seconds for the response
+			clientSocket.setSoTimeout(15000); 
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
@@ -39,17 +39,17 @@ public class RequestClientThread implements Callable{
 		byte[] buffer = null;
 		buffer = Utils.serialize(message);			
 		DatagramPacket packet = new DatagramPacket(buffer, buffer.length, ipAddr, port);
-		try {			
-			clientSocket.send(packet);						 
-		}
-	    catch (SocketTimeoutException se) {
-	    	//TODO: se receive eccede timeout, ritorna messaggio di errore.
-	    	// Problema: discriminare il caso in cui è la receive a sollevare questa eccezione,
-	    	// e non altri metodi!
-	    }		
-		byte[] incomingBuffer = new byte [clientSocket.getSendBufferSize()];
-		packet = new DatagramPacket(incomingBuffer, incomingBuffer.length);
-	    clientSocket.receive(packet);
+		//try {			
+			clientSocket.send(packet);	
+			byte[] incomingBuffer = new byte [clientSocket.getSendBufferSize()];
+			packet = new DatagramPacket(incomingBuffer, incomingBuffer.length);
+		    clientSocket.receive(packet);
+		//}
+	    /*catch (SocketTimeoutException se) {
+	    	System.out.println("Socket closed because of timeout");
+	    	return null; //TODO check this
+	    }*/		
+		
 	    Message msg = (Message) Utils.deserialize(packet.getData());
 		return msg;		
 	}

@@ -7,13 +7,18 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NoSuchElementException;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import it.unipi.mcsn.pad.core.message.Message;
+import com.google.code.gossip.LocalGossipMember;
+import com.google.code.gossip.manager.GossipManager;
+
 import it.unipi.mcsn.pad.core.message.SizedBackupMessage;
 import it.unipi.mcsn.pad.core.message.UpdateMessage;
 import it.unipi.mcsn.pad.core.storage.StorageService;
@@ -22,7 +27,7 @@ import voldemort.versioning.Versioned;
 public class ReplicaManager extends Thread{
 	
 	private StorageService storageService;	
-	private DatagramSocket socket = null;
+	//private DatagramSocket socket = null;
 	private AtomicBoolean isRunning;
 	private final ExecutorService threadPool;
 	private int nodePort;
@@ -36,7 +41,7 @@ public class ReplicaManager extends Thread{
 			String ipAddress, NodeCommunicationManager ncm
 			, int nid, int backupInterval) throws SocketException, UnknownHostException{
 		storageService = ss;
-		socket = new DatagramSocket(nodePort, InetAddress.getByName(ipAddress));
+		//socket = new DatagramSocket(nodePort, InetAddress.getByName(ipAddress));
 		isRunning = new AtomicBoolean(true);
 		this.nodePort = nodePort;
 		threadPool = Executors.newCachedThreadPool();
@@ -59,24 +64,52 @@ public class ReplicaManager extends Thread{
 				
 				
 				//TODO: backup non con modulo
+				GossipManager gManager = nodeCommManager.getNodeCommunicationService()
+						.getGossipService().get_gossipManager();
+				List<LocalGossipMember> members = new ArrayList<>(gManager.getMemberList());				
+				LocalGossipMember myself = gManager.getMyself();
+			
 				
-				//TODO: backupId a che serve??
 				
-				
-				int clusterSize = nodeCommManager.getClusterSize();
-				int replica1 = ((nodeId+1) % clusterSize);
+				//int clusterSize = nodeCommManager.getClusterSize();
+				//int replica1 = ((nodeId+1) % clusterSize);
 			//	int replica2 = ((nodeId+2) % clusterSize);
-				sendUpdates(replica1, updates);
+				int replica = findBackup(members, myself);
+				sendUpdates(replica, updates);
 		   //  sendUpdates(replica2, updates);				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			} catch (UnknownHostException e) {
+			} catch (NullPointerException e) {
+				// Skip this sending bacause the backupNode is down, so have to compute another replica
+			}
+			  catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
-				e.printStackTrace();
-			}			
+				//e.printStackTrace();
+			} catch (NoSuchElementException e) {
+				if (isRunning.get()) // Only if this node is running I print the error stack trace
+					e.printStackTrace();	
+			} catch (IllegalAccessError e) {
+				if (isRunning.get()) // Only if this node is running I print the error stack trace
+					e.printStackTrace();				
+			}
+			
 		}		
 	}
+	
+	
+	public int findBackup(List<LocalGossipMember> members, LocalGossipMember myself){
+		NavigableMap<Integer, Integer> upMemberssMap = new ConcurrentSkipListMap<>();
+		for(int i=0; i<members.size(); i++)
+	    // Map is redundant actually, I only use it for its capability to return the "ceiling" of the key
+			upMemberssMap.put(Integer.parseInt(members.get(i).getId()),
+					Integer.parseInt(members.get(i).getId())); 
+		Integer backupMemberId = upMemberssMap.ceilingKey(Integer.parseInt(myself.getId()));
+		return backupMemberId!= null ? backupMemberId
+				: upMemberssMap.firstKey();
+	}
+	
+	
 	
 	public int getBackupId() {
 		return backupId;
@@ -92,9 +125,11 @@ public class ReplicaManager extends Thread{
 	 * @throws InterruptedException 
 	 * @throws UnknownHostException 
 	 */
-	private void sendUpdates(int replica, List<UpdateMessage> updates) throws UnknownHostException, InterruptedException, ExecutionException
+	private void sendUpdates(int replica, List<UpdateMessage> updates) 
+			throws UnknownHostException, InterruptedException, ExecutionException, NullPointerException
 	{
 		String replicaAddress = nodeCommManager.getMemberFromId(replica).getHost();
+		//TODO: usa porta diversa per messaggi di update
 		int replicaPort = nodeCommManager.getRequestManager().getPort();
 		for (UpdateMessage umsg : updates){ 
 			/*Message reply =*/ nodeCommManager.getRequestManager().sendMessage(
@@ -120,7 +155,7 @@ public class ReplicaManager extends Thread{
 				umsg = new SizedBackupMessage(nodeId, false);
 			}
 		}
-		if (!umsg.isEmpty())
+		if (!umsg.isEmpty() || umsg.isFirst())
 			updates.add(umsg);		
 	}
 
