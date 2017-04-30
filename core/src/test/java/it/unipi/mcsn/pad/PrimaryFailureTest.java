@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,9 +32,17 @@ public class PrimaryFailureTest {
 	
 	private static List<Node> nodes;
 	private static List<Integer> backupIntervals;
-
 	
-	
+    /*private static List<GossipMember> startupMembers;
+    private static  List<Integer> virtualInstances;	    	
+    private static  Map<String, Integer> ports;
+    private static int gossipPort;
+    private static int clientPort;
+    private static int nodePort;
+    private static List<String> addresses;
+    private static GossipSettings settings;
+    */
+    
 	@BeforeClass
 	public static void setupCluster(){		
 		try {
@@ -62,14 +71,11 @@ public class PrimaryFailureTest {
 				nodes.add(node);    				   
 			} 
 		}		
-		catch (IOException e) {
-			// TODO Auto-generated catch block
+		catch (IOException e) {			
 			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+		} catch (JSONException e) {		
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}	
@@ -84,38 +90,30 @@ public class PrimaryFailureTest {
 	}
 	
 	@Test
-	public void  backupShouldReplacePrimary(){
-		
+	public void  backupShouldReplacePrimary()
+	{		
 		String url = "www.stringa_di_prova.it/testaFallimentoPrimario";
 		ClientMessage cmsg = new PutMessage(url, null);
 		int randomId = new Random().nextInt(nodes.size());
 		NodeCommunicationManager manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
-		manager.processClientMessage(cmsg);
-		
+		manager.processClientMessage(cmsg);		
 		// Now we retrieve the primary node for the url		
 		String surl = manager.getShortUrl(cmsg);
-		int primaryId = manager.findPrimary(surl);
-		// First we check that we found the right primary
-		//String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();
-		//assertEquals("Primary node must have stored the given url", url, primaryUrl);
+		int primaryId = manager.findPrimary(surl);		
 		// Then we wait for the primary to replicate its database into the backup node,
-		// we shut down the primary to simulate a crash and finally we check that the system still
-		// works despite primary failure
+		// we shut down the primary to simulate a crash,
+		// we wait for the backup node to merge its backup DB into the primary DB (eventual consistency)
+		// and finally we check that the system still works despite primary failure
 		try {
-			Thread.sleep(15000);
+			Thread.sleep(12000);
 			nodes.get(primaryId).shutdown();
-			nodes.remove(primaryId);
-			Thread.sleep(20000);
-			cmsg = new GetMessage(surl);
-			do{
-				randomId = new Random().nextInt(nodes.size());
-			} while (randomId == primaryId);
+			//TODO: it works because nodes[i] -> Node having id = 'i', but after I remove an item from nodes, this is no more true			
+			nodes.remove(primaryId); 
+			Thread.sleep(25000);
+			cmsg = new GetMessage(surl);		
+			randomId = new Random().nextInt(nodes.size());			
 			manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
-			System.out.println("Arrivato fino al manager di " + randomId);
-			NodeMessage reply = null; 
-			for (int i=0; i<10000; i++)
-				reply = (NodeMessage) manager.processClientMessage(cmsg);
-			System.out.println("primaryId = " + primaryId);
+			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);			
 			assertEquals("In case of primary failure, the system should automatically react"
 					+ "by using the backup node to answer the request", url, reply.getLongUrl());
 		} catch (InterruptedException e) {
@@ -124,5 +122,42 @@ public class PrimaryFailureTest {
 		}		
 	}
 	
+	
+	@Test
+	public void primaryShouldWorkWhenRejoiningCluster(){
+		String url = "www.stringa_di_prova.it/testaPrimarioQuandoTornaInFunzioneDopoFallimento";
+		ClientMessage cmsg = new PutMessage(url, null);
+		int randomId = new Random().nextInt(nodes.size());
+		NodeCommunicationManager manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
+		manager.processClientMessage(cmsg);				
+		String surl = manager.getShortUrl(cmsg);		
+		int primaryId = manager.findPrimary(surl);	
+		System.out.println("Primary node before crashing = " + primaryId);
+		try {
+			Thread.sleep(12000);
+			nodes.get(primaryId).shutdown();
+			Node underTest = nodes.remove(primaryId);
+			Thread.sleep(25000);
+			cmsg = new GetMessage(surl);		
+			randomId = new Random().nextInt(nodes.size());			
+			manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
+			primaryId = manager.findPrimary(surl);		
+			System.out.println("Primary node after crashing = " + primaryId);
+			underTest.restart();			
+			nodes.add(underTest);
+			Thread.sleep(20000);
+			primaryId = manager.findPrimary(surl);
+			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
+			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);			
+			assertEquals("After crashed node rejoins the cluster, it should immediately"
+					+ "resume the correct behaviour", url, reply.getLongUrl());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (IllegalThreadStateException e) {
+			e.printStackTrace();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
 
 }

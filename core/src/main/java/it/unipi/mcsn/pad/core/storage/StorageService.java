@@ -24,7 +24,8 @@ public class StorageService implements Service{
 	public void start() {		
 		// StorageManager already inizialized by the costructor
 	}
-
+	
+	
 	@Override
 	public void shutdown() {
 		storageManager.shutdown();		

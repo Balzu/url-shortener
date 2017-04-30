@@ -19,8 +19,22 @@ public class Node {
 	private NodeCommunicationService nodeCommService;
 	private ClientCommunicationService clientCommService;
 	private StorageService storageService;
-	//private VectorClock vectorClock;
-	//private int nodeId;
+	
+	// Following instance members only used to restart the service
+	private int clientPort;
+	private int backlog;
+	private String ipAddress;
+	private int gossipPort;
+	private String sid;
+	private int logLevel;
+	private List<GossipMember> gossipMembers;
+	private GossipSettings settings;
+	private GossipListener listener;
+	private int iid; 
+	private int nodePort;
+	private int virtualInstances;
+	private int backupInterval;
+	private VectorClock vc;
 	
 	
 	public Node (int clientPort, int backlog,	String ipAddress,
@@ -29,7 +43,7 @@ public class Node {
 			int virtualInstances, int backupInterval) 
 					throws UnknownHostException, InterruptedException 
 	{		
-		//nodeId = iid; 
+		
 		VectorClock vc = new VectorClock(); //TODO: ok this constructor?
 		vc.incrementVersion(/*nodeId*/ iid, System.currentTimeMillis());
 		storageService = new StorageService(vc, sid);	
@@ -39,7 +53,20 @@ public class Node {
 		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
 		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
 				iid, nodeCommService.getCommunicationManager());
-	
+		
+		this.clientPort = clientPort;
+		this.backlog = backlog;
+		this.ipAddress = ipAddress;
+		this.gossipPort = gossipPort;
+		this.sid = sid;
+		this.logLevel = logLevel;
+		this.gossipMembers = gossipMembers;
+		this.settings = settings;
+		this.listener = listener;
+		this.iid = iid;
+		this.nodePort = nodePort;
+		this.virtualInstances = virtualInstances;
+		this.backupInterval = backupInterval;
 		
 	}
 
@@ -73,6 +100,20 @@ public class Node {
 		nodeCommService.shutdown();
 		clientCommService.shutdown();
 		storageService.shutdown();
+	}
+	
+	public void restart() throws UnknownHostException, InterruptedException
+	{		
+		storageService = new StorageService(vc, sid);	
+		nodeCommService = new NodeCommunicationService(ipAddress, gossipPort, sid,
+				logLevel, gossipMembers, settings, listener, vc, iid,
+				storageService, nodePort, virtualInstances, backupInterval);
+		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
+		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
+				iid, nodeCommService.getCommunicationManager());
+		nodeCommService.start();
+		clientCommService.start();
+		storageService.start();
 	}
 	
 	
