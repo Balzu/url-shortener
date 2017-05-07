@@ -6,7 +6,9 @@ import java.util.List;
 
 import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.GossipSettings;
+import com.google.code.gossip.LocalGossipMember;
 import com.google.code.gossip.event.GossipListener;
+import com.google.code.gossip.manager.GossipManager;
 
 import it.unipi.mcsn.pad.core.communication.client.ClientCommunicationService;
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationService;
@@ -43,17 +45,6 @@ public class Node {
 			int virtualInstances, int backupInterval) 
 					throws UnknownHostException, InterruptedException 
 	{		
-		
-		VectorClock vc = new VectorClock(); //TODO: ok this constructor?
-		vc.incrementVersion(/*nodeId*/ iid, System.currentTimeMillis());
-		storageService = new StorageService(vc, sid);	
-		nodeCommService = new NodeCommunicationService(ipAddress, gossipPort, sid,
-				logLevel, gossipMembers, settings, listener, vc, iid,
-				storageService, nodePort, virtualInstances, backupInterval);
-		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
-		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
-				iid, nodeCommService.getCommunicationManager());
-		
 		this.clientPort = clientPort;
 		this.backlog = backlog;
 		this.ipAddress = ipAddress;
@@ -67,6 +58,18 @@ public class Node {
 		this.nodePort = nodePort;
 		this.virtualInstances = virtualInstances;
 		this.backupInterval = backupInterval;
+		vc = new VectorClock(); //TODO: ok this constructor?
+		vc.incrementVersion(/*nodeId*/ iid, System.currentTimeMillis());
+		
+		storageService = new StorageService(vc, sid);	
+		nodeCommService = new NodeCommunicationService(ipAddress, gossipPort, sid,
+				logLevel, gossipMembers, settings, listener, vc, iid,
+				storageService, nodePort, virtualInstances, backupInterval);
+		 InetAddress bindAddr = InetAddress.getByName(ipAddress); 
+		clientCommService = new ClientCommunicationService(clientPort,  backlog,  bindAddr, 
+				iid, nodeCommService.getCommunicationManager());
+		
+		
 		
 	}
 
@@ -102,6 +105,7 @@ public class Node {
 		storageService.shutdown();
 	}
 	
+		
 	public void restart() throws UnknownHostException, InterruptedException
 	{		
 		storageService = new StorageService(vc, sid);	
@@ -113,7 +117,8 @@ public class Node {
 				iid, nodeCommService.getCommunicationManager());
 		nodeCommService.start();
 		clientCommService.start();
-		storageService.start();
+		storageService.start();		
+		
 	}
 	
 	

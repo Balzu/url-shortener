@@ -61,13 +61,10 @@ public class DataReplicationTest{
 			} 
 		}		
 		catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}	
@@ -89,26 +86,19 @@ public class DataReplicationTest{
 		String url = "www.stringa_di_prova.it";
 		ClientMessage cmsg = new PutMessage(url, null);
 		NodeCommunicationManager manager = nodes.get(0).getNodeCommService().getCommunicationManager();
-		manager.processClientMessage(cmsg);
-		
-		// Now we retrieve the primary node for the url		
+		manager.processClientMessage(cmsg);			
 		String surl = manager.getShortUrl(cmsg);
-		int primaryId = manager.findPrimary(surl);
-		// First we check that we found the right primary
-		String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();
-		//assertEquals("Primary node must have stored the given url", url, primaryUrl);
-		// Then we check that data have been replicated in the next node clockwise in the ring
-        // (we wait the time for the primary to send its DB to the backup)
+		int primaryId = manager.findPrimary(surl);			
+		String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();		
 		try {
 			Thread.sleep(backupIntervals.get(primaryId));
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		int backupId = (primaryId + 1) % nodes.size();
+		}		
+		int backupId = (primaryId + 1) % nodes.size();		
 		String backupUrl = nodes.get(backupId).getStorageService().getStorageManager().readBackup(surl).getValue();
-		assertEquals("The Backup node must have a copy of the primary's database", primaryUrl, backupUrl);
+		assertEquals("The Backup node must have a copy of the url"
+				+ "in its backup database",	primaryUrl, backupUrl);
     }
 	
 

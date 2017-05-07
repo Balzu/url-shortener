@@ -31,7 +31,7 @@ public class NodeCommunicationManager {
 	private final AtomicBoolean nodeServiceRunning; 
 	private ReplicaManager replicaManager;
 	private RequestManager requestManager;
-	private NodeCommunicationService nodeCommunicationService;
+	public NodeCommunicationService nodeCommunicationService;
 	// I identify the buckets(= nodes) with a unique integer (node id) 
 	// and the members(=long_urls) with a String (their content).
 	private Partitioner<Integer, String> partitioner;
@@ -53,7 +53,8 @@ public class NodeCommunicationManager {
 	{
 		nodeServiceRunning = new AtomicBoolean(true);
 		nodeCommunicationService = nodeCommService;			
-		List<LocalGossipMember> members = nodeCommService.getGossipService().get_gossipManager().getMemberList();
+		List<LocalGossipMember> members = new ArrayList<>(nodeCommService.getGossipService().get_gossipManager().getMemberList());
+		members.add(nodeCommService.getGossipService().get_gossipManager().getMyself());
 		partitioner = new Partitioner<Integer, String>(virtualInstancesPerBucket,
 				ConsistentHasher.getIntegerToBytesConverter(), 
 				ConsistentHasher.getStringToBytesConverter(), hashFunction,
@@ -96,10 +97,7 @@ public class NodeCommunicationManager {
 	 * @param  The message received from client
 	 * @return A message containing the reply for the operation  
 	 */
-	public Message processClientMessage(Message msg) {
-		// when receive something, update the vector clock 
-		// TODO: (When I receive a msg, should I also merge the vt?)
-		vectorClock.incrementVersion(nodeId, System.currentTimeMillis());			
+	public Message processClientMessage(Message msg) {					
 		ClientMessage clmsg = (ClientMessage) msg;		
 		String surl = getShortUrl(clmsg);		
 		int primaryId = findPrimary(surl); 
@@ -184,9 +182,9 @@ public class NodeCommunicationManager {
 		for (LocalGossipMember member : members){
 			if (Integer.parseInt(member.getId()) == id)
 				return member;							
-		}
-		//TODO: raise an exception instead
-		return null;			
+		}		
+		throw new NullPointerException("The searched member" + 
+		"does not belong to the list of active gossip members.");			
 	}
 	
 	// TODO: made public only for test purposes

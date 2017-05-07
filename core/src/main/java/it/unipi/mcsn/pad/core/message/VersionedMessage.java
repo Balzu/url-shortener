@@ -1,6 +1,7 @@
 package it.unipi.mcsn.pad.core.message;
 
 
+import voldemort.versioning.VectorClock;
 import voldemort.versioning.Version;
 import voldemort.versioning.Versioned;
 
@@ -39,9 +40,9 @@ public class VersionedMessage implements NodeMessage{
 	}
 
 	@Override
-	public Version getVectorClock() {
+	public VectorClock getVectorClock() {
 		
-		return versioned.getVersion();
+		return ((VectorClock)versioned.getVersion());
 	}
 
 	@Override

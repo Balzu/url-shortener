@@ -16,11 +16,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.LocalGossipMember;
 import com.google.code.gossip.manager.GossipManager;
 
 import it.unipi.mcsn.pad.core.message.SizedBackupMessage;
 import it.unipi.mcsn.pad.core.message.UpdateMessage;
+import it.unipi.mcsn.pad.core.storage.StorageManager;
 import it.unipi.mcsn.pad.core.storage.StorageService;
 import voldemort.versioning.Versioned;
 
@@ -33,8 +35,10 @@ public class ReplicaManager extends Thread{
 	private int nodePort;
 	private NodeCommunicationManager nodeCommManager;
 	private int nodeId;
-	private int backupId;
+	private int backupSenderId;
+	private int backupSenderIdTemp;
 	private int backupInterval;
+	private List<String> removed;
 	
 	
 	public ReplicaManager(StorageService ss, int nodePort,
@@ -50,7 +54,9 @@ public class ReplicaManager extends Thread{
 		this.backupInterval = backupInterval;
 		// Assign a negative value, meaning that current node has not received the backup database from any node
 		// yet (recall that node id can only be positive)
-		backupId = -1; 
+		backupSenderId = -1; 
+		backupSenderIdTemp = -1; 
+		removed = null;
 	}
 	
 	@Override
@@ -60,23 +66,10 @@ public class ReplicaManager extends Thread{
 				Thread.sleep(backupInterval);
 				Map<String,Versioned<String>> dump = storageService.getStorageManager().getDump();				
 				List<UpdateMessage> updates = new ArrayList<>();
-				createUpdates(updates, dump);
-				
-				
-				//TODO: backup non con modulo
-				GossipManager gManager = nodeCommManager.getNodeCommunicationService()
-						.getGossipService().get_gossipManager();
-				List<LocalGossipMember> members = new ArrayList<>(gManager.getMemberList());				
-				LocalGossipMember myself = gManager.getMyself();
-			
-				
-				
-				//int clusterSize = nodeCommManager.getClusterSize();
-				//int replica1 = ((nodeId+1) % clusterSize);
-			//	int replica2 = ((nodeId+2) % clusterSize);
-				int replica = findBackup(members, myself);
-				sendUpdates(replica, updates);
-		   //  sendUpdates(replica2, updates);				
+				createUpdates(updates, dump);					
+				int replica = findBackup();
+				if (replica >= 0)
+					sendUpdates(replica, updates);						   				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (NullPointerException e) {
@@ -98,7 +91,13 @@ public class ReplicaManager extends Thread{
 	}
 	
 	
-	public int findBackup(List<LocalGossipMember> members, LocalGossipMember myself){
+	public int findBackup(){
+		GossipManager gManager = nodeCommManager.getNodeCommunicationService()
+				.getGossipService().get_gossipManager();
+		List<LocalGossipMember> members = new ArrayList<>(gManager.getMemberList());	
+		if (members.size() == 0) // Not connected to any member, so return (better throw exception)
+			return -1;
+		LocalGossipMember myself = gManager.getMyself();
 		NavigableMap<Integer, Integer> upMemberssMap = new ConcurrentSkipListMap<>();
 		for(int i=0; i<members.size(); i++)
 	    // Map is redundant actually, I only use it for its capability to return the "ceiling" of the key
@@ -112,30 +111,36 @@ public class ReplicaManager extends Thread{
 	
 	
 	public int getBackupId() {
-		return backupId;
+		return backupSenderId;
 	}
 
 	public void setBackupId(int backupId) {
-		this.backupId = backupId;
+		this.backupSenderId = backupId;
+	}
+	
+	public int getBackupIdTemp() {
+		return backupSenderIdTemp;
+	}
+
+	public void setBackupIdTemp(int backupId) {
+		this.backupSenderIdTemp = backupId;
 	}
 
 	/**
-	 * Send updates to a replica 
+	 * Delivers the backup DB to a node by sending more UpdateMessages
 	 * @throws ExecutionException 
 	 * @throws InterruptedException 
 	 * @throws UnknownHostException 
 	 */
-	private void sendUpdates(int replica, List<UpdateMessage> updates) 
+	public void sendUpdates(int replica, List<UpdateMessage> updates) 
 			throws UnknownHostException, InterruptedException, ExecutionException, NullPointerException
 	{
-		String replicaAddress = nodeCommManager.getMemberFromId(replica).getHost();
-		//TODO: usa porta diversa per messaggi di update
+		String replicaAddress = nodeCommManager.getMemberFromId(replica).getHost();		
 		int replicaPort = nodeCommManager.getRequestManager().getPort();
 		for (UpdateMessage umsg : updates){ 
-			/*Message reply =*/ nodeCommManager.getRequestManager().sendMessage(
+			nodeCommManager.getRequestManager().sendMessage(
 					umsg, replicaAddress, replicaPort);
-			/*System.out.println("The response status of the update message sent by node " +
-					nodeId + " is : " + reply.getMessageStatus());*/
+		
 		}		
 	}
 	
@@ -157,6 +162,53 @@ public class ReplicaManager extends Thread{
 		}
 		if (!umsg.isEmpty() || umsg.isFirst())
 			updates.add(umsg);		
+	}
+	
+	/**
+	 *   After crashed node resumes execution, keep in the Primary DB only the urls
+	 *   assigned to this node, and put in the backup DB all the other urls
+	 */
+	public void partitionUrlsBetweenDB(){
+		StorageManager sman = storageService.getStorageManager();
+		Map<String,Versioned<String>> dump = sman.getDump();	
+		int me = nodeId;
+		for (Entry<String, Versioned<String>> e :dump.entrySet()){
+			String surl = e.getKey();	
+			int primary = nodeCommManager.findPrimary(surl);
+			if ( primary != me){
+				sman.remove(surl);
+				sman.storeBackup(surl, e.getValue());
+			}
+		}
+	}
+	
+	public void setRemoved(){
+		removed = new ArrayList<>();
+	}
+	
+	public void unsetRemoved(){
+		removed = null;
+	}
+	
+	public boolean isSetRemoved(){
+		return (removed == null) ? false : true;
+	}
+	
+	public List<String> getRemoved(){
+		return removed;
+	}
+	
+	/** If the member with id = mid belongs to the list up dead members,
+	 *  adds it to the list of alive members
+	 */
+	public void addMemberToGossipListIfDead(int mid)
+	{
+		GossipManager gman = nodeCommManager.getNodeCommunicationService().
+				getGossipService().get_gossipManager();
+		for (LocalGossipMember dead: gman.getDeadList()){
+			if (Integer.parseInt(dead.getId()) == mid)
+				gman.createOrRevivieMember(dead);
+		}			
 	}
 
 }

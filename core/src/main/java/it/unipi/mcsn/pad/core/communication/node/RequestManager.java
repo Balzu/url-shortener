@@ -28,7 +28,7 @@ public class RequestManager extends Thread{
 	public RequestManager (AtomicBoolean isRunning, int nodePort,
 			String ipAddress, StorageService ss, ReplicaManager rm) throws SocketException, UnknownHostException{
 		socket = new DatagramSocket(nodePort, InetAddress.getByName(ipAddress));
-		socket.setSoTimeout(15000);
+		socket.setSoTimeout(5000);
 		this.isRunning = isRunning;
 		this.nodePort = nodePort;
 		storageService = ss;
@@ -49,7 +49,7 @@ public class RequestManager extends Thread{
 	            threadPool.submit(new RequestServerThread(packet, repMan, socket, storageService));		            
 			} catch (SocketTimeoutException e) {			
 				//e.printStackTrace();
-				System.out.println("Socket closed because of timeout");
+				//System.out.println("Socket closed because of timeout");
 			}				
 			  catch (SocketException e) {			
 				//e.printStackTrace();  arises only when we close the socket, so it is ok

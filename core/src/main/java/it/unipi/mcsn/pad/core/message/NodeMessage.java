@@ -1,6 +1,6 @@
 package it.unipi.mcsn.pad.core.message;
 
-import voldemort.versioning.Version;
+import voldemort.versioning.VectorClock;
 import voldemort.versioning.Versioned;
 
 public interface NodeMessage extends Message{
@@ -9,7 +9,7 @@ public interface NodeMessage extends Message{
 	
 	public String getLongUrl();
 	
-	public Version getVectorClock();
+	public VectorClock getVectorClock();
 	
 	public Versioned<String> getVersioned();
 	

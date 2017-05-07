@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.4.12)  27 APR 2017 09:19
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.4.12)  7 MAY 2017 12:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -368,7 +368,41 @@ LaTeX Info: Redefining \addtolength on input line 81.
 )
 \c@@todonotes@numberoftodonotes=\count111
 )
-(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+(/usr/share/texlive/texmf-dist/tex/latex/algorithms/algorithm.sty
+Package: algorithm 2009/08/24 v0.1 Document Style `algorithm' - floating enviro
+nment
+
+(/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count112
+\float@exts=\toks28
+\float@box=\box37
+\@float@everytoks=\toks29
+\@floatcapt=\box38
+)
+\@float@every@algorithm=\toks30
+\c@algorithm=\count113
+)
+(/usr/share/texlive/texmf-dist/tex/latex/algorithmicx/algpseudocode.sty
+Package: algpseudocode 
+
+(/usr/share/texlive/texmf-dist/tex/latex/algorithmicx/algorithmicx.sty
+Package: algorithmicx 2005/04/27 v1.2 Algorithmicx
+
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+\c@ALG@line=\count114
+\c@ALG@rem=\count115
+\c@ALG@nested=\count116
+\ALG@tlm=\skip46
+\ALG@thistlm=\skip47
+\c@ALG@Lnr=\count117
+\c@ALG@blocknr=\count118
+\c@ALG@storecount=\count119
+\c@ALG@tmpcounter=\count120
+\ALG@tmplength=\skip48
+)
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
 Package: caption 2016/02/21 v3.3-144 Customizing captions (AR)
 
 (/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty
@@ -382,7 +416,8 @@ Package caption3 Info: TeX engine: e-TeX on input line 67.
 \caption@parindent=\dimen158
 \caption@hangindent=\dimen159
 )
-\c@ContinuedFloat=\count112
+\c@ContinuedFloat=\count121
+Package caption Info: float package is loaded.
 )
 (/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2010/09/12 v5.6 Page Geometry
@@ -398,9 +433,9 @@ Package ifvtex Info: VTeX not detected.
 (/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
-\Gm@cnth=\count113
-\Gm@cntv=\count114
-\c@Gm@tempcnt=\count115
+\Gm@cnth=\count122
+\Gm@cntv=\count123
+\c@Gm@tempcnt=\count124
 \Gm@bindingoffset=\dimen160
 \Gm@wd@mp=\dimen161
 \Gm@odd@mp=\dimen162
@@ -409,36 +444,36 @@ Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 \Gm@layoutheight=\dimen165
 \Gm@layouthoffset=\dimen166
 \Gm@layoutvoffset=\dimen167
-\Gm@dimlist=\toks28
+\Gm@dimlist=\toks31
 )
 (./relation.aux)
 \openout1 = `relation.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
  (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count116
+\scratchcounter=\count125
 \scratchdimen=\dimen168
-\scratchbox=\box37
-\nofMPsegments=\count117
-\nofMParguments=\count118
-\everyMPshowfont=\toks29
-\MPscratchCnt=\count119
+\scratchbox=\box39
+\nofMPsegments=\count126
+\nofMParguments=\count127
+\everyMPshowfont=\toks32
+\MPscratchCnt=\count128
 \MPscratchDim=\dimen169
-\MPnumerator=\count120
-\makeMPintoPDFobject=\count121
-\everyMPtoPDFconversion=\toks30
+\MPnumerator=\count129
+\makeMPintoPDFobject=\count130
+\everyMPtoPDFconversion=\toks33
 ) ABD: EveryShipout initializing macros
 (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
@@ -522,11 +557,11 @@ Package caption Info: End \AtBeginDocument code.
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 23.
+(Font)              <12> on input line 26.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 23.
+(Font)              <8> on input line 26.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 23.
+(Font)              <6> on input line 26.
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./relation.toc
@@ -539,124 +574,139 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \openout4 = `relation.toc'.
 
 
-[2]
-Underfull \hbox (badness 10000) in paragraph at lines 57--58
+[2] [3
 
- []
-
-[1]
-Missing character: There is no Ã in font cmr10!
-Missing character: There is no   in font cmr10!
-Missing character: There is no Ã in font cmr10!
-Missing character: There is no   in font cmr10!
-Missing character: There is no Ã in font cmr10!
-Missing character: There is no   in font cmr10!
-Missing character: There is no Ã in font cmr10!
-Missing character: There is no   in font cmr10!
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 78.
+]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 83.
  (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 78.
- [2]
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 83.
+ [4]
 <images/architecture.png, id=27, 1027.84pt x 770.88pt>
 File: images/architecture.png Graphic file (type png)
 
 <use images/architecture.png>
-Package pdftex.def Info: images/architecture.png used on input line 99.
+Package pdftex.def Info: images/architecture.png used on input line 105.
 (pdftex.def)             Requested size: 421.41713pt x 316.06285pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 105--106
-
- []
-
-
 Underfull \hbox (badness 10000) in paragraph at lines 111--112
 
  []
 
-[3] [4 <./images/architecture.png>]
+[5]
+Underfull \hbox (badness 10000) in paragraph at lines 117--118
+
+ []
+
+[6 <./images/architecture.png>]
 <images/classes_client_subpackage.png, id=38, 281.05pt x 426.59375pt>
 File: images/classes_client_subpackage.png Graphic file (type png)
 
 <use images/classes_client_subpackage.png>
 Package pdftex.def Info: images/classes_client_subpackage.png used on input lin
-e 128.
+e 134.
 (pdftex.def)             Requested size: 112.418pt x 170.63446pt.
- [5 <./images/classes_client_subpackage.png>] <images/core_communication_node.p
+ [7 <./images/classes_client_subpackage.png>] <images/core_communication_node.p
 ng, id=44, 534.99875pt x 550.055pt>
 File: images/core_communication_node.png Graphic file (type png)
 
 <use images/core_communication_node.png>
 Package pdftex.def Info: images/core_communication_node.png used on input line 
-144.
+150.
 (pdftex.def)             Requested size: 213.9957pt x 220.0181pt.
- [6 <./images/core_communication_node.png>] <images/core_message.png, id=49, 10
-68.99374pt x 451.6875pt>
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[8] <images/core_message.png, id=48, 1068.99374pt x 451.6875pt>
 File: images/core_message.png Graphic file (type png)
 
 <use images/core_message.png>
-Package pdftex.def Info: images/core_message.png used on input line 163.
+Package pdftex.def Info: images/core_message.png used on input line 169.
 (pdftex.def)             Requested size: 427.58992pt x 180.67178pt.
- [7 <./images/core_message.png>] [8]
+ [9 <./images/core_communication_node.png>]
+[10 <./images/core_message.png>]
 <images/core_diagram.png, id=57, 694.595pt x 1308.89pt>
 File: images/core_diagram.png Graphic file (type png)
 
 <use images/core_diagram.png>
-Package pdftex.def Info: images/core_diagram.png used on input line 195.
+Package pdftex.def Info: images/core_diagram.png used on input line 201.
 (pdftex.def)             Requested size: 298.67003pt x 562.81174pt.
+ [11]
+Overfull \vbox (11.19034pt too high) has occurred while \output is active []
 
 
-LaTeX Warning: Float too large for page by 11.19034pt on input line 198.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[9] <images/sequence_diagram_complete.png, id=61, 1425.325pt x 1656.1875pt>
+[12 <./images/core_diagram.png>]
+<images/sequence_diagram_complete.png, id=65, 1425.325pt x 1656.1875pt>
 File: images/sequence_diagram_complete.png Graphic file (type png)
 
 <use images/sequence_diagram_complete.png>
 Package pdftex.def Info: images/sequence_diagram_complete.png used on input lin
-e 212.
+e 218.
 (pdftex.def)             Requested size: 456.11333pt x 529.99084pt.
 
-Overfull \hbox (26.1087pt too wide) in paragraph at lines 212--213
+Overfull \hbox (26.1087pt too wide) in paragraph at lines 218--219
  [][] 
  []
 
+[13] [14 <./images/sequence_diagram_complete.png>] [15]
+<images/conflict1.png, id=77, 317.185pt x 184.69pt>
+File: images/conflict1.png Graphic file (type png)
+ <use images/conflict1.png>
+Package pdftex.def Info: images/conflict1.png used on input line 248.
+(pdftex.def)             Requested size: 142.73192pt x 83.10971pt.
 
-LaTeX Warning: `h' float specifier changed to `ht'.
+<images/conflict2.png, id=78, 311.1625pt x 194.7275pt>
+File: images/conflict2.png Graphic file (type png)
 
-[10] [11] [12 <./images/core_diagram.png>] [13 <./images/sequence_diagram_compl
-ete.png>] (./relation.aux) ) 
+<use images/conflict2.png>
+Package pdftex.def Info: images/conflict2.png used on input line 255.
+(pdftex.def)             Requested size: 140.02182pt x 87.62656pt.
+
+<images/conflict3.png, id=79, 315.1775pt x 194.7275pt>
+File: images/conflict3.png Graphic file (type png)
+
+<use images/conflict3.png>
+Package pdftex.def Info: images/conflict3.png used on input line 262.
+(pdftex.def)             Requested size: 141.82855pt x 87.62656pt.
+ [16 <./images/conflict1.png> <./images/conflict2.png>] [17 <./images/conflict3
+.png>]
+<images/sets.png, id=89, 754.82pt x 412.54124pt>
+File: images/sets.png Graphic file (type png)
+ <use images/sets.png>
+Package pdftex.def Info: images/sets.png used on input line 320.
+(pdftex.def)             Requested size: 339.66586pt x 185.64185pt.
+ [18 <./images/sets.png>] [19] (./relation.aux) ) 
 Here is how much of TeX's memory you used:
- 13618 strings out of 494953
- 272673 string characters out of 6180977
- 317143 words of memory out of 5000000
- 16648 multiletter control sequences out of 15000+600000
+ 14109 strings out of 494953
+ 278990 string characters out of 6180977
+ 318596 words of memory out of 5000000
+ 17120 multiletter control sequences out of 15000+600000
  9630 words of font info for 34 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 62i,9n,92p,2379b,838s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
-s/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mbx9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.p
-fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmtt10.pfb>
-Output written on relation.pdf (15 pages, 581634 bytes).
+ 62i,10n,92p,2379b,437s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmbx9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr
+/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/t
+exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on relation.pdf (19 pages, 658280 bytes).
 PDF statistics:
- 113 PDF objects out of 1000 (max. 8388607)
- 72 compressed objects within 1 object stream
+ 138 PDF objects out of 1000 (max. 8388607)
+ 84 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 43 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 63 words of extra memory for PDF output out of 10000 (max. 10000000)
 

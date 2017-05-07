@@ -18,15 +18,17 @@ public class RequestClientThread implements Callable{
 	private DatagramSocket clientSocket;
 	private InetAddress ipAddr;
 	private int port;
+	int numAttempt;
 	
 	public RequestClientThread (Message msg, InetAddress addr, int p)
 	{
 		message = msg;
 		ipAddr = addr;
 		port = p;
+		numAttempt=0;
 		try {
 			clientSocket = new DatagramSocket();
-			clientSocket.setSoTimeout(15000); 
+			clientSocket.setSoTimeout(5000); 
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
@@ -39,17 +41,20 @@ public class RequestClientThread implements Callable{
 		byte[] buffer = null;
 		buffer = Utils.serialize(message);			
 		DatagramPacket packet = new DatagramPacket(buffer, buffer.length, ipAddr, port);
-		//try {			
+		try {			
 			clientSocket.send(packet);	
 			byte[] incomingBuffer = new byte [clientSocket.getSendBufferSize()];
 			packet = new DatagramPacket(incomingBuffer, incomingBuffer.length);
+			
 		    clientSocket.receive(packet);
-		//}
-	    /*catch (SocketTimeoutException se) {
-	    	System.out.println("Socket closed because of timeout");
+		}
+	    catch (SocketTimeoutException se) {
+	    	/*numAttempt++;
+	    	if ( numAttempt < 3)
+	    		return call();*/
+	    	//System.out.println("Socket closed because of timeout");
 	    	return null; //TODO check this
-	    }*/		
-		
+	    }			
 	    Message msg = (Message) Utils.deserialize(packet.getData());
 		return msg;		
 	}

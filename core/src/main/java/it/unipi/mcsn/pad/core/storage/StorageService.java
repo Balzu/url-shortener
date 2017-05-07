@@ -12,7 +12,7 @@ public class StorageService implements Service{
 	public StorageService(VectorClock vc, String id)
 	{
 		storageManager = new StorageManager(id, vc);
-	//	vectorClock = vc;
+	
 	}
 	
 	public StorageManager getStorageManager() 

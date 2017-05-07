@@ -1,6 +1,9 @@
 \documentclass{article} 
 \usepackage{todonotes}
 \usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{float}
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage[bottom=1.3in]{geometry}
 \graphicspath{ {images/} }
@@ -25,6 +28,9 @@
   \tableofcontents
   \newpage
   \pagenumbering{arabic}
+
+\clearpage
+\setcounter{page}{3}
   
 \section{Overview}  
 URL shortening is the translation of a long Uniform Resource Locator (URL) into an abbreviated alternative that redirects to the longer URL.  A shortened URL may be desired for messaging technologies that limit the number of characters in a message, for reducing the amount of typing required if the reader is copying a URL from a print source, for making it easier for a person to remember, or for the intention of a permalink.\\  
@@ -33,7 +39,7 @@ The aim of this project is to provide the implementation of a distributed url-sh
 
 \section{Design choices}
 There are three fundamental metrics in the assessment of a distributed system: Consistency, Availability and Partition Tolerance. It is well known from the CAP theorem that it is impossibile to achieve all of them at the same time in a distributed system. \\ 
-In this project, I have chosen to focus on availability and partition tolerance, at the expense of consistency. In particular, the consistency model is not a strong one.
+In this project, I have chosen to focus on availability and partition tolerance, at the expense of consistency. In particular, the consistency model is not a strong one. Another goal of this project is to be scalable.
 In the following subsections, I list and explain the design choices that I made.
 
 
@@ -41,7 +47,7 @@ In the following subsections, I list and explain the design choices that I made.
 The url-shortener project is a service that provides the following APIs:
 
 \paragraph{get}
-Given the shorten url returns the original url, if present. \\
+Given the shortened url returns the original url, if present. \\
 \texttt{get(shortUrl) -$>$ longUrl}
 
 \paragraph{put}
@@ -54,30 +60,30 @@ Removes the couple \texttt{<shortened url, original url>}.\\
 
 
 \subsection{Passive Replication}
-Clients can communicate with every node. If the contacted node is the primary for that request, it will execute the request and directly return the result to the client; otherwise it will forward the request to the primary, which will execute it and send back the response to the sending node, which in turn will hand it back to the client. \\
-
-I have chosen the Passive Replication strategy because I think it should keep lower the number of version conflicts.
+Clients can communicate with every node. If the contacted node is the primary for that request, it will execute the request and directly return the result to the client; otherwise it will forward the request to the primary, which will execute it and send back the response to the sending node, which in turn will hand it back to the client. \\ 
+I have chosen the Passive Replication strategy because I it should keep lower the number of version conflicts.
 
 \subsection{Data Partitioning}
-The partitioning strategy to map objects into nodes is a dynamic one: namely, it is employed Consistent Hashing with virtual nodes. The use of virtual nodes has potentially two advantages: in case of heterogeneous machines we can assign more virtual nodes to the most powerful machines, so that it will be more likely that these machines will handle a bigger number of items. The other advantage concerns homogeneous machines (\texttt{i.e.} machines with similar computational power, bandwidth, storage...). In this case the use of virtual nodes results in a more fair distribution of items among nodes with higher probability. \\ In case of node leave, due for instance to node crash or network partition, the keys asssigned to this node are automatically assigned to another, working node. Since we have replication of data and we use the gossip protocol to detect dead nodes, we are capable to face the leave of one or more nodes without compromising the functioning of the whole system. In other words, availability and partition tolerance are guaranteed.
+The partitioning strategy to map objects into nodes is a dynamic one: namely, it is employed Consistent Hashing with virtual nodes. The use of virtual nodes has potentially two advantages: in case of heterogeneous machines we can assign more virtual nodes to the most powerful machines, so that it will be more likely that these machines will handle a bigger number of items. The other advantage concerns homogeneous machines (\texttt{i.e.} machines with similar computational power, bandwidth, storage...). In this case the use of virtual nodes results in a more fair distribution of items among nodes with higher probability. \\ In case of node leave, due for instance to node crash or network partition, the keys assigned to this node are automatically assigned to another, working node. Since we have replication of data and we use the gossip protocol to detect dead nodes, we are capable to face the leave of one or more nodes without compromising the functioning of the whole system. In other words, availability and partition tolerance are guaranteed.
 
 \subsection{Data Replication}
 We want to achieve availability, so an asynchronous replication strategy is adopted. Namely, the primary node immediately answers to the client after an operation is performed. Messages to the backup nodes are sent periodically, and not after every update of the primary's data. This strategy reduces the latency of the communication client-primary, again at the expense of consistency. \\
-Each primary node is associated 1 backup node, which is the next node clockwise in the ring. Every time a primary wishes to update its replica, it sends all the content of its database to this node. 
+Each primary node is associated one backup node, which is the next node clockwise in the ring. Every time a primary wishes to update its replica, it sends all the content of its database to this node. I have chosen this strategy in order to be the more scalable as possible. Each node has a primary database and a backup database. The primary database is the one used by a node to answer the requests addressed to itself. The backup database instead is used to store the replicated urls: indeed periodically the primary node sends the content of its primary database to the backup node, which stores the received urls into its backup database.
 
 \subsection{Primary Failure}
-The use of Consistent Hashing and the the specific data replication strategy adopted (backup is the next node clockwise in the ring) allows to have a vry easy failover procedure: if node \textit{i} is down, the space of keys that belonged to node \textit{i} will be automatically mapped to node \textit{(i+1) mod n}. Since node \textit{(i+1) mod n} is the backup of node \textit{i} it will have a copy of the keys of node \textit{i} (although possibly not updated), so the correct behaviour will be maintained also in case of failure of the primary without needing an explicit failover procedure. For further details about the failover procedure please refer to the  \textit{Implementation} section.    
+The use of Consistent Hashing and the the specific data replication strategy adopted (backup is the next node clockwise in the ring) allows to have a very easy failover procedure: if node \textit{i} is down, the space of keys that belonged to node \textit{i} will be automatically mapped to node \textit{(i+1) mod n}. Since node \textit{(i+1) mod n} is the backup of node \textit{i} it will have a copy of the keys of node \textit{i} (although possibly not updated), so the correct behaviour will be maintained also in case of failure of the primary without needing an explicit failover procedure. For further details about the failover procedure please refer to the  \textit{Implementation} section.    
 
 
 \subsection{Consistency Model}
-This project adopts an eventual consistency model. \todo{In realtà tutte le richieste arrivano a un leader}It is possible to get different results if running the same query at the same time on the leader and on a follower. This may happen if the follower has an outdated version of the leader's data. Anyway this is only a temporary state: if we stop writing to the database for a while, the followers will eventually become consistent with the leader. I decided to accept this weak consistency model in order to have better availability and partition tolerance. 
+This project adopts an eventual consistency model. It is possible to get different results if running the same query at the same time on the leader and on a follower. This may happen if the follower has an outdated version of the leader's data. Anyway this is only a temporary state: if we stop writing to the database for a while, the followers will eventually become consistent with the leader. I decided to accept this weak consistency model in order to have better availability and partition tolerance. Furthermore, in absence of failures only the leader answers to requests for which it is the primary, and so inconsistencies do not arise.
 
 \subsection{Conflicts Resolution}
 Each node is assigned a vector clock that allows it to order events, that is to track causal dependencies between events. When a message is sent from a node to another, it carries both the object (the target of the communication) and the sender's vector clock. If the recipient node already has that object with the associated vector clock in its database, two situations may arise:
 \begin{itemize}
 \item  If one vector clock is smaller than the other, keep the greatest (i.e. latest) version of the object;
-\item  \todo{Non ti puoi affidare al client per risolvere inconsistenze, va fatto server-side}If that is not the case, the two vector clocks are concurrent, and if the two objects are assigned different values then we have a conflict.
+\item  If that is not the case, the two vector clocks are concurrent, and if the two objects are assigned different values then we have a conflict.
 \end{itemize}
+In case of conflict I have adopted a \textit{last write wins} approach: each object carries also a timestamp, so if the vector clocks are concurrent the object with more recent timestamp is kept. This method is prone to data loss but I decided to adopt it because of its simplicity and because with a Passive Replication Strategy conflicts should be rare. In particular, in this system it is possible to have conflicts only when a node recovers from failure and its backup node has processed requests such that now the state of the backup and of the primary node is inconsistent. I discuss this problem and the adopted solution in the \textit{Conflict Resolution} paragraph of the \textit{Test} section, where I also provide tests to check the correctness of the approach.
 
 
 
@@ -86,7 +92,7 @@ There are clients, that invoke the service, and nodes, that comprise the cluster
 
 \subsection{Architecture} 
 
-The client can make a request to any node in the cluster. The nodes process the request and handle back the result to the client. \todo{Molto specifico, inseriscilo negli use cases?} In particular, only the primary node for a given request actually processes it. If a node receives a request for which it is not the primary, it discovers who is the primary and forwards the request to such node. The primary node processes the request and then handles back the result to the previous node, who in turn returns the response to the client. \\
+The client can make a request to any node in the cluster. The nodes process the request and handle back the result to the client. In particular, only the primary node for a given request actually processes it. If a node receives a request for which it is not the primary, it discovers who is the primary and forwards the request to such node. The primary node processes the request and then handles back the result to the previous node, who in turn returns the response to the client. \\
 Each node has to do three main jobs, so I created a node as a container of three services: 
 \begin{itemize}
 \item \textit{client communication service}: each node must be able to communicate with the client, to accept requests from it and return responses;
@@ -97,7 +103,7 @@ Figure \ref{fig:architecture} shows the architecture of the service. The communi
 
 \begin{figure}[h]
 \includegraphics[scale=0.41]{architecture}
-\caption{General architecture. There is a client and a cluster, which is made of more nodes. Each node is made of a node communication service, a client communication service and a storage service. The letter ``P'' under the database stays for ``primary'' , the letter ``B'' for ``backup''.}
+\caption{General architecture. There is a client and a cluster, which is made of four nodes. Each node is made of a node communication service, a client communication service and a storage service. The letter ``P'' under the database stays for ``primary'' , the letter ``B'' for ``backup''.}
 \label{fig:architecture}
 \end{figure}
 
@@ -134,10 +140,10 @@ The core module contains all the classes that implement the logic of the project
 \begin{itemize}
 \item \textit{NodeCommunicationService} One of the three fundamental services a node is made of. It starts and shuts down a NodeCommunicationManager.
 \item \textit{NodeCommunicationManager} It is the responsible for the communication among nodes. It starts and shuts down the RequestManager and the ReplicaManager, and provides the capability to process the client messages it receives. In particular, if it is the primary for that request it will ask the StorageService of the node to perform the proper operations; otherwise it will discover the primary node and forward the message to it.
-\item \textit{RequestManager} NodeCommunicationManager relies on this class to actually receive and send requests among nodes. A Request is intended as any message that can be received or sent by a node. It can be a client message (the message sent by the client as it is), a node message (a message generated by the nodes that extends the client message with features like vector clocks) or an update message (a message periodically sent from a node to is backup node to update the backup database). The RequestManager acts both as server and client for the request: to manage incoming requests it spawns a RequestServerThread while to make outgoing requests it provides a \textit{sendMessage()} method that spawns a RequestClientThread to do the job. It continously listen on a UDP socket.
+\item \textit{RequestManager} NodeCommunicationManager relies on this class to actually receive and send requests among nodes. A Request is intended as any message that can be received or sent by a node. It can be a client message (the message sent by the client as it is), a node message (a message generated by the nodes that extends the client message with features like vector clocks) or an update message (a message periodically sent from a node to its backup node to update the backup database). The RequestManager acts both as server and client for the request: to manage incoming requests it spawns a RequestServerThread while to make outgoing requests it provides a \textit{sendMessage()} method that spawns a RequestClientThread to do the job. It continously listen on a UDP socket.
 \item \textit{RequestServerThread} It reconstructs the message from a stream of bytes, delegates the MessageHandler to properly process the message, collects the reply and sends it back to the requesting node via UDP.
 \item \textit{RequestClientThread} This class is symmetric with respect to RequestServerThread, in the sense that it is the class that starts the message exchange with another node in the cluster.
-\item \textit{ReplicaManager} Periodically sends the content of the database to the backup node. If we look at nodes in the cluster as points in a ring, the node to whom send the database is the next node clockwise in the ring. To update the backup database the ReplicaManager splits its own database in fixed-size pieces: each of these piece will be encapsulated in an UpdateMessage and sent to the backup node. To send these update messages the ReplicaManager relies on the RequestManager, because an update message is simply seen as a request.
+\item \textit{ReplicaManager} Periodically sends the content of the database to the backup node. If we look at nodes in the cluster as points in a ring, the node to whom send the database is the next node clockwise in the ring. To update the backup database the ReplicaManager splits its own database in fixed-size pieces: each of these pieces will be encapsulated in an UpdateMessage and sent to the backup node. To send these update messages the ReplicaManager relies on the RequestManager, because an UpdateMessage is simply seen as a request.
 \end{itemize}
 \begin{figure}[h]
 \centering
@@ -148,7 +154,7 @@ The core module contains all the classes that implement the logic of the project
 
 \paragraph{message} A Message is the base interface for communications. Following the layout of the project, three further interfaces are defined, that inherits from Message: ClientMessage, NodeMessage and UpdateMessage, to deal respectively with client messages, node messages and database backup. 
 \begin{itemize}
-\item \textit{Message} Base interface: inplementing classes must provide methods to return the status (success, error, ...) and the type (put, get, ...) of the message.
+\item \textit{Message} Base interface: implementing classes must provide methods to return the status (success, error, ...) and the type (put, get, ...) of the message.
 \item \textit{ClientMessage} Interface for client message: implementing classes must provide a method to get the url inserted by the client.
 \item \textit{GetMessage} Class that implements ClientMessage, it is used when GET requests are invoked by the client.
 \item \textit{PutMessage} Class that implements ClientMessage, it is used when PUT requests are invoked by the client.
@@ -158,7 +164,7 @@ The core module contains all the classes that implement the logic of the project
 \item \textit{UpdateMessage} Interface used when portions of the database are sent to the backup node. Implementing classes must provide methods to put and get entries of the database in the message, check whether the UpdateMessage is full or empty, return the identifier of the sender node and tell whether this message is the first of a sequence of UpdateMessage. Indeed, the content of a backup is delivered by sending a sequence of UpdateMessages, and the first message may need some special treatment.
 \item \textit{SizedBackupMessage} Class that implements the UpdateMessage interface. Its name means that it is involved in backup operations and that can carry only a limited amount of database entries (indeed these messages have to be sent over UDP).
 \end{itemize}
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[scale=0.4]{core_message}
 \caption{UML class diagram, showing up relationships among classes in the core.message subpackage}
@@ -168,7 +174,7 @@ The core module contains all the classes that implement the logic of the project
 \paragraph{storage} The classes inside this package deals with database operations.
 \begin{itemize}
 \item \textit{StorageService} It starts and shuts down the StorageManager. It is not directly involved in any operation concerning the database.
-\item \textit{StorageManager} It is the class that actually manages the database. The database is a simple \textit{(key,value)} store, whose keys are \textit{short urls} and whose values are \textit{versioned long urls}, that is the original url paired with a vector clock. Each node has two databases: a primary and a backup database. The primary database is the one that contains the urls for which the node is the primary. So every time the StorageManager is asked to answer to a client request, it looks in the primary database. The backup database instead contains a copy of the primary database of another node. Namely, according to the chosen replication strategy, the backup database of node \textit{i} contains the copy of the primary database of node \textit{(i-1) mod N}, where N is the cluster size. The backup database is never used to answer clients' query. The backup database of node \textit{i} is periodically updated by node \textit{(i-1)} through the sending of a sequence of UpdateMessages. Upon receiving this messages, the recipient node checks whether the sending node is the same of the last time (this is possible because the UpdateMessage has a field that stores the id of the sending node). If it the same, the backup database is updated and everything is fine; if it is different, it means that either node \textit{(i-1)} crashed or recovered from crashing (I assume that new nodes cannot join the cluster, but obviously crashed or partitioned nodes can re-join it). In this case node \textit{i} merges the backup database into the primary database, because in case of crashing or partitioning of node \textit{(i-1)}, it becomes the primary also for the urls of the crashed node. So the system is partition tolerant, because it keeps working despite the failure of a node in the cluster. When node \textit{(i-1)} re-joins the cluster, the situation previous to the failure is re-established, with node \textit{i} storing again the backup database of node \textit{(i-1) mod N}. A StorageManager provides methods to read and write single entries of the database, make a dump of the primary database and merge the backup database into the primary. 
+\item \textit{StorageManager} It is the class that actually manages the database. The database is a simple \textit{(key,value)} store, whose keys are \textit{short urls} and whose values are \textit{versioned long urls}, that is the original url paired with a vector clock and a timestamp. Each node has two databases: a primary and a backup database. The primary database is the one that contains the urls for which the node is the primary. So every time the StorageManager is asked to answer to a client request, it looks in the primary database. The backup database instead contains a copy of the primary database of another node. Namely, according to the chosen replication strategy, the backup database of node \textit{i} contains the copy of the primary database of node \textit{(i-1) mod N}, where N is the cluster size. The backup database is never used to answer clients' query. The backup database of node \textit{i} is periodically updated by node \textit{(i-1)} through the sending of a sequence of UpdateMessages. Upon receiving this messages, the recipient node checks whether the sending node is the same of the last time (this is possible because the UpdateMessage has a field that stores the id of the sending node). If it the same, the backup database is updated and everything is fine; if it is different, it means that either node \textit{(i-1)} crashed or recovered from crashing (I assume that new nodes cannot join the cluster, but obviously crashed or partitioned nodes can re-join it). In case of crashing or partitioning of node \textit{(i-1)} the node \textit{i} merges the backup database into the primary database, because now it must behave as primary also for the urls of the crashed node. So the system is partition tolerant, because it keeps working despite the failure of a node in the cluster. When node \textit{(i-1)} re-joins the cluster, the situation previous to the failure is re-established, with node \textit{i} storing again the backup database of node \textit{(i-1) mod N}. A StorageManager provides methods to read and write single entries of the database, make a dump of the primary database and merge the backup database into the primary. 
 \end{itemize}
 
 \paragraph{utils} This package contains classes that provide methods that don't fall in one of the previous categories, but may be needed by different classes. 
@@ -190,7 +196,7 @@ This module contains the classes that implement the client. The client chooses a
 
 
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[scale=0.43]{core_diagram}
 \caption{Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.}
@@ -207,7 +213,7 @@ So let's start reading the diagram. The ClientRunner parses the command-line to 
 
 
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \includegraphics[scale=0.32]{sequence_diagram_complete}
 \caption{Sequence diagram for the processing of a PUT request, when the node contacted by the client is not the primary.}
@@ -216,30 +222,121 @@ So let's start reading the diagram. The ClientRunner parses the command-line to 
 
 
 \section{Test}
+The tests that I provide are more similar to functional tests rather than unit tests. The reason is that I didn't want to provide a lot of trivial tests, but instead I preferred to put more complex tests, such that if they succeed, it is likely that the system works as expected. One point concerning all tests is that they generally deal with faulty situations and their successful completion depends on time. Indeed, new information does not spread immediately among the nodes. Indeed in case of node crash we have to wait that the gossip service of the nodes recognize that one node is down, to properly adapt the behaviour of the system. Furthermore, we saw that in this Passive Replication model, information is not replicated immediately upon generation, but periodically. In addition, the use of UDP may imply that the delivery of the database to the backup node from the primary node is unsucessful. In this case, the exchange is lost and the next exchange will not be performed soon after, but when the time period elapses. The result is that the system keeps working despite failures, but it may be the case that you have to wait a while to get consistent answers. I would also highlight that this behaviour only happens in case of failure: if no one of the node fails (both for a network partition or a node crash), the system promptly provides consistent results to user queries. \\
+I used JUnit 4 as framework for the tests. The classes used for the tests are \textit{DataReplicationTest}, \textit{PrimaryFailureTest} and \textit{ConflictResolutionTestTest}. Before the execution of the test, a cluster made of 5 nodes is built and after the execution of each test it is torn down, in order to have a clean environment for each test.
+
 
 \subsubsection{Replication of data}
-
+The test class is \textit{DataReplicationTest}. This test checks whether data replication actually takes place. A url is inserted in the system, by simulating a PUT request of a client. The system will find the primary for that request and will store it into the primary database of the primary node. This test checks whether, after waiting a while, this url is replicated into the backup database of the backup node. Indeed if we look at the nodes as points in a ring, each node of the cluster is assigned a backup node which is the next node clockwise in the ring. If the system works correctly, each node sends the content of its primary database to the backup node, which stores it into its backup database.
 
 \subsubsection{Primary failure} 
-In this test we show that the system reacts correctly in case of primary failure. The situation is analoguos to the case of network partition of the primary, so this test covers two cases. 
+The test class is \textit{PrimaryFailureTest}, the test function \textit{backupShouldReplacePrimary()}. In this test we show that the system reacts correctly in case of primary failure, without needing any manual intervention. The situation is analogous to the case of network partition of the primary. 
+A url is inserted in the system and is stored in the database of the designated primary node. Then we wait for the primary to replicate its database into the backup node and we shut down the primary to simulate a failure. At some point the backup node will receive an UpdateMessage from a node different from its primary. The backup node understands that the primary is down and that it must start to manage the requests of the failed primary too, so it merges its backup database into its primary database, that is it copies the urls in the backup database into the primary database. The test checks that if we make a request for the url inserted before, and the primary is down, the request is successfully answered by the backup node.
 
-\todo[inline]{ (Primary failure) Show that in case of primary failure the system still works correctly, without needing any manual intervention}
+
 
 
 \subsubsection{Primary re-joins cluster after failure} 
-In this test we show that the system works correctly when the primary node re-joins the cluster after crashing, that is it is assigned the same space of urls that it had before crashing. The situation is analoguos to the case of primary re-joining the network after a partition, so this test covers two cases.
+The test class is \textit{PrimaryFailureTest}, the test function \textit{primaryShouldWorkWhenRejoiningCluster()}. In this test we show that the system works correctly when the primary node re-joins the cluster after crashing, that is it is assigned the same space of urls that it had before crashing. The situation is analoguos to the case of primary re-joining the network after a partition.
+This test takes the previous one a step further, that is: a url is inserted in the system, some time is waited to allow the replication of data from primary to backup node, the primary node is shut down, some time is waited (during which the backup node manages the requests of the failed primary too), and finally the primary node is restarted. This test checks whether after rejoining the cluster, the primary node is able to return the url previously inserted in the system.
 
-\subsubsection{Conflict Resolution} 
+\subsubsection{Conflict Resolution} We need to spend more words on conflict resolution to show when conflicts may arise, how they are managed, and which are the tests employed to check whether the system handles conflicts as expected.
+\paragraph{Birth of a conflict} The system exploits a Passive Replication strategy. This means that only the primary node processes the requests it is responsible for. Backup nodes only forward the requests to the primary node: they do not directly process the requests for which they are not primary, no matter if they could because they have the requested url stored in their databases. This approach implies that in absence of failures, no conflict can arise. So, conflicts can happen only when a node recovers from crashing if during the time in which it was down its backup node has processed some requests that lead to an inconsistent state between the database of the primary and the database of the backup. Namely this can happen if the backup node has removed or updated some urls while the primary node was down. Figures \ref{fig:conflict1}, \ref{fig:conflict2} and \ref{fig:conflict3} show the sequence of actions that may lead conflicts. 
 
-\subsubsection{Load Balancing} 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.45]{conflict1}
+\caption{Behaviour of the system in absence of failures: the request is processed by the primary.}
+\label{fig:conflict1}
+\end{figure}
 
-\todo[inline]{Tweak the number of virtual nodes to show that more powerful machines can actually be assigned more items} 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.45]{conflict2}
+\caption{Behaviour of the system in case of failure of the primary: the requests are processed by its backup node.}
+\label{fig:conflict2}
+\end{figure}
 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.45]{conflict3}
+\caption{The failed node is recovered and re-joins the cluster. The backup node discovers that the primary is alive again as soon as it receives an UpdateMessage (carrying the content of the database to be replicated) from it. At this point the database received from the primary is discarded by the backup node, because it contains outdated information. Instead, the backup node sends to the primary the collection of urls that from now on will be managed by the primary again. This collection can contain new urls that the primary didn't receive, urls that the primary received, but whose value has been changed while it was down, and special ``to-be-removed'' urls, that is url that the primary has in its database but that have been removed while it was down.  }
+\label{fig:conflict3}
+\end{figure}
+
+\paragraph{Conflict management} Let's assume that now we are at the point in which the backup node is processing the requests addressed to the  primary, when the primary node suddenly recovers from failure and re-joins the cluster. The backup had discovered that the primary was down when it received the database to be replicated from a node different from its default primary. At that point it merged its backup database into the primary database, in order to be able to process also the requests of the failed node. Now it discovers that its default primary node is again alive, but probably there are inconsistencies among the primary databases of the two nodes. With reference to figure \ref{fig:sets}, it is possible to distinguish three cases:
+\begin{itemize}
+\item \textit{(1)} Urls in the database of the primary node BUT NOT in the database of the backup node. If this situation arises because these urls were not sent to the backup node because the primary node failed, then the primary node must keep those urls. Instead, if this urls are not present in the database of the backup node because they were removed while the primary node was down, then they have to be removed from the database of the primary too.
+\item \textit{(2)} Urls in the database of the primary node AND in the database of the backup node. It could be the case that both backup node and primary node have the same keys (short urls), but the values (long urls) are different because those url have been updated by the backup node while the primary node was down. So, all the urls belonging to this subset have to be sent to the primary node, which will run a conflict resolution procedure to solve possible conflicts among urls having the same key but different value.
+\item \textit{(3)} Urls in the database of the backup node BUT NOT in the database of the primary node. Recall that while the primary is down, the backup node processed also the requests that in absence of failures would be addressed to the primary node. So, it may have urls in its database that are not present in the database of the primary. Only the urls that have to be managed from the primary are sent to the primary.
+\end{itemize}
+These cases are handled by algorithms run both by the backup node and by the primary node. The backup node runs the algorithm as soon as it receives a message from its default primary node, that it believed crashed. The primary node instead runs the algorithm as soon as it receives the message sent from its backup node. The pseudocode capturing the main ideas of the algorithms is reported below. One point has to be explained of algorithm \ref{pa}. A url sent by the backup node to the primary node has value (i.e. long url) \textit{null} if and only if that url has been removed from the backup node. In other words a url with value equal to null is a url that belonged to the data structure \textit{removedUrls} in algorithm \ref{ba} and so it has to be removed from the database of the primary node too. The method \textit{storeWithConflictResolution} uses vector clock to resolve conflicts among the stored urls and the received urls. If a \textit{happen-before} relationship does not hold between the two conflicting urls, then vector clocks cannot be used to resolve the conflict. In this case a last write wins approach is adopted, and the url with more recent timestamp is kept.
+
+\begin{algorithm}
+\caption{Algorithm run by backup node}\label{ba}
+\begin{algorithmic}[1]
+\If  {(defaultPrimary == updateMsg.sender AND actualPrimary != defaultPrimary)}  
+\State backupDB.empty()
+\State partitionUrlsBetweenDB()
+\State backupDB.add(removedUrls)
+\State actualPrimary = defaultPrimary
+\State send backupDB to node defaultPrimary
+\EndIf 
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+\caption{partitionUrlsBetweenDB()}\label{purls}
+\begin{algorithmic}[1]
+\For {$<$surl, lurl$>$ in primaryDB} 
+\If {(findPrimary( surl ) != me)}
+\State primaryDB.remove( $<$surl, lurl$>$ )
+\State backupDB.store( $<$surl, lurl$>$ )
+\EndIf 
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Algorithm run by primary node}\label{pa}
+\begin{algorithmic}[1]
+\For {$<$surl, lurl$>$ received from backupNode}
+\If {($<$surl, lurl$>$ $\notin$ primaryDB )} \Comment{Case 3}
+\State primaryDB.store( $<$surl, lurl$>$ )
+\Else 
+\If {(lurl == null)} \Comment{Case 1}
+\State primaryDB.remove( $<$surl, lurl$>$ )
+\Else { storewithConflictResolution( $<$surl, lurl$>$ )} \Comment{Case 2}
+\EndIf
+\EndIf 
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.45]{sets}
+\caption{Cases that have to be managed when the primary node recovers from crashing}
+\label{fig:sets}
+\end{figure}
+
+
+\paragraph{Tests} The test class is \textit{CoflictResolutionTest}. Inside this class, two tests are present:
+\begin{itemize}
+\item \textit{primaryShouldResolveConflictsAfterRejoiningCluster()} This test checks whether the primary node resolves conflicts as expected. A url is inserted in the database of the primary node and some time is waited to allow the replication of the database in the backup node. Then the primary node is shut down and some time is waited to allow the backup node to understand that it must handle also the urls of the failed node. At this point the value of the previous url is modified by the backup node and then the primary node is restarted. At some point the primary node will contact again the backup node, which understands that its default primary is up again. The backup node sends to the primary node the updated url. The primary node recognizes that it has already stored that url in its database and runs the conflict resolution procedure. If the system works as expected, the primary node replaces the old value of the url with the new value received from the backup node. The test checks whether at this point the primary node has stored in its database the new value associated to the url (when I talk about value of the url I mean the long url: indeed the urls are stored in the database as pairs \texttt{$<$surl, lurl$>$}, so the short url can be seen as key and the long url can be seen as value of the pair).
+\item \textit{primaryShouldRemoveUrlsRemovedByTheBackupNode()} This test checks whether the primary node removes the urls that were removed from the backup node while it was down. The test is analogous to the previous one, with the exception that now the backup node sends to the primary node a special url with value = null, allowing the primary to understand that it has to remove the received url.
+\end{itemize}
 
 \section{Future work} 
 \begin{itemize}
-\item Hash function for the url shortener. \todo[inline]{32 bit hash function allows too few urls; and in that case find another method to translate sequence of bytes into allowed charactes [A-Za-z0-9]}
-\item Replication Strategy. \todo[inline]{Every time the backup database has to be updated, the whole DB is emptied and then rebuild from scratch. This is a simple approach (the sending node sends all its database and not only the entries that have changed from the last DB delivery) but not very efficient.}
+\item Hash function for the url shortener. \\
+The 32 bit hash function used allows about 4 billions of distinct urls. If a lot of urls have to be shortened, it must be used a hash function that maps the long urls in a bigger space. As an example, it could be exploited the 128 bit Murmurhash3 function.
+\item Replication Strategy. \\
+Every time the backup database has to be updated, the whole database is emptied and then rebuild from scratch. This is a simple approach (the sending node sends all its database and not only the entries that have changed from the last database delivery) but not very efficient.
+\item Eventual Consistency. \\
+The system is maybe too slow to reach consistency. If you run the tests decreasing the waiting time, it is very likely that the tests will not succeed.
 \end{itemize}
 
 \end{document}
