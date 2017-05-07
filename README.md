@@ -1,12 +1,23 @@
 # Distributed url-shortener service
 A distributed url-shortener service that focuses on availability and partition tolerance.
 
-## Usage
-First of all, you have to download and build the project:
+
+
+## Dependencies
+Some of the dependencies are not in Maven Central, so you will need to download them and install in your local Maven repository. These dependencies are [Consistent Hashing](https://github.com/Balzu/Consistent-Hashing), [Gossiping](https://github.com/tonellotto/Distributed-Enabling-Platforms/tree/master/gossiping) and [Versioning](https://github.com/tonellotto/Distributed-Enabling-Platforms/tree/master/versioning). The procedure to follow is the same for each dependency, so let's show only for Consistent Hashing. You have to do only
+
+`git clone https://github.com/Balzu/Consistent-Hashing.git`  
+`mvn install`  
+
+## Build
+
+Now you can download and build the project:
 
 `git clone https://github.com/Balzu/url-shortener.git`  
 `cd url-shortener`  
 `mvn clean package`  
+
+## Usage
 
 Then you have to run the url-shortener service. This setups a cluster of nodes that all implement the url-shortener service. It is possible to tweak the system by providing a custom configuration file, otherwise the default one will be used. To start the service:
 
