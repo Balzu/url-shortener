@@ -7,22 +7,15 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import it.unipi.mcsn.pad.core.Node;
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager;
-import it.unipi.mcsn.pad.core.message.ClientMessage;
+import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager.MessageTypeException;
 import it.unipi.mcsn.pad.core.message.Message;
-import it.unipi.mcsn.pad.core.utils.Partitioner;
-import voldemort.versioning.VectorClock;
 
-public class ClientCommunicationManager extends Thread{
-	
-	//private ClientCommunicationThread clientCommunicationThread;
+public class ClientCommunicationManager extends Thread
+{	
 	private ServerSocket serverSocket;
-	private final ExecutorService threadPool;
-	//Usato per gestire richieste concorrenti da client (è lock-free), ma va bene il nome??
-	private final AtomicBoolean clientServiceRunning; 
-	
+	private final ExecutorService threadPool;	
+	private final AtomicBoolean clientServiceRunning; 	
 	private final int nodeId;
 	private NodeCommunicationManager nodeCommManager;
 	
@@ -30,11 +23,10 @@ public class ClientCommunicationManager extends Thread{
 			int nid, NodeCommunicationManager ncm){
 		
 		clientServiceRunning = new AtomicBoolean(true);
-		threadPool = Executors.newCachedThreadPool();
-		
+		threadPool = Executors.newCachedThreadPool();		
 		nodeId = nid;
 		nodeCommManager = ncm;
-		try { //TODO: Have to close ServerSocket somewhere? Think only on shutdown!!
+		try { 
 			serverSocket = new ServerSocket(port, backlog, bindAddr);			
 		} catch (IOException e) {			
 			e.printStackTrace();
@@ -62,12 +54,15 @@ public class ClientCommunicationManager extends Thread{
 	 * Delegates the processing of the message to the NodeCommunicationManager.
 	 *  Returns a message containing the reply for the operation.
 	 */
-	public Message processMessage(Message msg) {
-		
-		Message response = nodeCommManager.processClientMessage(msg);
-		
+	public Message processMessage(Message msg)
+	{		
+		Message response= null;
+		try {
+			response = nodeCommManager.processClientMessage(msg);
+		} catch (MessageTypeException e) {
+			e.printStackTrace();
+		}		
 		return response;
-	}
-	
+	}	
 
 }

@@ -29,9 +29,7 @@ public class NodeRunner
     	try {
     		CoreCommandLineManager clm = new CoreCommandLineManager(args); 
 			
-			// If asked help, show help message and quit
-    		//TODO if --help and other options are present it does not return usage error message, 
-    		// but just prints help message and quit - think it's ok, maven too behaves so
+			// If asked help, show help message and quit    		
 			if (clm.needHelp()){ 
 				clm.printHelp();
 				System.exit(0);
@@ -44,26 +42,20 @@ public class NodeRunner
 			}
 			else{
 				configFile = new File ("src/main/resources/core.conf");
-			}
-			System.out.println("Configuration file exists? " + configFile.exists()); // TODO throw exception if config file does not exist?
-			
+			}		
     		List<String> addresses =  getAddressesFromFile(configFile);
     		List<Integer> virtualInstances = getVirtualInstancesFromFile(configFile);
     		List<Integer> backupIntervals =  getBackupIntervalsFromFile(configFile);
     		Map<String, Integer> ports = getPortsFromFile(configFile);
     		int gossipPort = ports.get("gossip_port");
     		int clientPort = ports.get("client_port");
-    		int nodePort = ports.get("node_port");
-    		
+    		int nodePort = ports.get("node_port");    		
     		    		
-    		GossipSettings settings = new GossipSettings();
-    		
-    		
+    		GossipSettings settings = new GossipSettings();    		
     		List<GossipMember> startupMembers = new ArrayList<>();
     		for (int i = 0; i < addresses.size(); ++i) {
-    			startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); //TODO: fix the id
-    		}
-    		
+    			startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); 
+    		}    		
     		List<Node> nodes = new ArrayList<>();
     		for (int i = 0; i < addresses.size(); ++i) {	    			
     			Node node = new Node(clientPort, 50, addresses.get(i), gossipPort, i+"" , 
@@ -71,8 +63,7 @@ public class NodeRunner
     					virtualInstances.get(i), backupIntervals.get(i));
     			node.start();
     			nodes.add(node);    				   
-    		}       	
-    		
+    		}       	    		
     		System.out.println("url-shortener service is running... ");
     		BufferedReader stdIn = new BufferedReader(
 					new InputStreamReader(System.in));	
@@ -93,11 +84,9 @@ public class NodeRunner
     		e.printStackTrace();
     	} catch (InterruptedException e) {		
     		e.printStackTrace();
-    	} catch (IOException e) {
-			// TODO Auto-generated catch block
+    	} catch (IOException e) {			
 			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+		} catch (JSONException e) {			
 			e.printStackTrace();
 		} catch (ParseException e) {			
     		System.err.println(e.getMessage());

@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.storage.StorageService;
 
@@ -41,8 +40,7 @@ public class RequestManager extends Thread{
 	{
 		while (isRunning.get())
 		{
-			try {
-				// In questo caso do' dimensione massima, ma meglio se lo dico io quanto allocare (?)
+			try {				
 				byte[] buf = new byte[socket.getReceiveBufferSize()];
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 	            socket.receive(packet);
@@ -56,30 +54,23 @@ public class RequestManager extends Thread{
 			} catch (IOException e) {			
 				e.printStackTrace();
 			}			
-		}
-		
+		}		
 	}
 	
 	public void shutdown(){
 		isRunning.set(false);
 		socket.close();
-	}
-	
+	}	
 	
 	public int getPort() {
 		return nodePort;
 	}
-
-	//TODO check that putting this method here is ok
+	
 	public Message sendMessage(Message msg, String ipAddr, int port) throws UnknownHostException, InterruptedException, ExecutionException
 	{		
 		Future <Message> future = threadPool.submit(new RequestClientThread(msg, 
 				InetAddress.getByName(ipAddr), port));
-		return future.get();
-		
-	}
-	
-	
-	
+		return future.get();		
+	}	
 
 }

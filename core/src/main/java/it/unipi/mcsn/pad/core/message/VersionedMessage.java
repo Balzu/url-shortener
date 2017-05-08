@@ -11,8 +11,7 @@ public class VersionedMessage implements NodeMessage{
 	private MessageStatus messageStatus;
 	private MessageType messageType;
 	private String shortUrl;
-	private Versioned<String> versioned;
-	
+	private Versioned<String> versioned;	
 	
 	public  VersionedMessage(String lUrl, String sUrl, Version vectorClock, 
 			MessageType mt){
@@ -66,7 +65,4 @@ public class VersionedMessage implements NodeMessage{
 		return " Original url = " + versioned.getValue() + 
 				", \n               Shortened url = " + shortUrl; 
 	}
-	
-	
-
 }

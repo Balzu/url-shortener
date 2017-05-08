@@ -6,9 +6,7 @@ import java.util.List;
 
 import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.GossipSettings;
-import com.google.code.gossip.LocalGossipMember;
 import com.google.code.gossip.event.GossipListener;
-import com.google.code.gossip.manager.GossipManager;
 
 import it.unipi.mcsn.pad.core.communication.client.ClientCommunicationService;
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationService;
@@ -58,8 +56,8 @@ public class Node {
 		this.nodePort = nodePort;
 		this.virtualInstances = virtualInstances;
 		this.backupInterval = backupInterval;
-		vc = new VectorClock(); //TODO: ok this constructor?
-		vc.incrementVersion(/*nodeId*/ iid, System.currentTimeMillis());
+		vc = new VectorClock(); 
+		vc.incrementVersion(iid, System.currentTimeMillis());
 		
 		storageService = new StorageService(vc, sid);	
 		nodeCommService = new NodeCommunicationService(ipAddress, gossipPort, sid,
@@ -120,9 +118,4 @@ public class Node {
 		storageService.start();		
 		
 	}
-	
-	
-	
-	
-
 }

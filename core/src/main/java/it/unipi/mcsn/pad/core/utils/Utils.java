@@ -12,6 +12,7 @@ import com.google.common.hash.Hashing;
 
 public class Utils {
 	
+	/*
 	public static int getIntegerIpAddress (String ipAddress) throws NumberFormatException
 	{		
 		StringTokenizer tokenizer = new StringTokenizer(ipAddress, ".");
@@ -19,7 +20,7 @@ public class Utils {
 		while(tokenizer.hasMoreTokens())
 			stringId.append(tokenizer.nextToken());
 		return Integer.parseInt(stringId.toString());		
-	}
+	}*/
 	
 	/**
 	 * Returns the byte representation of an arbitrary object
@@ -52,5 +53,4 @@ public class Utils {
 		// String id = new String(bid, StandardCharsets.US_ASCII);
 		 return prefix + id;
 	 }
-
 }

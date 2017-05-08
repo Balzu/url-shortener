@@ -1,7 +1,6 @@
 package it.unipi.mcsn.pad;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,15 +21,14 @@ import com.google.code.gossip.RemoteGossipMember;
 import it.unipi.mcsn.pad.core.Node;
 import it.unipi.mcsn.pad.core.NodeRunner;
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager;
+import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager.MessageTypeException;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
 import it.unipi.mcsn.pad.core.message.PutMessage;
 
 public class DataReplicationTest{
 	
 	private static List<Node> nodes;
-	private static List<Integer> backupIntervals;
-
-	
+	private static List<Integer> backupIntervals;	
 	
 	@BeforeClass
 	public static void setupCluster(){		
@@ -49,7 +47,7 @@ public class DataReplicationTest{
 			GossipSettings settings = new GossipSettings();			
 			List<GossipMember> startupMembers = new ArrayList<>();
 			for (int i = 0; i < addresses.size(); ++i) {
-				startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); //TODO: fix the id
+				startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); 
 			}			
 			nodes = new ArrayList<>();
 			for (int i = 0; i < addresses.size(); ++i) {	    			
@@ -67,8 +65,7 @@ public class DataReplicationTest{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}		
-	}	
-		
+	}			
 	
 	@AfterClass
 	public static void tearDownCluster(){
@@ -77,30 +74,28 @@ public class DataReplicationTest{
 			node.getStorageService().getStorageManager().emptyBackup();
 			node.shutdown();
 		}		
-	}
-	
-	
+	}	
 	
 	@Test
     public void dataShouldBeReplicated(){
-		String url = "www.stringa_di_prova.it";
-		ClientMessage cmsg = new PutMessage(url, null);
-		NodeCommunicationManager manager = nodes.get(0).getNodeCommService().getCommunicationManager();
-		manager.processClientMessage(cmsg);			
-		String surl = manager.getShortUrl(cmsg);
-		int primaryId = manager.findPrimary(surl);			
-		String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();		
+			
 		try {
+			String url = "www.stringa_di_prova.it";
+			ClientMessage cmsg = new PutMessage(url, null);
+			NodeCommunicationManager manager = nodes.get(0).getNodeCommService().getCommunicationManager();
+			manager.processClientMessage(cmsg);			
+			String surl = manager.getShortUrl(cmsg);
+			int primaryId = manager.findPrimary(surl);			
+			String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();	
 			Thread.sleep(backupIntervals.get(primaryId));
+			int backupId = (primaryId + 1) % nodes.size();		
+			String backupUrl = nodes.get(backupId).getStorageService().getStorageManager().readBackup(surl).getValue();
+			assertEquals("The Backup node must have a copy of the url"
+					+ "in its backup database",	primaryUrl, backupUrl);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}		
-		int backupId = (primaryId + 1) % nodes.size();		
-		String backupUrl = nodes.get(backupId).getStorageService().getStorageManager().readBackup(surl).getValue();
-		assertEquals("The Backup node must have a copy of the url"
-				+ "in its backup database",	primaryUrl, backupUrl);
+		} catch (MessageTypeException e) {
+			e.printStackTrace();
+		}			
     }
-	
-
-
 }

@@ -1,37 +1,28 @@
 package it.unipi.mcsn.pad.core.storage;
 
-import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
-
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-
 import it.unipi.mcsn.pad.core.message.NodeMessage;
 import voldemort.versioning.Occurred;
 import voldemort.versioning.VectorClock;
 import voldemort.versioning.Versioned;
 
-// The backup DB is never used to answer to queries. If this node has to answer queries concerning items in the
-// backup, the system will automatically copy the backup into the primary DB, and will use the primary to
-// answer such queries.
 public class StorageManager {
 	
 	private ConcurrentMap <String, Versioned<String>> primaryMap ;
 	private ConcurrentMap <String, Versioned<String>> backupMap ;
 	private DB db;
 	private VectorClock vc;	
-	private int nid;
+	private int nid;	
 	
-	
-	//TODO: only for testing, then delete
+	//TODO: only for testing
 	public int getNid() {
 		return nid;
 	}
-
-
 
 	public StorageManager(String id, VectorClock vc) {
 		db = DBMaker.fileDB("file" + id + ".db").fileMmapEnable().make();
@@ -39,9 +30,7 @@ public class StorageManager {
 		backupMap = (ConcurrentMap<String, Versioned<String>>) db.hashMap("backupMap").createOrOpen();
 		this.vc = vc;		
 		this.nid = Integer.parseInt(id);
-	}
-	
-	
+	}	
 
 	public boolean store(String surl, Versioned<String> versioned)
 	{
@@ -174,7 +163,7 @@ public class StorageManager {
 			Occurred compared = vc1.compare(vc2);
 			if(compared == Occurred.BEFORE)
 				store(surl, versioned);
-	// The cases in which the winning version is the already stored one are omitted (nothing to do)
+	// If the winning version is the already stored one there is nothing to do
 			else if(compared == Occurred.CONCURRENTLY){
 				long ts1 = vc1.getTimestamp();
 				long ts2 = vc2.getTimestamp();
@@ -188,9 +177,7 @@ public class StorageManager {
 			db.rollback();
 			return false;
 		}		
-	}	
-	
-	
+	}		
 	
 	public boolean contains(String surl)
 	{		
@@ -204,7 +191,6 @@ public class StorageManager {
 	public VectorClock getVc() {
 		return vc;
 	}
-
 
 
 	//TODO method used only for testing
@@ -299,8 +285,7 @@ public class StorageManager {
 			   // I deliberately create a copy of the object, that I will return
 			   Versioned<String> vlurl = new Versioned<String>(e.getValue().getValue(), e.getValue().getVersion());
 			   store(surl,vlurl);			  
-			   System.out.println("node " + nid + "has stored into the primary the url "+
-			   vlurl.getValue());			   
+			   //System.out.println("node " + nid + "has stored into the primary the url " +  vlurl.getValue());			   
 		   }
 	   	return true;
 		}   		
@@ -347,11 +332,9 @@ public class StorageManager {
 	{		
 		vc.incrementVersion(nid, System.currentTimeMillis());
 		vc.merge(received);	
-	}
-	
+	}	
 	
 	public void shutdown(){
 		db.close();
 	}
-
 }

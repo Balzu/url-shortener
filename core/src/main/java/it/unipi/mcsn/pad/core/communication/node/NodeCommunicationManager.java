@@ -66,18 +66,13 @@ public class NodeCommunicationManager {
 		try {
 			replicaManager = new ReplicaManager(storageService, 3000, ipAddress, this, nid, backupInterval);
 			requestManager = new RequestManager(nodeServiceRunning, nodePort,
-					ipAddress, storageService, replicaManager);
-			
+					ipAddress, storageService, replicaManager);			
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-	}
-	
-	
+		}		
+	}	
 
 	public void start(){
 		requestManager.start();
@@ -87,17 +82,17 @@ public class NodeCommunicationManager {
 	public void shutdown() {
 		requestManager.shutdown();
 		replicaManager.shutdown();
-	}
-	
-	
+	}	
 	
 	/**
 	 * Processes the message: finds the primary node and sends the message to it
 	 * if primary node is different from this node. 
 	 * @param  The message received from client
 	 * @return A message containing the reply for the operation  
+	 * @throws MessageTypeException 
+	 * @throws Exception 
 	 */
-	public Message processClientMessage(Message msg) {					
+	public Message processClientMessage(Message msg) throws MessageTypeException {					
 		ClientMessage clmsg = (ClientMessage) msg;		
 		String surl = getShortUrl(clmsg);		
 		int primaryId = findPrimary(surl); 
@@ -106,8 +101,7 @@ public class NodeCommunicationManager {
 					storageService, replicaManager);
 			return reply; 
 		}
-		else {
-			// TODO Version message and send it to primary			
+		else {		
 			NodeMessage nmsg = createNodeMessage(clmsg, surl);
 			GossipMember member = getMemberFromId(primaryId);
 			String ipAddr = member.getHost();
@@ -115,16 +109,20 @@ public class NodeCommunicationManager {
 			Message reply=null;
 			try {
 				reply = requestManager.sendMessage(nmsg, ipAddr, port);
-			} catch (UnknownHostException | InterruptedException | ExecutionException e) {
-				// TODO Auto-generated catch block
+			} catch (UnknownHostException | InterruptedException | ExecutionException e) {				
 				e.printStackTrace();
 			}
 			return reply;
 		}		
 	}	
 	
+	public class MessageTypeException extends Exception {
+	    public MessageTypeException(String message) {
+	        super(message);
+	    }
+	}
 	
-	private NodeMessage createNodeMessage(ClientMessage clmsg, String surl)
+	private NodeMessage createNodeMessage(ClientMessage clmsg, String surl) throws MessageTypeException
 	{
 		String lurl = null;
 		MessageType mt = null;
@@ -141,12 +139,12 @@ public class NodeCommunicationManager {
 			  break;		  
 		  case REMOVE:
 			  mt = MessageType.REMOVE;
-			  break;				 
-		}	//TODO: handle default case with exception?		
-		
+			  break;
+		default:
+			throw new MessageTypeException("Not a valid operation for a client message");							 
+		}		
 		return (new VersionedMessage(lurl, surl, vectorClock, mt));
-	}
-	
+	}	
 	
 	// TODO: made public only for test purposes
 	/** 
@@ -215,7 +213,5 @@ public class NodeCommunicationManager {
 
 		public NodeCommunicationService getNodeCommunicationService() {
 			return nodeCommunicationService;
-		}
-
-		
+		}		
 }

@@ -17,8 +17,6 @@ public interface UpdateMessage extends Message{
 	
 	public void put (String surl, Versioned<String> vlurl);
 	
-	public Map<String,Versioned<String>> getitems();
-	
-	
+	public Map<String,Versioned<String>> getitems();	
 
 }

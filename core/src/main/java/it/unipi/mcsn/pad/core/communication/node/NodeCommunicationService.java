@@ -17,31 +17,11 @@ public class NodeCommunicationService implements Service{
 	private GossipService gossipService;
 	private NodeCommunicationManager nodeCommManager;
 	
-	/*private String ipAddress;
-	private int gossipPort;
-	public String id; //TODO set private
-	private int logLevel; 
-	private List<GossipMember> gossipMembers;
-	private GossipSettings settings;
-	private GossipListener listener;
-	*/
-
-	
 	public NodeCommunicationService(String ipAddress, int gossipPort, String id, int logLevel, 
 			 List<GossipMember> gossipMembers, GossipSettings settings,
 			 GossipListener listener, VectorClock vc, int nid,
 			 StorageService storageService , int nodePort, int virtualInstances, int backupInterval)
-					 throws UnknownHostException, InterruptedException {	
-		/*
-		this.ipAddress = ipAddress;
-		this.gossipPort = gossipPort;
-		this.id = id;
-		this.logLevel = logLevel;
-		this.gossipMembers = gossipMembers;
-		this.settings = settings;
-		this.listener = listener;
-		*/
-		
+					 throws UnknownHostException, InterruptedException {			
 	    gossipService = new GossipService(ipAddress, gossipPort, id, logLevel, gossipMembers, settings, listener);		
 		nodeCommManager = new NodeCommunicationManager(vc, nid, this, virtualInstances, 
 				nodePort,ipAddress, storageService, backupInterval);	
@@ -67,5 +47,4 @@ public class NodeCommunicationService implements Service{
 		gossipService.shutdown();
 		nodeCommManager.shutdown();		
 	}		
-
 }

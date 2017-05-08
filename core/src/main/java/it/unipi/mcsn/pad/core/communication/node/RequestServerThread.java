@@ -15,7 +15,6 @@ import it.unipi.mcsn.pad.core.utils.Utils;
 public class RequestServerThread implements Runnable{
 	
 	 private DatagramPacket packet;
-	// private RequestManager requestManager;
 	 private DatagramSocket socket;
 	 private StorageService storageService;
 	 private ReplicaManager manager;
@@ -55,10 +54,6 @@ public class RequestServerThread implements Runnable{
 		}		
 		catch (IOException e) {
 			e.printStackTrace();
-		}
-		
-
-		
+		}		
 	}
-
 }

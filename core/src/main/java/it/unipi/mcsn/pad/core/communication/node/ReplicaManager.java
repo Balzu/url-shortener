@@ -1,7 +1,5 @@
 package it.unipi.mcsn.pad.core.communication.node;
 
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -15,11 +13,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.LocalGossipMember;
 import com.google.code.gossip.manager.GossipManager;
-
 import it.unipi.mcsn.pad.core.message.SizedBackupMessage;
 import it.unipi.mcsn.pad.core.message.UpdateMessage;
 import it.unipi.mcsn.pad.core.storage.StorageManager;
@@ -29,7 +24,7 @@ import voldemort.versioning.Versioned;
 public class ReplicaManager extends Thread{
 	
 	private StorageService storageService;	
-	//private DatagramSocket socket = null;
+
 	private AtomicBoolean isRunning;
 	private final ExecutorService threadPool;
 	private int nodePort;
@@ -73,7 +68,7 @@ public class ReplicaManager extends Thread{
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (NullPointerException e) {
-				// Skip this sending bacause the backupNode is down, so have to compute another replica
+				// Skip this sending because the backupNode is down, so have to compute another replica
 			}
 			  catch (UnknownHostException e) {
 				e.printStackTrace();
@@ -85,8 +80,7 @@ public class ReplicaManager extends Thread{
 			} catch (IllegalAccessError e) {
 				if (isRunning.get()) // Only if this node is running I print the error stack trace
 					e.printStackTrace();				
-			}
-			
+			}			
 		}		
 	}
 	
@@ -106,9 +100,7 @@ public class ReplicaManager extends Thread{
 		Integer backupMemberId = upMemberssMap.ceilingKey(Integer.parseInt(myself.getId()));
 		return backupMemberId!= null ? backupMemberId
 				: upMemberssMap.firstKey();
-	}
-	
-	
+	}	
 	
 	public int getBackupId() {
 		return backupSenderId;
@@ -139,15 +131,14 @@ public class ReplicaManager extends Thread{
 		int replicaPort = nodeCommManager.getRequestManager().getPort();
 		for (UpdateMessage umsg : updates){ 
 			nodeCommManager.getRequestManager().sendMessage(
-					umsg, replicaAddress, replicaPort);
-		
+					umsg, replicaAddress, replicaPort);		
 		}		
 	}
 	
+	
 	public void shutdown(){
 		isRunning.set(false);
-	}
-	
+	}	
 	
 	public void createUpdates(List<UpdateMessage> updates, Map<String,Versioned<String>> dump){		
 		// It is the first update message of a possible sequence of updates, so the flag is set to true.
@@ -210,5 +201,4 @@ public class ReplicaManager extends Thread{
 				gman.createOrRevivieMember(dead);
 		}			
 	}
-
 }

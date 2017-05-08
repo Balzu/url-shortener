@@ -24,6 +24,7 @@ import com.google.code.gossip.RemoteGossipMember;
 import it.unipi.mcsn.pad.core.Node;
 import it.unipi.mcsn.pad.core.NodeRunner;
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager;
+import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager.MessageTypeException;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
 import it.unipi.mcsn.pad.core.message.GetMessage;
 import it.unipi.mcsn.pad.core.message.MessageType;
@@ -85,23 +86,23 @@ public class ConflictResolutionTest {
 	
 	
 	@Test
-	public void primaryShouldResolveConflictsAfterRejoiningCluster(){
-		String url = "www.stringa_di_prova.it/questaUrlèProcessataDalPrimario";
-		ClientMessage cmsg = new PutMessage(url, null);
-		int randomId = new Random().nextInt(nodes.size());
-		NodeCommunicationManager manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
-		NodeMessage reply = (NodeMessage)manager.processClientMessage(cmsg);				
-		String surl = manager.getShortUrl(cmsg);	
-		System.out.println("I insert the url " + url + " in the primary."+
-				"\n It returns the shortened url " + surl);
-		int primaryId = manager.findPrimary(surl);		
-		System.out.println("Primary node before crashing = " + primaryId);
+	public void primaryShouldResolveConflictsAfterRejoiningCluster(){		
 		try {
-			Thread.sleep(10000); //12
+			String url = "www.stringa_di_prova.it/questaUrlèProcessataDalPrimario";
+			ClientMessage cmsg = new PutMessage(url, null);
+			int randomId = new Random().nextInt(nodes.size());
+			NodeCommunicationManager manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
+			NodeMessage reply = (NodeMessage)manager.processClientMessage(cmsg);				
+			String surl = manager.getShortUrl(cmsg);	
+			System.out.println("I insert the url " + url + " in the primary."+
+					"\n It returns the shortened url " + surl);
+			int primaryId = manager.findPrimary(surl);		
+			System.out.println("Primary node before crashing = " + primaryId);
+			Thread.sleep(12000); //12
 			nodes.get(primaryId).shutdown();
 			Node underTest = nodes.get(primaryId); 
 			System.out.println("I shut down the primary...");
-			Thread.sleep(20000); //25
+			Thread.sleep(22000); //25
 			System.out.println("Now the primary is down, and I update the original url =>" +
 					"\nThe updated url is now stored in the DB of the backup node ");			
 			do { //Ask to every node but not to the crashed one
@@ -116,7 +117,7 @@ public class ConflictResolutionTest {
 			nodes.get(primaryId).getStorageService().getStorageManager().store(updated);
 			underTest.restart();
 			System.out.println("Primary node restarted...");		
-			Thread.sleep(18000); //20000
+			Thread.sleep(25000); //20000
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			cmsg = new GetMessage(surl);	
@@ -130,29 +131,30 @@ public class ConflictResolutionTest {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
+		} catch (MessageTypeException e) {			
+			e.printStackTrace();
 		}
-	}
-	
+	}	
 	
 
 	@Test
-	public void primaryShouldRemoveUrlsRemovedByTheBackupNode(){
-		String url = "www.stringa_di_prova.it/questaUrlèProcessataDalPrimario";
-		ClientMessage cmsg = new PutMessage(url, null);
-		int randomId = new Random().nextInt(nodes.size());
-		NodeCommunicationManager manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
-		NodeMessage reply = (NodeMessage)manager.processClientMessage(cmsg);				
-		String surl = manager.getShortUrl(cmsg);	
-		System.out.println("I insert the url " + url + " in the primary."+
-				"\n It returns the shortened url " + surl);
-		int primaryId = manager.findPrimary(surl);		
-		System.out.println("Primary node before crashing = " + primaryId);
+	public void primaryShouldRemoveUrlsRemovedByTheBackupNode(){		
 		try {
-			Thread.sleep(10000); //12
+			String url = "www.stringa_di_prova.it/questaUrlèProcessataDalPrimario";
+			ClientMessage cmsg = new PutMessage(url, null);
+			int randomId = new Random().nextInt(nodes.size());
+			NodeCommunicationManager manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
+			NodeMessage reply = (NodeMessage)manager.processClientMessage(cmsg);				
+			String surl = manager.getShortUrl(cmsg);	
+			System.out.println("I insert the url " + url + " in the primary."+
+					"\n It returns the shortened url " + surl);
+			int primaryId = manager.findPrimary(surl);		
+			System.out.println("Primary node before crashing = " + primaryId);
+			Thread.sleep(12000); //12
 			nodes.get(primaryId).shutdown();
 			Node underTest = nodes.get(primaryId); 
 			System.out.println("I shut down the primary...");
-			Thread.sleep(15000); //25
+			Thread.sleep(17000); //25
 			System.out.println("Now the primary is down, and I delete the url =>" +
 					"\nin the backup node ");			
 			do { //Ask to every node but not to the crashed one
@@ -180,7 +182,8 @@ public class ConflictResolutionTest {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
+		} catch (MessageTypeException e) {			
+			e.printStackTrace();
 		}
 	}
-
 }

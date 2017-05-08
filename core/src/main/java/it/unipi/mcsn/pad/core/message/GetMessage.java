@@ -1,8 +1,7 @@
 package it.unipi.mcsn.pad.core.message;
 
-public class GetMessage implements ClientMessage{
+public class GetMessage implements ClientMessage{	
 	
-	//TODO: solo un primo abbozzo
 	private static final long serialVersionUID = 1L;
 	private String shortUrl;
 	private MessageStatus messageStatus;
@@ -31,7 +30,4 @@ public class GetMessage implements ClientMessage{
 	{
 		return shortUrl;
 	}
-	
-	
-
 }

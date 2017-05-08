@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
-
 import it.unipi.mcsn.pad.core.communication.node.ReplicaManager;
 import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.MessageStatus;
@@ -16,15 +15,12 @@ import it.unipi.mcsn.pad.core.message.UpdateMessage;
 import it.unipi.mcsn.pad.core.message.VersionedMessage;
 import it.unipi.mcsn.pad.core.storage.StorageManager;
 import it.unipi.mcsn.pad.core.storage.StorageService;
-import voldemort.versioning.VectorClock;
 import voldemort.versioning.Version;
 import voldemort.versioning.Versioned;
 
-public class MessageHandler {
+public class MessageHandler {	
 	
-	
-	public static Message handleMessage(Message msg, StorageService storageService, ReplicaManager rm){
-		//TODO merge received vector clock with node's vector clock?
+	public static Message handleMessage(Message msg, StorageService storageService, ReplicaManager rm){		
 		if (msg instanceof NodeMessage){
 			NodeMessage nmsg = (NodeMessage) msg;
 			switch(nmsg.getMessageType())
@@ -112,15 +108,11 @@ public class MessageHandler {
     	// now on this node should answer also the queries concerning the crashed node)
     	else 
     		// First time I receive update from a node different from default sender
-    		if (umsg.getSenderId() != rm.getBackupId() && rm.getBackupIdTemp() == -1){ 
-    		 // System.out.println("EBackupIdTemp " + rm.getBackupIdTemp());
+    		if (umsg.getSenderId() != rm.getBackupId() && rm.getBackupIdTemp() == -1){     		
     		  rm.setBackupIdTemp(umsg.getSenderId());
     		  rm.setRemoved();
     		  //storageService.getStorageManager().removeAlsoFromBackup(rm.getRemoved());
-    		  storageService.getStorageManager().mergeDB();
-    		//System.out.println("Actual sender " + umsg.getSenderId());
-    		//System.out.println("Expected sender " + rm.getBackupId());
-    		  
+    		  storageService.getStorageManager().mergeDB();    		  
     	    }
     		else if (umsg.getSenderId() == rm.getBackupId()){  // The sender of the backup is who I expect
     			if(rm.getBackupIdTemp() != -1){ // true IFF sender recovered from crashing
@@ -136,19 +128,17 @@ public class MessageHandler {
     					dump.put(surl, null);
     				List<UpdateMessage> updates = new ArrayList<>();
     				rm.createUpdates(updates, dump);
-    				try {    				
-    					// rm.addMemberToGossipListIfDead(rm.getBackupId());
+    				try {    					
 						rm.sendUpdates(rm.getBackupId(), updates);
 						rm.unsetRemoved();
-// End here: not going to store in the backup DB the outdated url from the crashed node						
+// End here: not going to store in the backup DB the outdated urls from the crashed node						
 						return new VersionedMessage(   
 								null, null, null, MessageType.REPLY, MessageStatus.SUCCESS);
 					} catch (UnknownHostException | NullPointerException | InterruptedException
 							| ExecutionException e) {
 						e.printStackTrace();
 						System.out.println("Exception from node " + storageService.getStorageManager().getNid());
-					}  
-    				//TODO put a return here?
+					}      				
     			}
     		}    		
     	

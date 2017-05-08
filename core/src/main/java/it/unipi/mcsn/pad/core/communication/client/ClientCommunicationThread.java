@@ -4,12 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-
 import it.unipi.mcsn.pad.core.message.Message;
-import it.unipi.mcsn.pad.core.message.MessageStatus;
-import it.unipi.mcsn.pad.core.message.MessageType;
-import it.unipi.mcsn.pad.core.message.PutMessage;
-
 
 public class ClientCommunicationThread implements Runnable{
 	
@@ -31,14 +26,11 @@ public class ClientCommunicationThread implements Runnable{
 			Message reply = null;
 			reply = manager.processMessage(message);
 			oos.writeObject(reply);
-		} 
-		
+		} 		
 		catch (IOException e) {					
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {			
 			e.printStackTrace();
-		}
-		
+		}		
 	}
-
 }

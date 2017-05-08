@@ -2,10 +2,6 @@ package it.unipi.mcsn.pad.core.message;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import org.omg.PortableInterceptor.SUCCESSFUL;
-
 import voldemort.versioning.Versioned;
 
 public class SizedBackupMessage implements UpdateMessage{
@@ -76,9 +72,4 @@ public class SizedBackupMessage implements UpdateMessage{
 	public boolean isFirst() {
 		return first;
 	}
-	
-	
-	
-	
-
 }
