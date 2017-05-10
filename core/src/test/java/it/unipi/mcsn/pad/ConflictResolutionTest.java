@@ -102,7 +102,7 @@ public class ConflictResolutionTest {
 			nodes.get(primaryId).shutdown();
 			Node underTest = nodes.get(primaryId); 
 			System.out.println("I shut down the primary...");
-			Thread.sleep(22000); //25
+			Thread.sleep(25000); //25
 			System.out.println("Now the primary is down, and I update the original url =>" +
 					"\nThe updated url is now stored in the DB of the backup node ");			
 			do { //Ask to every node but not to the crashed one
@@ -117,7 +117,7 @@ public class ConflictResolutionTest {
 			nodes.get(primaryId).getStorageService().getStorageManager().store(updated);
 			underTest.restart();
 			System.out.println("Primary node restarted...");		
-			Thread.sleep(25000); //20000
+			Thread.sleep(30000); //20000
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			cmsg = new GetMessage(surl);	
@@ -154,7 +154,7 @@ public class ConflictResolutionTest {
 			nodes.get(primaryId).shutdown();
 			Node underTest = nodes.get(primaryId); 
 			System.out.println("I shut down the primary...");
-			Thread.sleep(17000); //25
+			Thread.sleep(25000); //25
 			System.out.println("Now the primary is down, and I delete the url =>" +
 					"\nin the backup node ");			
 			do { //Ask to every node but not to the crashed one
@@ -169,7 +169,7 @@ public class ConflictResolutionTest {
 			manager.processClientMessage(remove);
 			underTest.restart();
 			System.out.println("Primary node restarted...");		
-			Thread.sleep(20000); //20000
+			Thread.sleep(30000); //20000
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			cmsg = new GetMessage(surl);	

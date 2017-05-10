@@ -94,7 +94,7 @@ public class PrimaryFailureTest {
 			Thread.sleep(12000);
 			nodes.get(primaryId).shutdown();						
 			nodes.remove(primaryId); 
-			Thread.sleep(22000);
+			Thread.sleep(26000);
 			cmsg = new GetMessage(surl);		
 			randomId = new Random().nextInt(nodes.size());			
 			manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
@@ -122,7 +122,7 @@ public class PrimaryFailureTest {
 			Thread.sleep(12000); //12
 			nodes.get(primaryId).shutdown();
 			Node underTest = nodes.remove(primaryId);
-			Thread.sleep(22000); //25
+			Thread.sleep(25000); //25
 			cmsg = new GetMessage(surl);		
 			randomId = new Random().nextInt(nodes.size());			
 			manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
@@ -130,7 +130,7 @@ public class PrimaryFailureTest {
 			System.out.println("Primary node after crashing = " + primaryId);
 			underTest.restart();			
 			nodes.add(underTest);
-			Thread.sleep(20000); 
+			Thread.sleep(30000); 
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);			

@@ -48,3 +48,7 @@ where
 * `-c` allows to provide a custom configuration file. It must be named `client.conf` and must be placed in the `client/src/main/resources` folder
 * `-o` is used to write the output in an output file
 
+## Known Issues
+
+I designed the project with eventual consistency in mind, but in case of failure of same node it takes a lot of time to reach consistency. This is due both to my design choices, but also to the underlying gossip service. Indeed, it is possible to see from the printed output that almost every time a test fails is because a wrong primary has been computed after a node has rejoined the cluster. In turn, this is due to the Gossip Protocol that takes some time to spread the new information. Currently I am using the default configurations for Gossip, it is likely that decreasing the gossip interval will mitigate this problem. 
+
