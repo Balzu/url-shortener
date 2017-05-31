@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.4.12)  7 MAY 2017 12:20
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.4.12)  31 MAY 2017 18:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -530,15 +530,15 @@ Package caption Info: End \AtBeginDocument code.
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(92.14519pt, 430.00462pt, 92.14519pt)
-* v-part:(T,H,B)=(95.39737pt, 605.6214pt, 93.95122pt)
+* h-part:(L,W,R)=(57.81621pt, 498.66258pt, 57.81621pt)
+* v-part:(T,H,B)=(72.26999pt, 650.43001pt, 72.26999pt)
 * \paperwidth=614.295pt
 * \paperheight=794.96999pt
-* \textwidth=430.00462pt
-* \textheight=605.6214pt
-* \oddsidemargin=19.8752pt
-* \evensidemargin=19.8752pt
-* \topmargin=-13.87262pt
+* \textwidth=498.66258pt
+* \textheight=650.43001pt
+* \oddsidemargin=-14.45378pt
+* \evensidemargin=-14.45378pt
+* \topmargin=-37.0pt
 * \headheight=12.0pt
 * \headsep=25.0pt
 * \topskip=10.0pt
@@ -562,9 +562,12 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <8> on input line 26.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 26.
-[1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./relation.toc
+Overfull \hbox (13.48701pt too wide) in paragraph at lines 28--29
+[] 
+ []
+
+(./relation.toc
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 3.
 LaTeX Font Info:    External font `cmex10' loaded for size
@@ -573,140 +576,140 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 \tf@toc=\write4
 \openout4 = `relation.toc'.
 
+ [1
 
-[2] [3
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+[2
 
 ]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 83.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 84.
  (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 83.
- [4]
-<images/architecture.png, id=27, 1027.84pt x 770.88pt>
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 84.
+ [3]
+<images/architecture.png, id=24, 1027.84pt x 770.88pt>
 File: images/architecture.png Graphic file (type png)
 
 <use images/architecture.png>
-Package pdftex.def Info: images/architecture.png used on input line 105.
+Package pdftex.def Info: images/architecture.png used on input line 106.
 (pdftex.def)             Requested size: 421.41713pt x 316.06285pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 111--112
+Underfull \hbox (badness 10000) in paragraph at lines 112--113
 
  []
 
-[5]
-Underfull \hbox (badness 10000) in paragraph at lines 117--118
+
+Underfull \hbox (badness 10000) in paragraph at lines 118--119
 
  []
 
-[6 <./images/architecture.png>]
-<images/classes_client_subpackage.png, id=38, 281.05pt x 426.59375pt>
+[4] <images/classes_client_subpackage.png, id=29, 281.05pt x 426.59375pt>
 File: images/classes_client_subpackage.png Graphic file (type png)
 
 <use images/classes_client_subpackage.png>
 Package pdftex.def Info: images/classes_client_subpackage.png used on input lin
-e 134.
+e 135.
 (pdftex.def)             Requested size: 112.418pt x 170.63446pt.
- [7 <./images/classes_client_subpackage.png>] <images/core_communication_node.p
-ng, id=44, 534.99875pt x 550.055pt>
+ [5 <./images/architecture.png>]
+<images/core_communication_node.png, id=36, 534.99875pt x 550.055pt>
 File: images/core_communication_node.png Graphic file (type png)
 
 <use images/core_communication_node.png>
 Package pdftex.def Info: images/core_communication_node.png used on input line 
-150.
+151.
 (pdftex.def)             Requested size: 213.9957pt x 220.0181pt.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[8] <images/core_message.png, id=48, 1068.99374pt x 451.6875pt>
+ [6 <./images/classes_client_subpackage.png>] <images/core_message.png, id=41, 
+1068.99374pt x 451.6875pt>
 File: images/core_message.png Graphic file (type png)
 
 <use images/core_message.png>
-Package pdftex.def Info: images/core_message.png used on input line 169.
+Package pdftex.def Info: images/core_message.png used on input line 170.
 (pdftex.def)             Requested size: 427.58992pt x 180.67178pt.
- [9 <./images/core_communication_node.png>]
-[10 <./images/core_message.png>]
-<images/core_diagram.png, id=57, 694.595pt x 1308.89pt>
+ [7 <./images/core_communication_node.png>]
+[8 <./images/core_message.png>]
+Overfull \hbox (27.12091pt too wide) in paragraph at lines 192--193
+ \OT1/cmr/bx/n/10 Client[] \OT1/cmr/m/n/10 A sim-ple in-ter-face for the client
+, stat-ing that im-ple-ment-ing classes must pro-vide the method \OT1/cmr/m/it/
+10 sendRequest(Message
+ []
+
+<images/core_diagram.png, id=51, 694.595pt x 1308.89pt>
 File: images/core_diagram.png Graphic file (type png)
 
 <use images/core_diagram.png>
-Package pdftex.def Info: images/core_diagram.png used on input line 201.
+Package pdftex.def Info: images/core_diagram.png used on input line 202.
 (pdftex.def)             Requested size: 298.67003pt x 562.81174pt.
- [11]
-Overfull \vbox (11.19034pt too high) has occurred while \output is active []
-
-
-[12 <./images/core_diagram.png>]
-<images/sequence_diagram_complete.png, id=65, 1425.325pt x 1656.1875pt>
+ [9] [10 <./images/core_diagram.png>]
+<images/sequence_diagram_complete.png, id=59, 1425.325pt x 1656.1875pt>
 File: images/sequence_diagram_complete.png Graphic file (type png)
 
 <use images/sequence_diagram_complete.png>
 Package pdftex.def Info: images/sequence_diagram_complete.png used on input lin
-e 218.
+e 219.
 (pdftex.def)             Requested size: 456.11333pt x 529.99084pt.
-
-Overfull \hbox (26.1087pt too wide) in paragraph at lines 218--219
- [][] 
- []
-
-[13] [14 <./images/sequence_diagram_complete.png>] [15]
-<images/conflict1.png, id=77, 317.185pt x 184.69pt>
+ [11] [12 <./images/sequence_diagram_complete.png>] <images/conflict1.png, id=6
+7, 640.3925pt x 191.71625pt>
 File: images/conflict1.png Graphic file (type png)
- <use images/conflict1.png>
-Package pdftex.def Info: images/conflict1.png used on input line 248.
-(pdftex.def)             Requested size: 142.73192pt x 83.10971pt.
 
-<images/conflict2.png, id=78, 311.1625pt x 194.7275pt>
+<use images/conflict1.png>
+Package pdftex.def Info: images/conflict1.png used on input line 249.
+(pdftex.def)             Requested size: 224.39664pt x 67.17775pt.
+
+<images/conflict2.png, id=68, 640.3925pt x 191.71625pt>
 File: images/conflict2.png Graphic file (type png)
 
 <use images/conflict2.png>
-Package pdftex.def Info: images/conflict2.png used on input line 255.
-(pdftex.def)             Requested size: 140.02182pt x 87.62656pt.
+Package pdftex.def Info: images/conflict2.png used on input line 253.
+(pdftex.def)             Requested size: 224.39664pt x 67.17775pt.
 
-<images/conflict3.png, id=79, 315.1775pt x 194.7275pt>
+<images/conflict3.png, id=69, 315.1775pt x 194.7275pt>
 File: images/conflict3.png Graphic file (type png)
 
 <use images/conflict3.png>
-Package pdftex.def Info: images/conflict3.png used on input line 262.
+Package pdftex.def Info: images/conflict3.png used on input line 260.
 (pdftex.def)             Requested size: 141.82855pt x 87.62656pt.
- [16 <./images/conflict1.png> <./images/conflict2.png>] [17 <./images/conflict3
-.png>]
-<images/sets.png, id=89, 754.82pt x 412.54124pt>
+ [13 <./images/conflict1.png> <./images/conflict2.png> <./images/conflict3.png>
+] <images/sets.png, id=77, 754.82pt x 412.54124pt>
 File: images/sets.png Graphic file (type png)
- <use images/sets.png>
-Package pdftex.def Info: images/sets.png used on input line 320.
+
+<use images/sets.png>
+Package pdftex.def Info: images/sets.png used on input line 318.
 (pdftex.def)             Requested size: 339.66586pt x 185.64185pt.
- [18 <./images/sets.png>] [19] (./relation.aux) ) 
+ [14] [15 <./images/sets.png>] (./relation.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 14109 strings out of 494953
- 278990 string characters out of 6180977
- 318596 words of memory out of 5000000
- 17120 multiletter control sequences out of 15000+600000
+ 14108 strings out of 494953
+ 278980 string characters out of 6180977
+ 321653 words of memory out of 5000000
+ 17119 multiletter control sequences out of 15000+600000
  9630 words of font info for 34 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  62i,10n,92p,2379b,437s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1
-/public/amsfonts/cm/cmbx9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
-cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.p
-fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr
-/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/t
-exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf
--dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on relation.pdf (19 pages, 658280 bytes).
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti
+10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb
+>
+Output written on relation.pdf (15 pages, 646948 bytes).
 PDF statistics:
- 138 PDF objects out of 1000 (max. 8388607)
- 84 compressed objects within 1 object stream
+ 125 PDF objects out of 1000 (max. 8388607)
+ 75 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  63 words of extra memory for PDF output out of 10000 (max. 10000000)
 

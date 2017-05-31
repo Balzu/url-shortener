@@ -89,7 +89,7 @@ public class ReplicaManager extends Thread{
 		GossipManager gManager = nodeCommManager.getNodeCommunicationService()
 				.getGossipService().get_gossipManager();
 		List<LocalGossipMember> members = new ArrayList<>(gManager.getMemberList());	
-		if (members.size() == 0) // Not connected to any member, so return (better throw exception)
+		if (members.size() == 0) // Not connected to any member, so return a negative value
 			return -1;
 		LocalGossipMember myself = gManager.getMyself();
 		NavigableMap<Integer, Integer> upMemberssMap = new ConcurrentSkipListMap<>();
