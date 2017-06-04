@@ -6,11 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
+
+import org.apache.log4j.Logger;
+
 import it.unipi.mcsn.pad.core.communication.node.ReplicaManager;
 import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.MessageStatus;
 import it.unipi.mcsn.pad.core.message.MessageType;
 import it.unipi.mcsn.pad.core.message.NodeMessage;
+import it.unipi.mcsn.pad.core.message.SizedBackupMessage;
 import it.unipi.mcsn.pad.core.message.UpdateMessage;
 import it.unipi.mcsn.pad.core.message.VersionedMessage;
 import it.unipi.mcsn.pad.core.storage.StorageManager;
@@ -19,6 +23,7 @@ import voldemort.versioning.Version;
 import voldemort.versioning.Versioned;
 
 public class MessageHandler {	
+	
 	
 	public static Message handleMessage(Message msg, StorageService storageService, ReplicaManager rm){		
 		if (msg instanceof NodeMessage){
@@ -89,18 +94,45 @@ public class MessageHandler {
 				MessageType.REPLY, MessageStatus.SUCCESS));
 	}
     
-    private static NodeMessage processUpdateMessage(
+    private static UpdateMessage processUpdateMessage(
     		UpdateMessage umsg, StorageService storageService, ReplicaManager rm)
     {    	
-        // This can only happen if this node has recovered from crashing and now it is receiving
-    	// the updates from the backup node
-    	if (umsg.getSenderId() == rm.findBackup())    	
+    	Logger logger = Logger.getLogger("myLogger");
+        // This can only happen if this node has to manage some of the urls of the sending node
+    	// (has recovered from crashing and now it is receiving the updates from the backup node)
+    	if (umsg.getMessageType() == MessageType.RECOVERED){  // TODO: change name RECOVERED. umsg.getSenderId() == rm.findBackup() was the old test
+    		logger.info("Node " + rm.getNodeId() + " manages some urls previously "
+    				+ " assigned to node " + umsg.getSenderId());
     		return processUpdatesFromBackupNode(umsg,storageService,rm);
+    	}
+    		
+    	
+    	// If the node that sends me the backup leaves, prepare to handle the urls previously assigned to it and reset backup ids
+    	if (umsg.getMessageType() == MessageType.LEAVE){
+    		logger.info("Node " + rm.getNodeId() + " is notified of leaving of node " + umsg.getSenderId());
+    		storageService.getStorageManager().mergeDB();  
+   	        rm.setBackupId(-1);
+   	        rm.setBackupIdTemp(-1);
+    		return new SizedBackupMessage(0, rm.getNodeId(), false, MessageStatus.SUCCESS, MessageType.REPLY);
+    	}    	     
+    	
+    	if  (umsg.getMessageType() == MessageType.NEW)
+    	{
+    		handleNewNode(umsg, storageService, rm);
+    		return new SizedBackupMessage(0, rm.getNodeId(), false, MessageStatus.SUCCESS, MessageType.REPLY);
+    	}			
     	
     	// If the replica manager never received a backup before, we store the id of the sending node in the
     	// replica manager to mean that from now on the replica manager expects update messages from that node
-    	if (rm.getBackupId() == -1)
-    		rm.setBackupId(umsg.getSenderId());
+    	if (rm.getBackupId() == -1){
+    	//	if (umsg.getMessageType() == MessageType.NEW)
+    	//		handleNewNode(umsg, storageService, rm);
+    		//else {
+    			logger.info("Node " + rm.getNodeId() + " sets its backup sender node to " + umsg.getSenderId());
+    			rm.setBackupId(umsg.getSenderId());
+    		//}    		
+    	}
+    		
     	// If the id of the sender is different from the id stored in the replica manager it means that 
     	// a node crashed. The replica manager must prepare 
     	// to receive the following messages from a different node: so it updates its backupIdTemp 
@@ -108,14 +140,26 @@ public class MessageHandler {
     	// now on this node should answer also the queries concerning the crashed node)
     	else 
     		// First time I receive update from a node different from default sender
-    		if (umsg.getSenderId() != rm.getBackupId() && rm.getBackupIdTemp() == -1){     		
+    		//TODO: check that considering the backup node down is not an error of the gossip protocol
+    		if (umsg.getSenderId() != rm.getBackupId() && rm.getBackupIdTemp() == -1 
+    		        && umsg.getMessageType()!=MessageType.NEW && rm.isNodeAlive(rm.getBackupId()) == false){     	
+    			
+    			logger.info("Node " + rm.getNodeId() + " expects backup from " + 
+    		        + rm.getBackupId() + " but receives it from " + umsg.getSenderId());	
+    			logger.info("Node Id =  " + rm.getNodeId() + ", backupId = " + 
+        		        + rm.getBackupId() + ", backupIdTemp = " + rm.getBackupIdTemp() + ", Sender id = "+ umsg.getSenderId()
+        		        + "Message type " + umsg.getMessageType());
     		  rm.setBackupIdTemp(umsg.getSenderId());
     		  rm.setRemoved();
-    		  //storageService.getStorageManager().removeAlsoFromBackup(rm.getRemoved());
     		  storageService.getStorageManager().mergeDB();    		  
     	    }
+    	    // A new node enters the cluster
+    		else if (umsg.getSenderId() != rm.getBackupId() && umsg.getMessageType() == MessageType.NEW){
+    			handleNewNode(umsg, storageService, rm);
+    		}
     		else if (umsg.getSenderId() == rm.getBackupId()){  // The sender of the backup is who I expect
     			if(rm.getBackupIdTemp() != -1){ // true IFF sender recovered from crashing
+    				logger.info("Node " + rm.getNodeId() + " receives backup from the RECOVERED node " + umsg.getSenderId());
     				rm.setBackupIdTemp(-1);      	
     				//It could be the case that the primary node is UP, but this node hasn't received
     	    		// this gossip yet. In this case, I force this knowledge.	
@@ -127,13 +171,12 @@ public class MessageHandler {
     				for (String surl : rm.getRemoved()) 
     					dump.put(surl, null);
     				List<UpdateMessage> updates = new ArrayList<>();
-    				rm.createUpdates(updates, dump);
+    				rm.createUpdatesToRecover(updates, dump);
     				try {    					
 						rm.sendUpdates(rm.getBackupId(), updates);
 						rm.unsetRemoved();
 // End here: not going to store in the backup DB the outdated urls from the crashed node						
-						return new VersionedMessage(   
-								null, null, null, MessageType.REPLY, MessageStatus.SUCCESS);
+						return new SizedBackupMessage(0, rm.getNodeId(), false, MessageStatus.SUCCESS, MessageType.REPLY);
 					} catch (UnknownHostException | NullPointerException | InterruptedException
 							| ExecutionException e) {
 						e.printStackTrace();
@@ -149,12 +192,13 @@ public class MessageHandler {
     	
     	boolean stored = storageService.getStorageManager().storeBackup(umsg.getitems());
     	if (!stored)
-    		return new VersionedMessage(null, null, null, MessageType.REPLY, MessageStatus.ERROR);
-    	return new VersionedMessage(null, null, null, MessageType.REPLY, MessageStatus.SUCCESS);
+    		return new SizedBackupMessage(0, rm.getNodeId(), false, MessageStatus.ERROR, MessageType.REPLY);
+    	return new SizedBackupMessage(0, rm.getNodeId(), false, MessageStatus.SUCCESS, MessageType.REPLY);
     }
     
+ 
     
-    private static NodeMessage processUpdatesFromBackupNode(
+    private static UpdateMessage processUpdatesFromBackupNode(
     		UpdateMessage umsg, StorageService storageService, ReplicaManager rm)
     {    	
     	StorageManager sman = storageService.getStorageManager();
@@ -171,7 +215,28 @@ public class MessageHandler {
     		}    			
     	}    	
     	//TODO: handle the case of failure with an ERROR message ?
-    	return new VersionedMessage(null, null, null, MessageType.REPLY, MessageStatus.SUCCESS);
+    	return new SizedBackupMessage(0, rm.getNodeId(), false, MessageStatus.SUCCESS, MessageType.REPLY);
+    }
+    
+    
+    private static void handleNewNode(UpdateMessage umsg, StorageService storageService, ReplicaManager rm)
+    {    	
+		try {
+			Logger logger = Logger.getLogger("myLogger");
+	    	logger.info("Node " + rm.getNodeId() + " receives backup from the NEW node " + umsg.getSenderId());
+	    	if (rm.isFirstMessage())
+	    		rm.sendBackupDB(); // invokes createUpdates() to manage the special case of the first message when 2 new nodes meet
+	    	rm.setBackupId(umsg.getSenderId());
+	    	rm.addMemberToGossipListIfDead(rm.getBackupId()); // forse puoi toglierlo da qui
+			storageService.getStorageManager().emptyBackup(); 			
+			rm.partitionUrlsBetweenDB();
+			Map<String,Versioned<String>> dump = storageService.getStorageManager().getBackupDump();
+			List<UpdateMessage> updates = new ArrayList<>();
+			rm.createUpdatesToRecover(updates, dump); //TODO: maybe change name
+			rm.sendUpdates(rm.getBackupId(), updates);
+		} catch (UnknownHostException | NullPointerException | InterruptedException | ExecutionException e) {					
+			e.printStackTrace();
+		}
     }
     
 }

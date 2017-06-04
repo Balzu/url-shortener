@@ -5,16 +5,21 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.NoSuchElementException;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.log4j.Logger;
+
 import com.google.code.gossip.LocalGossipMember;
 import com.google.code.gossip.manager.GossipManager;
+
+import it.unipi.mcsn.pad.core.message.Message;
+import it.unipi.mcsn.pad.core.message.MessageStatus;
+import it.unipi.mcsn.pad.core.message.MessageType;
 import it.unipi.mcsn.pad.core.message.SizedBackupMessage;
 import it.unipi.mcsn.pad.core.message.UpdateMessage;
 import it.unipi.mcsn.pad.core.storage.StorageManager;
@@ -24,16 +29,19 @@ import voldemort.versioning.Versioned;
 public class ReplicaManager extends Thread{
 	
 	private StorageService storageService;	
-
 	private AtomicBoolean isRunning;
-	private final ExecutorService threadPool;
-	private int nodePort;
+    private boolean firstMsg;
 	private NodeCommunicationManager nodeCommManager;
 	private int nodeId;
+	public int getNodeId() {
+		return nodeId;
+	}
+
 	private int backupSenderId;
 	private int backupSenderIdTemp;
 	private int backupInterval;
 	private List<String> removed;
+	private Logger l = Logger.getLogger("myLogger");
 	
 	
 	public ReplicaManager(StorageService ss, int nodePort,
@@ -42,8 +50,7 @@ public class ReplicaManager extends Thread{
 		storageService = ss;
 		//socket = new DatagramSocket(nodePort, InetAddress.getByName(ipAddress));
 		isRunning = new AtomicBoolean(true);
-		this.nodePort = nodePort;
-		threadPool = Executors.newCachedThreadPool();
+		firstMsg = true;
 		nodeCommManager = ncm;
 		nodeId = nid;
 		this.backupInterval = backupInterval;
@@ -59,12 +66,7 @@ public class ReplicaManager extends Thread{
 		while (isRunning.get()) {
 			try {
 				Thread.sleep(backupInterval);
-				Map<String,Versioned<String>> dump = storageService.getStorageManager().getDump();				
-				List<UpdateMessage> updates = new ArrayList<>();
-				createUpdates(updates, dump);					
-				int replica = findBackup();
-				if (replica >= 0)
-					sendUpdates(replica, updates);						   				
+				sendBackupDB();					   				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (NullPointerException e) {
@@ -84,6 +86,25 @@ public class ReplicaManager extends Thread{
 		}		
 	}
 	
+	public void sendBackupDB() throws UnknownHostException, NullPointerException, InterruptedException, ExecutionException {
+		Map<String,Versioned<String>> dump = storageService.getStorageManager().getDump();				
+		List<UpdateMessage> updates = new ArrayList<>();
+		createUpdates(updates, dump);					
+		int replica = findBackup();
+		if (replica >= 0){
+			sendUpdates(replica, updates);
+			
+		}			
+	}
+	
+	public void unsetFirstMessage(UpdateMessage umsg){
+		if (umsg.getMessageType() == MessageType.REPLY && umsg.getMessageStatus() == MessageStatus.SUCCESS){
+			l.info("Node " + nodeId + 
+					" sent its backup DB for the first time to node " + umsg.getSenderId());
+		    firstMsg = false;
+		}	
+	}
+	
 	
 	public int findBackup(){
 		GossipManager gManager = nodeCommManager.getNodeCommunicationService()
@@ -92,11 +113,14 @@ public class ReplicaManager extends Thread{
 		if (members.size() == 0) // Not connected to any member, so return a negative value
 			return -1;
 		LocalGossipMember myself = gManager.getMyself();
-		NavigableMap<Integer, Integer> upMemberssMap = new ConcurrentSkipListMap<>();
+		NavigableMap<Integer, Integer> upMemberssMap = new ConcurrentSkipListMap<>();		
 		for(int i=0; i<members.size(); i++)
 	    // Map is redundant actually, I only use it for its capability to return the "ceiling" of the key
+			{
 			upMemberssMap.put(Integer.parseInt(members.get(i).getId()),
 					Integer.parseInt(members.get(i).getId())); 
+			 l.debug("Node " + myself.getId() + " sees UP node " + members.get(i).getId());
+			}		   
 		Integer backupMemberId = upMemberssMap.ceilingKey(Integer.parseInt(myself.getId()));
 		return backupMemberId!= null ? backupMemberId
 				: upMemberssMap.firstKey();
@@ -127,12 +151,16 @@ public class ReplicaManager extends Thread{
 	public void sendUpdates(int replica, List<UpdateMessage> updates) 
 			throws UnknownHostException, InterruptedException, ExecutionException, NullPointerException
 	{
+		//addMemberToGossipListIfDead(replica);
 		String replicaAddress = nodeCommManager.getMemberFromId(replica).getHost();		
 		int replicaPort = nodeCommManager.getRequestManager().getPort();
+		Message msg = null;		
 		for (UpdateMessage umsg : updates){ 
-			nodeCommManager.getRequestManager().sendMessage(
+			msg = nodeCommManager.getRequestManager().sendMessage(
 					umsg, replicaAddress, replicaPort);		
 		}		
+		if (msg != null && msg instanceof UpdateMessage && firstMsg)
+			unsetFirstMessage((UpdateMessage) msg);
 	}
 	
 	
@@ -143,7 +171,11 @@ public class ReplicaManager extends Thread{
 	public void createUpdates(List<UpdateMessage> updates, Map<String,Versioned<String>> dump){		
 		// It is the first update message of a possible sequence of updates, so the flag is set to true.
 		// Following messages (if any) will have the flag set to false.
-		UpdateMessage umsg = new SizedBackupMessage(nodeId, true);
+		UpdateMessage umsg = null;
+        if (firstMsg)
+        	umsg = new SizedBackupMessage(50,nodeId, true, MessageStatus.SUCCESS, MessageType.NEW);         
+        else 
+        	umsg = new SizedBackupMessage(nodeId, true);	
 		for (Entry<String, Versioned<String>> e : dump.entrySet()){
 			umsg.put(e.getKey(), e.getValue());
 			if (umsg.isFull()){
@@ -152,7 +184,23 @@ public class ReplicaManager extends Thread{
 			}
 		}
 		if (!umsg.isEmpty() || umsg.isFirst())
-			updates.add(umsg);		
+			updates.add(umsg);			
+	}
+	
+	public void createUpdatesToRecover(List<UpdateMessage> updates, Map<String,Versioned<String>> dump){		
+		// It is the first update message of a possible sequence of updates, so the flag is set to true.
+		// Following messages (if any) will have the flag set to false.
+		UpdateMessage umsg = null;      
+        	umsg = new SizedBackupMessage(50,nodeId, true, MessageStatus.SUCCESS, MessageType.RECOVERED); 
+		for (Entry<String, Versioned<String>> e : dump.entrySet()){
+			umsg.put(e.getKey(), e.getValue());
+			if (umsg.isFull()){
+				updates.add(umsg);
+				umsg = new SizedBackupMessage(50,nodeId, true, MessageStatus.SUCCESS, MessageType.RECOVERED); 
+			}
+		}
+		if (!umsg.isEmpty() || umsg.isFirst())
+			updates.add(umsg);			
 	}
 	
 	/**
@@ -192,13 +240,38 @@ public class ReplicaManager extends Thread{
 	/** If the member with id = mid belongs to the list up dead members,
 	 *  adds it to the list of alive members
 	 */
-	public void addMemberToGossipListIfDead(int mid)
-	{
+	public void addMemberToGossipListIfDead(int mid)	
+	{		
 		GossipManager gman = nodeCommManager.getNodeCommunicationService().
 				getGossipService().get_gossipManager();
 		for (LocalGossipMember dead: gman.getDeadList()){
-			if (Integer.parseInt(dead.getId()) == mid)
+			if (Integer.parseInt(dead.getId()) == mid){
 				gman.createOrRevivieMember(dead);
+				l.info(nodeId + " forced to be alive node " + mid);
+			}				
 		}			
 	}
+	
+    public boolean isNodeAlive(int mid){
+    	GossipManager gman = nodeCommManager.getNodeCommunicationService().
+				getGossipService().get_gossipManager();
+    	//int trials = 0; // Try 2 times to see if the node is alive?
+    	//while (trials < 2){
+    		for (LocalGossipMember alive: gman.getMemberList()){
+        		if (Integer.parseInt(alive.getId()) == mid)
+        			return true;
+    	/*    }
+    		trials ++;
+    		try {
+				Thread.sleep(1500);
+			} catch (InterruptedException e) {				
+				e.printStackTrace();
+			}*/
+    	}
+    	return false;		
+	}
+    
+    public boolean isFirstMessage(){
+    	return firstMsg;
+    }
 }

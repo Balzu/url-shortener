@@ -101,8 +101,22 @@ public class ClientRunner {
 							else				 
 							    System.out.println(formatReply(msg, reply));							
 						}
-						else
-							System.out.println("No reply has been received from the service");						
+						else{
+							int trials= 0;
+							while (trials < 5 && reply == null){
+								reply = (NodeMessage)c.sendRequest(msg);
+							    trials++;
+							}								
+							if (trials == 5)
+							    System.out.println("No reply has been received from the service");
+							else {
+								if (clm.hasOutputFile())				 
+									writeOutputFile(clm, msg, reply);				 
+								else				 
+								    System.out.println(formatReply(msg, reply));	
+							}
+						}
+													
 					}					 
 				 }
 			}

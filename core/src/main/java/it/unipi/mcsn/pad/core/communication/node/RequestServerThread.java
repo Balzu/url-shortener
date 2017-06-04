@@ -5,6 +5,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
 import it.unipi.mcsn.pad.core.message.Message;
 import it.unipi.mcsn.pad.core.message.NodeMessage;
 import it.unipi.mcsn.pad.core.message.UpdateMessage;
@@ -18,6 +21,7 @@ public class RequestServerThread implements Runnable{
 	 private DatagramSocket socket;
 	 private StorageService storageService;
 	 private ReplicaManager manager;
+	 static Logger logger = Logger.getLogger(MessageHandler.class);
 	 
 	 public  RequestServerThread(DatagramPacket packet, ReplicaManager rm,
 			  DatagramSocket socket, StorageService ss) {
@@ -25,6 +29,7 @@ public class RequestServerThread implements Runnable{
 	    manager = rm;
 		this.socket = socket;
 		storageService = ss;
+		PropertyConfigurator.configure("src/main/resources/log4j.properties");		   	
 	}
 
 	@Override

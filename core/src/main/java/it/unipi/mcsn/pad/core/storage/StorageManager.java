@@ -4,8 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
+
+import org.apache.log4j.Logger;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
+
 import it.unipi.mcsn.pad.core.message.NodeMessage;
 import voldemort.versioning.Occurred;
 import voldemort.versioning.VectorClock;
@@ -18,6 +21,7 @@ public class StorageManager {
 	private DB db;
 	private VectorClock vc;	
 	private int nid;	
+	private Logger l;
 	
 	//TODO: only for testing
 	public int getNid() {
@@ -30,6 +34,7 @@ public class StorageManager {
 		backupMap = (ConcurrentMap<String, Versioned<String>>) db.hashMap("backupMap").createOrOpen();
 		this.vc = vc;		
 		this.nid = Integer.parseInt(id);
+		l = Logger.getLogger("myLogger"); 
 	}	
 
 	public boolean store(String surl, Versioned<String> versioned)
@@ -37,8 +42,9 @@ public class StorageManager {
 		try{			
 			vc.incremented(nid, System.currentTimeMillis());
 			Versioned<String> updatedVersioned= new Versioned<String>(versioned.getValue(), vc);
-			primaryMap.put(surl, updatedVersioned);			
+			primaryMap.put(surl, updatedVersioned);					
 			db.commit();
+			l.info("Node " + nid + " stored <" + surl + "," + updatedVersioned.getValue() + ">");
 			return true;
 		}
 		catch(Exception e){
@@ -55,6 +61,7 @@ public class StorageManager {
 			Versioned<String> updatedVersioned= new Versioned<String>(versioned.getValue(), vc);
 			primaryMap.put(surl, updatedVersioned);			
 			db.commit();
+			l.info("Node " + nid + " stored <" + surl + "," + updatedVersioned.getValue() + ">");
 			return true;
 		}
 		catch(Exception e){
@@ -75,7 +82,11 @@ public class StorageManager {
 	{
 		try{
 			vc.incrementVersion(nid, System.currentTimeMillis());
-			Versioned<String> read = primaryMap.get(surl);			
+			Versioned<String> read = primaryMap.get(surl);		
+			if (read != null)
+			    l.info("Node " + nid + " read <" + surl + "," + read.getValue() + ">");
+			else
+				l.info("Node " + nid + " has not the surl '" + surl + "' in its database");
 			db.commit();
 			return read; 		
 		}
@@ -91,6 +102,10 @@ public class StorageManager {
 			incrementAndMergeVc(vck);
 			Versioned<String> read = primaryMap.get(surl);			
 			db.commit();
+			if (read != null)
+			    l.info("Node " + nid + " read <" + surl + "," + read.getValue() + ">");
+			else
+				l.info("Node " + nid + " has not the surl '" + surl + "' in its database");
 			return read; 		
 		}
 		catch (Exception e) {
@@ -119,6 +134,10 @@ public class StorageManager {
 			vc.incrementVersion(nid, System.currentTimeMillis());
 			Versioned<String> removed = primaryMap.remove(surl);			
 			db.commit();
+			if (removed != null)
+			    l.info("Node " + nid + " removed <" + surl + "," + removed.getValue() + ">");
+			else
+				l.info("Node " + nid + " has not the surl '" + surl + "' in its database");
 			return removed;
 		}
 		catch (Exception e){
@@ -132,6 +151,10 @@ public class StorageManager {
 			incrementAndMergeVc(vck);
 			Versioned<String> removed = primaryMap.remove(surl);			
 			db.commit();
+			if (removed != null)
+			    l.info("Node " + nid + " removed <" + surl + "," + removed.getValue() + ">");
+			else
+				l.info("Node " + nid + " has not the surl '" + surl + "' in its database");
 			return removed;
 		}
 		catch (Exception e){

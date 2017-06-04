@@ -140,8 +140,8 @@ public class CommandLineManager {
 	
 	public void printHelp(){
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( "{ i | [ p <long_url> | g <short_url> | r <short_url>] }"
-				+ " [ c <path_to_config>] [ o <output_file>]", options );
+		formatter.printHelp( "{ -i | [ -p <long_url> | -g <short_url> | -r <short_url>] }"
+				+ " [ -c <path_to_config>] [ -o <output_file>]", options );
 	}
 	
 	public boolean needHelp(){

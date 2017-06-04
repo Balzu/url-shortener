@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.GossipSettings;
 import com.google.code.gossip.event.GossipListener;
@@ -11,6 +13,7 @@ import com.google.code.gossip.event.GossipListener;
 import it.unipi.mcsn.pad.core.communication.client.ClientCommunicationService;
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationService;
 import it.unipi.mcsn.pad.core.storage.StorageService;
+import it.unipi.mcsn.pad.core.utils.MessageHandler;
 import voldemort.versioning.VectorClock;
 
 
@@ -94,6 +97,7 @@ public class Node {
 		nodeCommService.start();
 		clientCommService.start();
 		storageService.start();
+		Logger.getLogger(MessageHandler.class).info("Started node " + iid);
 	}
 	
 	public void shutdown()
@@ -102,7 +106,13 @@ public class Node {
 		clientCommService.shutdown();
 		storageService.shutdown();
 	}
-	
+	// To be used to simulate a failure in the tests
+	public void shutdownWithFailure()
+	{		
+		nodeCommService.shutdownWithFailure();
+		clientCommService.shutdown();
+		storageService.shutdown();
+	}
 		
 	public void restart() throws UnknownHostException, InterruptedException
 	{		

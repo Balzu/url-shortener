@@ -41,18 +41,19 @@ public class ConflictResolutionTest {
 	@Before
 	public  void setupCluster(){		
 		try {
-			List<Integer> virtualInstances=null;	    	
-	    	Map<String, Integer> ports= null;
+			List<Integer> virtualInstances=null;
 	    	File configFile = new File ("src/main/resources/core.conf");
 	    	List<String> addresses;
 			addresses = NodeRunner.getAddressesFromFile(configFile);
 			virtualInstances = NodeRunner.getVirtualInstancesFromFile(configFile);
 			backupIntervals =  NodeRunner.getBackupIntervalsFromFile(configFile);
-			ports = NodeRunner.getPortsFromFile(configFile);
-			int gossipPort = ports.get("gossip_port");
-			int clientPort = ports.get("client_port");
-			int nodePort = ports.get("node_port");			    		
-			GossipSettings settings = new GossipSettings();			
+			Map<String, Integer> confs = NodeRunner.getConfFromFile(configFile);
+    		int gossipPort = confs.get("gossip_port");
+    		int clientPort = confs.get("client_port");
+    		int nodePort = confs.get("node_port");    		
+    		int gossipInterval = confs.get("gossip_interval");
+    		int cleanupInterval = confs.get("cleanup_interval");
+    		GossipSettings settings = new GossipSettings(gossipInterval, cleanupInterval); 						
 			List<GossipMember> startupMembers = new ArrayList<>();
 			for (int i = 0; i < addresses.size(); ++i) {
 				startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); //TODO: fix the id

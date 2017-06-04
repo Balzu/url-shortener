@@ -26,7 +26,7 @@ public class RandomClient implements Client{
 	private InetSocketAddress chooseRandomNode() {
 		
 		List<InetSocketAddress> addresses = clientConf.getAddresses();
-		Random random = new Random();
+		Random random = new Random(System.currentTimeMillis());
 		int index = random.nextInt(addresses.size());
 		return addresses.get(index);
 	}
@@ -52,11 +52,11 @@ public class RandomClient implements Client{
 			
 			
 		} catch (UnknownHostException e) {			
-			e.printStackTrace();
-		} catch (IOException e) {			
-			System.out.println(e.getMessage());
+			//e.printStackTrace();
+		} catch (IOException e) {				
+			//System.out.println(e.getMessage());
 		} catch (ClassNotFoundException e) {			
-			e.printStackTrace();
+			//e.printStackTrace();
 		}		
 		return null;
 	}
