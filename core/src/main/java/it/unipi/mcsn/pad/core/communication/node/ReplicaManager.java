@@ -31,6 +31,7 @@ public class ReplicaManager extends Thread{
 	private StorageService storageService;	
 	private AtomicBoolean isRunning;
     private boolean firstMsg;
+    private boolean sentFirst;
 	private NodeCommunicationManager nodeCommManager;
 	private int nodeId;
 	public int getNodeId() {
@@ -51,6 +52,7 @@ public class ReplicaManager extends Thread{
 		//socket = new DatagramSocket(nodePort, InetAddress.getByName(ipAddress));
 		isRunning = new AtomicBoolean(true);
 		firstMsg = true;
+		sentFirst = false;
 		nodeCommManager = ncm;
 		nodeId = nid;
 		this.backupInterval = backupInterval;
@@ -66,7 +68,8 @@ public class ReplicaManager extends Thread{
 		while (isRunning.get()) {
 			try {
 				Thread.sleep(backupInterval);
-				sendBackupDB();					   				
+				sendBackupDB();		
+				sentFirst=true;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (NullPointerException e) {
@@ -92,13 +95,13 @@ public class ReplicaManager extends Thread{
 		createUpdates(updates, dump);					
 		int replica = findBackup();
 		if (replica >= 0){
-			sendUpdates(replica, updates);
-			
+			sendUpdates(replica, updates);			
 		}			
+		l.debug("Node " + nodeId + " sent backup to node " + replica + ", firstMessage = " + firstMsg);
 	}
 	
 	public void unsetFirstMessage(UpdateMessage umsg){
-		if (umsg.getMessageType() == MessageType.REPLY && umsg.getMessageStatus() == MessageStatus.SUCCESS){
+		if (umsg.getMessageType() == MessageType.REPLY && umsg.getMessageStatus() == MessageStatus.SUCCESS ){
 			l.info("Node " + nodeId + 
 					" sent its backup DB for the first time to node " + umsg.getSenderId());
 		    firstMsg = false;
@@ -159,7 +162,7 @@ public class ReplicaManager extends Thread{
 			msg = nodeCommManager.getRequestManager().sendMessage(
 					umsg, replicaAddress, replicaPort);		
 		}		
-		if (msg != null && msg instanceof UpdateMessage && firstMsg)
+		if (msg != null && msg instanceof UpdateMessage && firstMsg && sentFirst)
 			unsetFirstMessage((UpdateMessage) msg);
 	}
 	

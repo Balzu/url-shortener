@@ -224,8 +224,8 @@ public class MessageHandler {
 		try {
 			Logger logger = Logger.getLogger("myLogger");
 	    	logger.info("Node " + rm.getNodeId() + " receives backup from the NEW node " + umsg.getSenderId());
-	    	if (rm.isFirstMessage())
-	    		rm.sendBackupDB(); // invokes createUpdates() to manage the special case of the first message when 2 new nodes meet
+	    	//if (rm.isFirstMessage())
+	    	//	rm.sendBackupDB(); // invokes createUpdates() to manage the special case of the first message when 2 new nodes meet
 	    	rm.setBackupId(umsg.getSenderId());
 	    	rm.addMemberToGossipListIfDead(rm.getBackupId()); // forse puoi toglierlo da qui
 			storageService.getStorageManager().emptyBackup(); 			
