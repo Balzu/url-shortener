@@ -305,7 +305,6 @@ public class StorageManager {
 		try{
 	   	   for(Entry<String, Versioned<String>> e :backupMap.entrySet()){
 			   String surl= e.getKey();
-			   // I deliberately create a copy of the object, that I will return
 			   Versioned<String> vlurl = new Versioned<String>(e.getValue().getValue(), e.getValue().getVersion());
 			   store(surl,vlurl);			  
 			   //System.out.println("node " + nid + "has stored into the primary the url " +  vlurl.getValue());			   
@@ -316,19 +315,6 @@ public class StorageManager {
 			return false;
 		}
 	}
-	
-	/*public void removeAlsoFromBackup(List<String> removed){
-		if (removed != null){
-			for(int i=0 ; i < removed.size() ; i++)
-				try{				
-					backupMap.remove(removed.get(i));			
-					db.commit();					
-				}
-				catch (Exception e){
-					db.rollback();					
-				}						
-		}
-	}*/
 	
 	public boolean emptyBackup(){
 		try{

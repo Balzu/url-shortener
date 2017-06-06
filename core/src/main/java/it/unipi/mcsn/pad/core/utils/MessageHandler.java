@@ -101,7 +101,7 @@ public class MessageHandler {
         // This can only happen if this node has to manage some of the urls of the sending node
     	// (has recovered from crashing and now it is receiving the updates from the backup node)
     	if (umsg.getMessageType() == MessageType.RECOVERED){  // TODO: change name RECOVERED. umsg.getSenderId() == rm.findBackup() was the old test
-    		logger.info("Node " + rm.getNodeId() + " manages some urls previously "
+    		logger.debug("Node " + rm.getNodeId() + " manages some urls previously "
     				+ " assigned to node " + umsg.getSenderId());
     		return processUpdatesFromBackupNode(umsg,storageService,rm);
     	}
@@ -128,7 +128,7 @@ public class MessageHandler {
     	//	if (umsg.getMessageType() == MessageType.NEW)
     	//		handleNewNode(umsg, storageService, rm);
     		//else {
-    			logger.info("Node " + rm.getNodeId() + " sets its backup sender node to " + umsg.getSenderId());
+    			logger.debug("Node " + rm.getNodeId() + " sets its backup sender node to " + umsg.getSenderId());
     			rm.setBackupId(umsg.getSenderId());
     		//}    		
     	}
@@ -146,7 +146,7 @@ public class MessageHandler {
     			
     			logger.info("Node " + rm.getNodeId() + " expects backup from " + 
     		        + rm.getBackupId() + " but receives it from " + umsg.getSenderId());	
-    			logger.info("Node Id =  " + rm.getNodeId() + ", backupId = " + 
+    			logger.debug("Node Id =  " + rm.getNodeId() + ", backupId = " + 
         		        + rm.getBackupId() + ", backupIdTemp = " + rm.getBackupIdTemp() + ", Sender id = "+ umsg.getSenderId()
         		        + "Message type " + umsg.getMessageType());
     		  rm.setBackupIdTemp(umsg.getSenderId());
@@ -159,7 +159,7 @@ public class MessageHandler {
     		}
     		else if (umsg.getSenderId() == rm.getBackupId()){  // The sender of the backup is who I expect
     			if(rm.getBackupIdTemp() != -1){ // true IFF sender recovered from crashing
-    				logger.info("Node " + rm.getNodeId() + " receives backup from the RECOVERED node " + umsg.getSenderId());
+    				logger.debug("Node " + rm.getNodeId() + " receives backup from the RECOVERED node " + umsg.getSenderId());
     				rm.setBackupIdTemp(-1);      	
     				//It could be the case that the primary node is UP, but this node hasn't received
     	    		// this gossip yet. In this case, I force this knowledge.	
@@ -223,7 +223,7 @@ public class MessageHandler {
     {    	
 		try {
 			Logger logger = Logger.getLogger("myLogger");
-	    	logger.info("Node " + rm.getNodeId() + " receives backup from the NEW node " + umsg.getSenderId());
+	    	logger.debug("Node " + rm.getNodeId() + " receives backup from the NEW node " + umsg.getSenderId());
 	    	//if (rm.isFirstMessage())
 	    	//	rm.sendBackupDB(); // invokes createUpdates() to manage the special case of the first message when 2 new nodes meet
 	    	rm.setBackupId(umsg.getSenderId());

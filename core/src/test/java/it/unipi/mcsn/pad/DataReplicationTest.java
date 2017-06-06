@@ -56,7 +56,8 @@ public class DataReplicationTest{
 						LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
 						virtualInstances.get(i), backupIntervals.get(i));
 				node.start();
-				nodes.add(node);    				   
+				nodes.add(node);  
+				Thread.sleep(5000);
 			} 
 		}		
 		catch (IOException e) {
@@ -88,7 +89,7 @@ public class DataReplicationTest{
 			String surl = manager.getShortUrl(cmsg);
 			int primaryId = manager.findPrimary(surl);			
 			String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();	
-			Thread.sleep(backupIntervals.get(primaryId));
+			Thread.sleep(8000);
 			int backupId = (primaryId + 1) % nodes.size();		
 			String backupUrl = nodes.get(backupId).getStorageService().getStorageManager().readBackup(surl).getValue();
 			assertEquals("The Backup node must have a copy of the url"

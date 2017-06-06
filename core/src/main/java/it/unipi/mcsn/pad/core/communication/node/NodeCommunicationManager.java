@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.log4j.Logger;
+
 import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.LocalGossipMember;
 import com.google.code.gossip.manager.GossipManager;
@@ -85,12 +87,15 @@ public class NodeCommunicationManager {
 	public void shutdown() {
 		try {
 			replicaManager.sendBackupDB();
-			informLeaving();
+			if (!replicaManager.isLast()){
+				informLeaving();
+				storageService.getStorageManager().emptyPrimary();
+			}			
 			requestManager.shutdown();
 			replicaManager.shutdown();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
 		} catch (NullPointerException e) {
+			Logger.getLogger("myLogger").info("The last node of the cluster has been shut down");;
+		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -234,7 +239,7 @@ public class NodeCommunicationManager {
 			return nodeCommunicationService;
 		}		
 		
-		public void informLeaving() throws UnknownHostException, InterruptedException, ExecutionException{
+		public void informLeaving() throws NullPointerException, UnknownHostException, InterruptedException, ExecutionException{
 			UpdateMessage leave = new SizedBackupMessage(0, nodeId, false, MessageStatus.SUCCESS, MessageType.LEAVE);	
 			int replica = replicaManager.findBackup();
 			String replicaAddress = getMemberFromId(replica).getHost();

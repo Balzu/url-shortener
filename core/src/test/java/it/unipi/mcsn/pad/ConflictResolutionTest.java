@@ -64,7 +64,8 @@ public class ConflictResolutionTest {
 						LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
 						virtualInstances.get(i), backupIntervals.get(i));
 				node.start();
-				nodes.add(node);    				   
+				nodes.add(node);  
+				Thread.sleep(5000);
 			} 
 		}		
 		catch (IOException e) {			
@@ -118,7 +119,7 @@ public class ConflictResolutionTest {
 			nodes.get(primaryId).getStorageService().getStorageManager().store(updated);
 			underTest.restart();
 			System.out.println("Primary node restarted...");		
-			Thread.sleep(30000); //20000
+			Thread.sleep(40000); //20000
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			cmsg = new GetMessage(surl);	
@@ -170,7 +171,7 @@ public class ConflictResolutionTest {
 			manager.processClientMessage(remove);
 			underTest.restart();
 			System.out.println("Primary node restarted...");		
-			Thread.sleep(30000); //20000
+			Thread.sleep(40000); //20000
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			cmsg = new GetMessage(surl);	

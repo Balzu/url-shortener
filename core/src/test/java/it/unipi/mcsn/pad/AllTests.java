@@ -6,7 +6,6 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	AdditionsAndRemovalsTest.class,
 	DataReplicationTest.class,
 	PrimaryFailureTest.class,
 	ConflictResolutionTest.class})

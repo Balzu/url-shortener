@@ -22,10 +22,11 @@ Now you can download and build the project:
 Then you have to run the url-shortener service. This setups a cluster of nodes that all implement the url-shortener service. It is possible to tweak the system by providing a custom configuration file, otherwise the default one will be used. To start the service:
 
 `cd core`  
-`java -jar target/core-1.0-SNAPSHOT-jar-with-dependencies.jar [-c <configuration_file>] `  
+`java -jar target/core-1.0-SNAPSHOT-jar-with-dependencies.jar -n <node_id> [-c <configuration_file>] `  
 
 where
 
+* `-n` specifies the id of the node you want to turn on, where the id corresponds to the index of the node in the "nodes" array of the configuration file;
 * `-c` allows to provide a custom configuration file. It must be named `core.conf` and must be placed in the `core/src/main/resources` folder
 
 Finally you can run the client to actually use the service. Three APIs are provided:

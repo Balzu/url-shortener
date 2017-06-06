@@ -60,7 +60,8 @@ public class PrimaryFailureTest {
 						LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
 						virtualInstances.get(i), backupIntervals.get(i));
 				node.start();
-				nodes.add(node);    				   
+				nodes.add(node);    
+				Thread.sleep(5000);
 			} 
 		}		
 		catch (IOException e) {			
@@ -92,16 +93,18 @@ public class PrimaryFailureTest {
 			manager.processClientMessage(cmsg);				
 			String surl = manager.getShortUrl(cmsg);
 			int primaryId = manager.findPrimary(surl);	
-			Thread.sleep(12000);
+			Thread.sleep(7000);
 			nodes.get(primaryId).shutdownWithFailure();						
 			nodes.remove(primaryId); 
-			Thread.sleep(26000);
+			Thread.sleep(15000);
 			cmsg = new GetMessage(surl);		
 			randomId = new Random().nextInt(nodes.size());			
 			manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
-			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);			
+			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);	
+			//nodes.add(off);
 			assertEquals("In case of primary failure, the system should automatically react"
 					+ "by using the backup node to answer the request", url, reply.getLongUrl());
+			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (MessageTypeException e) {
@@ -131,7 +134,7 @@ public class PrimaryFailureTest {
 			System.out.println("Primary node after crashing = " + primaryId);
 			underTest.restart();			
 			nodes.add(underTest);
-			Thread.sleep(30000); 
+			Thread.sleep(40000); 
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);			

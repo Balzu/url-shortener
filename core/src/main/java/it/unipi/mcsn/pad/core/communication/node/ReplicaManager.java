@@ -34,6 +34,7 @@ public class ReplicaManager extends Thread{
     private boolean sentFirst;
 	private NodeCommunicationManager nodeCommManager;
 	private int nodeId;
+	private int failedSends;
 	public int getNodeId() {
 		return nodeId;
 	}
@@ -49,6 +50,7 @@ public class ReplicaManager extends Thread{
 			String ipAddress, NodeCommunicationManager ncm
 			, int nid, int backupInterval) throws SocketException, UnknownHostException{
 		storageService = ss;
+		failedSends = 0;
 		//socket = new DatagramSocket(nodePort, InetAddress.getByName(ipAddress));
 		isRunning = new AtomicBoolean(true);
 		firstMsg = true;
@@ -95,8 +97,15 @@ public class ReplicaManager extends Thread{
 		createUpdates(updates, dump);					
 		int replica = findBackup();
 		if (replica >= 0){
-			sendUpdates(replica, updates);			
-		}			
+			sendUpdates(replica, updates);	
+			failedSends=0;
+		}	
+		else
+			failedSends++;
+		// If the node fails to send its database for 3 consecutive times, it is likely that it is remained alone 
+		// because the other node failed
+		if (failedSends == 3) 
+			storageService.getStorageManager().mergeDB();
 		l.debug("Node " + nodeId + " sent backup to node " + replica + ", firstMessage = " + firstMsg);
 	}
 	
@@ -153,8 +162,7 @@ public class ReplicaManager extends Thread{
 	 */
 	public void sendUpdates(int replica, List<UpdateMessage> updates) 
 			throws UnknownHostException, InterruptedException, ExecutionException, NullPointerException
-	{
-		//addMemberToGossipListIfDead(replica);
+	{		
 		String replicaAddress = nodeCommManager.getMemberFromId(replica).getHost();		
 		int replicaPort = nodeCommManager.getRequestManager().getPort();
 		Message msg = null;		
@@ -164,6 +172,10 @@ public class ReplicaManager extends Thread{
 		}		
 		if (msg != null && msg instanceof UpdateMessage && firstMsg && sentFirst)
 			unsetFirstMessage((UpdateMessage) msg);
+	}
+	
+	public boolean isLast(){
+		return (failedSends >= 3) ? true : false;
 	}
 	
 	
@@ -257,19 +269,10 @@ public class ReplicaManager extends Thread{
 	
     public boolean isNodeAlive(int mid){
     	GossipManager gman = nodeCommManager.getNodeCommunicationService().
-				getGossipService().get_gossipManager();
-    	//int trials = 0; // Try 2 times to see if the node is alive?
-    	//while (trials < 2){
+				getGossipService().get_gossipManager();    	
     		for (LocalGossipMember alive: gman.getMemberList()){
         		if (Integer.parseInt(alive.getId()) == mid)
-        			return true;
-    	/*    }
-    		trials ++;
-    		try {
-				Thread.sleep(1500);
-			} catch (InterruptedException e) {				
-				e.printStackTrace();
-			}*/
+        			return true;    
     	}
     	return false;		
 	}

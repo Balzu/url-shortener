@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -15,48 +16,43 @@ public class RandomClient implements Client{
 	
 	private ClientConfig clientConf;
 	
-	public RandomClient(ClientConfig cc) {
+	public RandomClient(ClientConfig cc)
+	{
 		clientConf = cc;
-		
 	}
 	
 	/*
 	 *  Randomly chooses a node to send the request to
 	 * */
-	private InetSocketAddress chooseRandomNode() {
+	private List<InetSocketAddress> chooseRandomNode() {
 		
 		List<InetSocketAddress> addresses = clientConf.getAddresses();
 		Random random = new Random(System.currentTimeMillis());
-		int index = random.nextInt(addresses.size());
-		return addresses.get(index);
+		Collections.shuffle(addresses, random);
+		//int index = random.nextInt(addresses.size());
+		return addresses;
 	}
 
 	@Override
 	public Message sendRequest(Message msg) {
 		
-		InetSocketAddress ipAddr = chooseRandomNode();
-		//TODO: togli try-with-resources, se poi chiudi ois e oos a mano (e metti chiusure in un blocco finally)
-		try (
-			Socket socket = new Socket(ipAddr.getHostName(), ipAddr.getPort());			
-			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());	
-			ObjectInputStream ois= new ObjectInputStream(socket.getInputStream());	
-			)
-		{
-			
-			oos.writeObject(msg);			
-			
-			Message receivedMsg = (Message) ois.readObject();
-			//ois.close();
-			//oos.close();
-			return receivedMsg;
-			
-			
-		} catch (UnknownHostException e) {			
-			//e.printStackTrace();
-		} catch (IOException e) {				
-			//System.out.println(e.getMessage());
-		} catch (ClassNotFoundException e) {			
-			//e.printStackTrace();
+		List<InetSocketAddress> addresses = chooseRandomNode();		
+		for (InetSocketAddress ipAddr : addresses){
+			try (
+					Socket socket = new Socket(ipAddr.getHostName(), ipAddr.getPort());			
+					ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());	
+					ObjectInputStream ois= new ObjectInputStream(socket.getInputStream());	
+					)
+				{			
+					oos.writeObject(msg);				
+					Message receivedMsg = (Message) ois.readObject();			
+					if (receivedMsg != null)
+						return receivedMsg;
+				}
+				catch (UnknownHostException e) {	
+				} catch (IOException e) {	
+				} catch (ClassNotFoundException e) {
+				}		
 		}		
 		return null;
 	}
