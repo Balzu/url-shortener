@@ -49,7 +49,12 @@ where
 * `-c` allows to provide a custom configuration file. It must be named `client.conf` and must be placed in the `client/src/main/resources` folder
 * `-o` is used to write the output in an output file
 
-## Known Issues
+## Limitations
 
-I designed the project with eventual consistency in mind, but in case of failure of same node it takes a lot of time to reach consistency. This is due both to my design choices, but also to the underlying gossip service. Indeed, it is possible to see from the printed output that almost every time a test fails is because a wrong primary has been computed after a node has rejoined the cluster. In turn, this is due to the Gossip Protocol that takes some time to spread the new information. Currently I am using the default configurations for Gossip, it is likely that decreasing the gossip interval will mitigate this problem. 
+There are two main limitations above the others:
+
+* **Replica management**: I designated the project with scalability in mind, that's why I avoided a replication strategy based on multicast. Anyway the solution I devised offers no way to solve replication problems in a general way, so I had to patch all the bugs by hand. This made the code dirtier in some parts and does not provide strong guarantees that the system is bug-free, although now it seems to work smoothly;
+
+* **eventual consistency**: in some cases, especially in case of failure of some node, the system takes a lot of time to reach consistency. This is what happens in the tests: usually they work as expected, but when they fail it is because the system has not reached consistency yet
+
 

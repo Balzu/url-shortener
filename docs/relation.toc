@@ -16,23 +16,18 @@
 \contentsline {subsubsection}{\numberline {3.2.1}The core module}{4}
 \contentsline {paragraph}{communication}{5}
 \contentsline {subparagraph}{client}{5}
-\contentsline {subparagraph}{node}{6}
+\contentsline {subparagraph}{node}{5}
 \contentsline {paragraph}{message}{6}
 \contentsline {paragraph}{storage}{7}
 \contentsline {paragraph}{utils}{8}
-\contentsline {subsubsection}{\numberline {3.2.2}The client module}{9}
-\contentsline {paragraph}{Client}{9}
-\contentsline {paragraph}{RandomClient}{9}
-\contentsline {paragraph}{ClientConfig}{9}
-\contentsline {paragraph}{CommandLineManager}{9}
-\contentsline {paragraph}{ClientRunner}{9}
+\contentsline {subsubsection}{\numberline {3.2.2}The client module}{8}
 \contentsline {subsection}{\numberline {3.3}Use cases}{9}
 \contentsline {subsubsection}{\numberline {3.3.1}Processing of a PUT request}{9}
-\contentsline {section}{\numberline {4}Test}{11}
-\contentsline {subsubsection}{\numberline {4.0.1}Replication of data}{11}
-\contentsline {subsubsection}{\numberline {4.0.2}Primary failure}{11}
-\contentsline {subsubsection}{\numberline {4.0.3}Primary re-joins cluster after failure}{11}
-\contentsline {subsubsection}{\numberline {4.0.4}Conflict Resolution}{13}
+\contentsline {section}{\numberline {4}Test}{12}
+\contentsline {subsubsection}{\numberline {4.0.1}Replication of data}{12}
+\contentsline {subsubsection}{\numberline {4.0.2}Primary failure}{12}
+\contentsline {subsubsection}{\numberline {4.0.3}Primary re-joins cluster after failure}{12}
+\contentsline {subsubsection}{\numberline {4.0.4}Conflict Resolution}{12}
 \contentsline {paragraph}{Birth of a conflict}{13}
 \contentsline {paragraph}{Conflict management}{13}
 \contentsline {paragraph}{Tests}{14}

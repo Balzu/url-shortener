@@ -111,7 +111,7 @@ public class ReplicaManager extends Thread{
 	
 	public void unsetFirstMessage(UpdateMessage umsg){
 		if (umsg.getMessageType() == MessageType.REPLY && umsg.getMessageStatus() == MessageStatus.SUCCESS ){
-			l.info("Node " + nodeId + 
+			l.debug("Node " + nodeId + 
 					" sent its backup DB for the first time to node " + umsg.getSenderId());
 		    firstMsg = false;
 		}	
