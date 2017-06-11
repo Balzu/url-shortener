@@ -306,8 +306,7 @@ public class StorageManager {
 	   	   for(Entry<String, Versioned<String>> e :backupMap.entrySet()){
 			   String surl= e.getKey();
 			   Versioned<String> vlurl = new Versioned<String>(e.getValue().getValue(), e.getValue().getVersion());
-			   store(surl,vlurl);			  
-			   //System.out.println("node " + nid + "has stored into the primary the url " +  vlurl.getValue());			   
+			   store(surl,vlurl);					   
 		   }
 	   	return true;
 		}   		

@@ -44,11 +44,6 @@ public class ClientConfig {
 				addresses.add(address);
 			}
 		
-		
-	//TODO: add operations that retrieve all the current nodes alive in the cluster?
-		// Should be done in background spanning a thread?
-		
-		
 	}
 
 	public List<InetSocketAddress> getAddresses() {

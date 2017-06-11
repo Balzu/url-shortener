@@ -89,7 +89,6 @@ public class MessageHandler {
 		Version vers = vlurl.getVersion();
 		if (rm.isSetRemoved())  
 			rm.getRemoved().add(surl);
-		    //storageService.getStorageManager().removeBackup(surl);
     	return (new VersionedMessage(lurl, surl, vers,
 				MessageType.REPLY, MessageStatus.SUCCESS));
 	}
@@ -97,10 +96,10 @@ public class MessageHandler {
     private static UpdateMessage processUpdateMessage(
     		UpdateMessage umsg, StorageService storageService, ReplicaManager rm)
     {    	
+
     	Logger logger = Logger.getLogger("myLogger");
-        // This can only happen if this node has to manage some of the urls of the sending node
-    	// (has recovered from crashing and now it is receiving the updates from the backup node)
-    	if (umsg.getMessageType() == MessageType.RECOVERED){  // TODO: change name RECOVERED. umsg.getSenderId() == rm.findBackup() was the old test
+        // This can only happen if this node has to manage some of the urls of the backup node
+    	if (umsg.getMessageType() == MessageType.RECOVERED){  
     		logger.debug("Node " + rm.getNodeId() + " manages some urls previously "
     				+ " assigned to node " + umsg.getSenderId());
     		return processUpdatesFromBackupNode(umsg,storageService,rm);
@@ -124,13 +123,10 @@ public class MessageHandler {
     	
     	// If the replica manager never received a backup before, we store the id of the sending node in the
     	// replica manager to mean that from now on the replica manager expects update messages from that node
-    	if (rm.getBackupId() == -1){
-    	//	if (umsg.getMessageType() == MessageType.NEW)
-    	//		handleNewNode(umsg, storageService, rm);
-    		//else {
+    	if (rm.getBackupId() == -1)
+    	{    	
     			logger.debug("Node " + rm.getNodeId() + " sets its backup sender node to " + umsg.getSenderId());
-    			rm.setBackupId(umsg.getSenderId());
-    		//}    		
+    			rm.setBackupId(umsg.getSenderId()); 		
     	}
     		
     	// If the id of the sender is different from the id stored in the replica manager it means that 
@@ -140,48 +136,16 @@ public class MessageHandler {
     	// now on this node should answer also the queries concerning the crashed node)
     	else 
     		// First time I receive update from a node different from default sender
-    		//TODO: check that considering the backup node down is not an error of the gossip protocol
+    		// I also check that considering the backup node down is not an error of the gossip protocol
     		if (umsg.getSenderId() != rm.getBackupId() && rm.getBackupIdTemp() == -1 
-    		        && umsg.getMessageType()!=MessageType.NEW && rm.isNodeAlive(rm.getBackupId()) == false){     	
-    			
-    			logger.info("Node " + rm.getNodeId() + " expects backup from " + 
-    		        + rm.getBackupId() + " but receives it from " + umsg.getSenderId());	
-    			logger.debug("Node Id =  " + rm.getNodeId() + ", backupId = " + 
-        		        + rm.getBackupId() + ", backupIdTemp = " + rm.getBackupIdTemp() + ", Sender id = "+ umsg.getSenderId()
-        		        + "Message type " + umsg.getMessageType());
-    		  rm.setBackupIdTemp(umsg.getSenderId());
-    		  rm.setRemoved();
-    		  storageService.getStorageManager().mergeDB();    		  
-    	    }
-    	    // A new node enters the cluster
-    		else if (umsg.getSenderId() != rm.getBackupId() && umsg.getMessageType() == MessageType.NEW){
-    			handleNewNode(umsg, storageService, rm);
-    		}
+    		        && umsg.getMessageType()!=MessageType.NEW && rm.isNodeAlive(rm.getBackupId()) == false)    		  			
+    		    handleCrashedNode(umsg, storageService, rm);   	    	    
+    	    
     		else if (umsg.getSenderId() == rm.getBackupId()){  // The sender of the backup is who I expect
     			if(rm.getBackupIdTemp() != -1){ // true IFF sender recovered from crashing
-    				logger.debug("Node " + rm.getNodeId() + " receives backup from the RECOVERED node " + umsg.getSenderId());
-    				rm.setBackupIdTemp(-1);      	
-    				//It could be the case that the primary node is UP, but this node hasn't received
-    	    		// this gossip yet. In this case, I force this knowledge.	
-    				rm.addMemberToGossipListIfDead(rm.getBackupId());
-    				storageService.getStorageManager().emptyBackup();  
-    				rm.partitionUrlsBetweenDB();
-    				Map<String,Versioned<String>> dump = storageService.getStorageManager().getBackupDump();
-    // I also add the removed urls to the backup. They have recognizable because have lurl = null
-    				for (String surl : rm.getRemoved()) 
-    					dump.put(surl, null);
-    				List<UpdateMessage> updates = new ArrayList<>();
-    				rm.createUpdatesToRecover(updates, dump);
-    				try {    					
-						rm.sendUpdates(rm.getBackupId(), updates);
-						rm.unsetRemoved();
-// End here: not going to store in the backup DB the outdated urls from the crashed node						
-						return new SizedBackupMessage(0, rm.getNodeId(), false, MessageStatus.SUCCESS, MessageType.REPLY);
-					} catch (UnknownHostException | NullPointerException | InterruptedException
-							| ExecutionException e) {
-						e.printStackTrace();
-						System.out.println("Exception from node " + storageService.getStorageManager().getNid());
-					}      				
+    				handleRecoveredNode(umsg, storageService, rm); 
+    				//End here: not going to store in the backup DB the outdated urls from the crashed node						
+    				return new SizedBackupMessage(0, rm.getNodeId(), false, MessageStatus.SUCCESS, MessageType.REPLY);
     			}
     		}    		
     	
@@ -223,19 +187,55 @@ public class MessageHandler {
     {    	
 		try {
 			Logger logger = Logger.getLogger("myLogger");
-	    	logger.debug("Node " + rm.getNodeId() + " receives backup from the NEW node " + umsg.getSenderId());
-	    	//if (rm.isFirstMessage())
-	    	//	rm.sendBackupDB(); // invokes createUpdates() to manage the special case of the first message when 2 new nodes meet
+	    	logger.debug("Node " + rm.getNodeId() + " receives backup from the NEW node " + umsg.getSenderId());	    	
 	    	rm.setBackupId(umsg.getSenderId());
-	    	rm.addMemberToGossipListIfDead(rm.getBackupId()); // forse puoi toglierlo da qui
+	    	rm.addMemberToGossipListIfDead(rm.getBackupId()); 
 			storageService.getStorageManager().emptyBackup(); 			
-			rm.partitionUrlsBetweenDB();
-			Map<String,Versioned<String>> dump = storageService.getStorageManager().getBackupDump();
+			rm.partitionUrlsBetweenDB();			
+			Map<String,Versioned<String>> dump = storageService.getStorageManager().getBackupDump(); 
 			List<UpdateMessage> updates = new ArrayList<>();
-			rm.createUpdatesToRecover(updates, dump); //TODO: maybe change name
+			rm.createUpdatesToRecover(updates, dump); 
 			rm.sendUpdates(rm.getBackupId(), updates);
 		} catch (UnknownHostException | NullPointerException | InterruptedException | ExecutionException e) {					
 			e.printStackTrace();
+		}
+    }
+    
+    
+    private static void handleCrashedNode(UpdateMessage umsg, StorageService storageService, ReplicaManager rm){
+    	Logger logger = Logger.getLogger("myLogger");
+    	logger.info("Node " + rm.getNodeId() + " expects backup from " + 
+		        + rm.getBackupId() + " but receives it from " + umsg.getSenderId());	
+		logger.debug("Node Id =  " + rm.getNodeId() + ", backupId = " + 
+    		        + rm.getBackupId() + ", backupIdTemp = " + rm.getBackupIdTemp() + ", Sender id = "+ umsg.getSenderId()
+    		        + "Message type " + umsg.getMessageType());
+		rm.setBackupIdTemp(umsg.getSenderId());
+		rm.setRemoved();
+		storageService.getStorageManager().mergeDB();    		
+    }
+    
+    private static void handleRecoveredNode(UpdateMessage umsg, StorageService storageService, ReplicaManager rm){
+    	Logger logger = Logger.getLogger("myLogger");
+    	logger.debug("Node " + rm.getNodeId() + " receives backup from the RECOVERED node " + umsg.getSenderId());
+		rm.setBackupIdTemp(-1);      	
+		//It could be the case that the primary node is UP, but this node hasn't received
+		// this gossip yet. In this case, I force this knowledge.	
+		rm.addMemberToGossipListIfDead(rm.getBackupId());
+		storageService.getStorageManager().emptyBackup();  
+		rm.partitionUrlsBetweenDB();
+		Map<String,Versioned<String>> dump = storageService.getStorageManager().getBackupDump();
+         // I also add the removed urls to the backup. They have recognizable because have lurl = null
+		for (String surl : rm.getRemoved()) 
+			dump.put(surl, null);
+		List<UpdateMessage> updates = new ArrayList<>();
+		rm.createUpdatesToRecover(updates, dump);
+		try {    					
+			rm.sendUpdates(rm.getBackupId(), updates);
+			rm.unsetRemoved();         
+		} catch (UnknownHostException | NullPointerException | InterruptedException
+				| ExecutionException e) {
+			e.printStackTrace();
+			System.out.println("Exception from node " + storageService.getStorageManager().getNid());
 		}
     }
     

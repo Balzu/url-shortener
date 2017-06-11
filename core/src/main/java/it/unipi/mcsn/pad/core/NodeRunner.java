@@ -1,7 +1,6 @@
 package it.unipi.mcsn.pad.core;
 
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -63,9 +62,7 @@ public class NodeRunner
     		List<GossipMember> startupMembers = new ArrayList<>();
     		for (int i = 0; i < addresses.size(); ++i) {
     			startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); 
-    		}    		
-    		//List<Node> nodes = new ArrayList<>();
-    		//for (int i = 0; i < addresses.size(); ++i) {	 
+    		}
     		int nid = Integer.parseInt(clm.getNode());
     		if (nid < 0 || nid >= addresses.size()){
     			System.err.println("Invalid node id provided: the ids of the nodes in the cluster"
@@ -75,13 +72,7 @@ public class NodeRunner
     			Node node = new Node(clientPort, 50, addresses.get(nid), gossipPort, nid+"" , 
     					LogLevel.DEBUG,	startupMembers, settings, null,  nid, nodePort,
     					virtualInstances.get(nid), backupIntervals.get(nid));
-    			node.start();
-    		//	nodes.add(node);  
-    			//TODO: added these 2 lines
-    			//Thread.sleep(60000);
-    			//Console console = System.console();
-				//String input = console.readLine("Type to pass to next node:");
-    		//}       	    		
+    			node.start();      	    		
     		System.out.println("Node " + nid + " is running the url-shortener service... ");
     		BufferedReader stdIn = new BufferedReader(
 					new InputStreamReader(System.in));	
@@ -90,10 +81,8 @@ public class NodeRunner
     			displayUsageMessage();
     			input = stdIn.readLine();
     			if (input.equals("quit")){
-    				System.out.println("Shutting down the service... ");
-    			//	for (Node node : nodes){
-    					node.shutdown();
-    			//	}
+    				System.out.println("Shutting down the service... ");    			
+    				node.shutdown();
     				System.exit(0);
     			}
     		}

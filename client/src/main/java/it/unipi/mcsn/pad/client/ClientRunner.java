@@ -42,7 +42,7 @@ public class ClientRunner
 			else{
 				configFile = new File ("src/main/resources/client.conf");
 			}
-			//System.out.println("Configuration file exists? " + configFile.exists()); // TODO throw exception if config file does not exist?
+			
 			ClientConfig cc = new ClientConfig(configFile);
 			Client c = new RandomClient(cc); 
 						

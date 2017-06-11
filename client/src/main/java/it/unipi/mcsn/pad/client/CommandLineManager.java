@@ -72,21 +72,15 @@ public class CommandLineManager {
 	}
 
 	public boolean isInteractive(){
-		if (line.hasOption( interactive.getOpt()))
-			return true;
-		return false;
+		return (line.hasOption( interactive.getOpt()));		
 	}
 	
 	public boolean hasConfigFile(){
-		if (line.hasOption( config.getOpt()))
-			return true;
-		return false;
+		return (line.hasOption( config.getOpt()));
 	}
 	
 	public boolean hasOutputFile(){
-		if (line.hasOption( output.getOpt()))
-			return true;
-		return false;
+		return (line.hasOption( output.getOpt()));
 	}
 	
 	public String getOutputFileName() {

@@ -38,7 +38,7 @@ public class NodeCommunicationManager {
 	private RequestManager requestManager;
 	public NodeCommunicationService nodeCommunicationService;
 	// I identify the buckets(= nodes) with a unique integer (node id) 
-	// and the members(=long_urls) with a String (their content).
+	// and the members(= urls) with a String (their content).
 	private Partitioner<Integer, String> partitioner;
 	private VectorClock vectorClock;
 	private int nodeId;
@@ -222,9 +222,6 @@ public class NodeCommunicationManager {
 		return surl;
 	}
 	
-	public int getClusterSize(){
-		return nodeCommunicationService.getGossipService().get_gossipManager().getMemberList().size()+1;
-	}
 	
 	public RequestManager getRequestManager(){
 	 	return requestManager;

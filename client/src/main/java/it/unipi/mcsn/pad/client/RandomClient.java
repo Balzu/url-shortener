@@ -29,7 +29,6 @@ public class RandomClient implements Client{
 		List<InetSocketAddress> addresses = clientConf.getAddresses();
 		Random random = new Random(System.currentTimeMillis());
 		Collections.shuffle(addresses, random);
-		//int index = random.nextInt(addresses.size());
 		return addresses;
 	}
 

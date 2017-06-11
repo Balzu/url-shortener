@@ -44,7 +44,7 @@ public class RequestClientThread implements Callable{
 		    clientSocket.receive(packet);
 		}
 	    catch (SocketTimeoutException se) {	    
-	    	return null; //TODO check this
+	    	return null;
 	    }			
 	    Message msg = (Message) Utils.deserialize(packet.getData());
 		return msg;		
