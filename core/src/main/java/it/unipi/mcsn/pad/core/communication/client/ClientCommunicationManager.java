@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager;
 import it.unipi.mcsn.pad.core.communication.node.NodeCommunicationManager.MessageTypeException;
 import it.unipi.mcsn.pad.core.message.Message;
@@ -15,16 +16,14 @@ public class ClientCommunicationManager extends Thread
 {	
 	private ServerSocket serverSocket;
 	private final ExecutorService threadPool;	
-	private final AtomicBoolean clientServiceRunning; 	
-	private final int nodeId;
+	private final AtomicBoolean clientServiceRunning; 
 	private NodeCommunicationManager nodeCommManager;
 	
 	public ClientCommunicationManager( int port, int backlog, InetAddress bindAddr,
 			int nid, NodeCommunicationManager ncm){
 		
 		clientServiceRunning = new AtomicBoolean(true);
-		threadPool = Executors.newCachedThreadPool();		
-		nodeId = nid;
+		threadPool = Executors.newCachedThreadPool();
 		nodeCommManager = ncm;
 		try { 
 			serverSocket = new ServerSocket(port, backlog, bindAddr);			
@@ -39,8 +38,7 @@ public class ClientCommunicationManager extends Thread
 			try {
 				Socket clientSocket = serverSocket.accept(); 
 				threadPool.submit(new ClientCommunicationThread(clientSocket, this));				
-			} catch (IOException e) {				
-				//e.printStackTrace();
+			} catch (IOException e) {
 			}			
 		}		
 	}

@@ -5,7 +5,7 @@
 \usepackage[noend]{algpseudocode}
 \usepackage{float}
 \usepackage[font=small,labelfont=bf]{caption}
-\usepackage[left=0.8in, right=0.8in, top=1in, bottom=1in]{geometry}
+\usepackage[left=0.8in, right=0.8in, top=0.9in, bottom=1in]{geometry}
 \graphicspath{ {images/} }
 
 
@@ -189,12 +189,13 @@ The core module contains all the classes that implement the logic of the project
 
 \subsubsection{The client module} 
 This module contains the classes that implement the client. The client chooses a node of the cluster and invokes an operation among PUT, GET and REMOVE. The client can establish a connection with a node that only lasts the time needed to carry out the requested operation, or an interactive session can be started, during which the connection is kept alive and the client can make as many requests as it wishes. The classes belonging to this module are the following:
-\paragraph{Client} A simple interface for the client, stating that implementing classes must provide the method \textit{sendRequest(Message msg)} to send the request to a node of the cluster. The policy used to select the node is implementation-dependent.
-\paragraph{RandomClient} A class that implements the Client Interface. Every time RandomClient has to send a message to a node, the recipient node is randomly selected among the nodes of the cluster. It uses a ClientConfig to get the list of nodes comprising the cluster.
-\paragraph{ClientConfig} This class holds configuration parameters for the client. In particular, it parses the configuration file to retrieve the addresses of the nodes comprising the cluster. Such addresses are stored in a list, which is returned to the client upon request.
-\paragraph{CommandLineManager} It parses the command line arguments, checking that nothing is missing and that the provided options are legal. Provides methods that ClientRunner uses to check the presence of such options and to display help or error messages.
-\paragraph{ClientRunner} Runs the client, either in batch or interactive mode, and returns the result. 
-
+\begin{itemize}
+\item \textit{Client} A simple interface for the client, stating that implementing classes must provide the method \textit{sendRequest} \textit{(Message msg)} to send the request to a node of the cluster. The policy used to select the node is implementation-dependent.
+\item \textit{RandomClient} A class that implements the Client Interface. Every time RandomClient has to send a message to a node, the recipient node is randomly selected among the nodes of the cluster. It uses a ClientConfig to get the list of nodes comprising the cluster.
+\item \textit{ClientConfig} This class holds configuration parameters for the client. In particular, it parses the configuration file to retrieve the addresses of the nodes comprising the cluster. Such addresses are stored in a list, which is returned to the client upon request.
+\item \textit{CommandLineManager} It parses the command line arguments, checking that nothing is missing and that the provided options are legal. Provides methods that ClientRunner uses to check the presence of such options and to display help or error messages.
+\item \textit{ClientRunner} Runs the client, either in batch or interactive mode, and returns the result. 
+\end{itemize}
 
 
 \begin{figure}
@@ -334,7 +335,11 @@ The 32 bit hash function used allows about 4 billions of distinct urls. If a lot
 \item Replication Strategy. \\
 Every time the backup database has to be updated, the whole database is emptied and then rebuild from scratch. This is a simple approach (the sending node sends all its database and not only the entries that have changed from the last database delivery) but not very efficient.
 \item Eventual Consistency. \\
-The system is maybe too slow to reach consistency. If you run the tests decreasing the waiting time, it is very likely that the tests will not succeed.
+Sometimes the system is slow at reaching consistency. If you run the tests decreasing the waiting time, it is likely that the tests will not succeed.
+\item Replica management. \\
+I designated the project with scalability in mind, that's why I avoided a replication strategy based on multicast. Anyway the solution I devised obliged me to put ad-hoc code to deal with special situations (\textit{e.g.} when a node remains alone in the cluster, when one node fails, ... ) making the code longer and more bug-prone.  
+\item Partition Tolerance. \\
+Since in the cluster all nodes are connected with all the others, I considered that only disconnections of single nodes may happen. The system supports more than one simoultaneous (single) disconnections, but I didn't test what happens in case of a disconnected components with more than one node.
 \end{itemize}
 
 \end{document}

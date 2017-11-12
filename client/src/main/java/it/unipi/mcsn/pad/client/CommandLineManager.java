@@ -72,21 +72,15 @@ public class CommandLineManager {
 	}
 
 	public boolean isInteractive(){
-		if (line.hasOption( interactive.getOpt()))
-			return true;
-		return false;
+		return (line.hasOption( interactive.getOpt()));		
 	}
 	
 	public boolean hasConfigFile(){
-		if (line.hasOption( config.getOpt()))
-			return true;
-		return false;
+		return (line.hasOption( config.getOpt()));
 	}
 	
 	public boolean hasOutputFile(){
-		if (line.hasOption( output.getOpt()))
-			return true;
-		return false;
+		return (line.hasOption( output.getOpt()));
 	}
 	
 	public String getOutputFileName() {
@@ -140,8 +134,8 @@ public class CommandLineManager {
 	
 	public void printHelp(){
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( "{ i | [ p <long_url> | g <short_url> | r <short_url>] }"
-				+ " [ c <path_to_config>] [ o <output_file>]", options );
+		formatter.printHelp( "{ -i | [ -p <long_url> | -g <short_url> | -r <short_url>] }"
+				+ " [ -c <path_to_config>] [ -o <output_file>]", options );
 	}
 	
 	public boolean needHelp(){

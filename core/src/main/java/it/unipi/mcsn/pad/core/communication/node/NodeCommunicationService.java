@@ -43,8 +43,13 @@ public class NodeCommunicationService implements Service{
 	}
 
 	@Override
-	public void shutdown() {
-		gossipService.shutdown();
+	public void shutdown() {		
 		nodeCommManager.shutdown();		
+		gossipService.shutdown();
+	}		
+	
+	public void shutdownWithFailure() {		
+		nodeCommManager.shutdownWithFailure();		
+		gossipService.shutdown();
 	}		
 }

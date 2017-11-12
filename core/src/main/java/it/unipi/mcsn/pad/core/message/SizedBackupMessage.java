@@ -24,9 +24,14 @@ public class SizedBackupMessage implements UpdateMessage{
 		this(capacity, senderId, first, MessageStatus.SUCCESS);
 	}
 
-	public SizedBackupMessage (int capacity, int senderId, boolean first, MessageStatus ms)
+	
+	public SizedBackupMessage (int capacity, int senderId, boolean first, MessageStatus ms){
+		this(capacity, senderId, first, ms, MessageType.UPDATE);
+	}
+	
+	public SizedBackupMessage (int capacity, int senderId, boolean first, MessageStatus ms, MessageType type)
 	{
-		messageType=MessageType.UPDATE;		
+		messageType=type;		
 		messageStatus = ms;
 		this.capacity = capacity;
 		size = 0;

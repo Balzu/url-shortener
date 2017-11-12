@@ -45,12 +45,9 @@ public class RequestManager extends Thread{
 				DatagramPacket packet = new DatagramPacket(buf, buf.length);
 	            socket.receive(packet);
 	            threadPool.submit(new RequestServerThread(packet, repMan, socket, storageService));		            
-			} catch (SocketTimeoutException e) {			
-				//e.printStackTrace();
-				//System.out.println("Socket closed because of timeout");
+			} catch (SocketTimeoutException e) {
 			}				
-			  catch (SocketException e) {			
-				//e.printStackTrace();  arises only when we close the socket, so it is ok
+			  catch (SocketException e) {
 			} catch (IOException e) {			
 				e.printStackTrace();
 			}			

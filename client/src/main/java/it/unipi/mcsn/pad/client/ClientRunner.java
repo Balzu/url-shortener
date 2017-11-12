@@ -1,6 +1,5 @@
 package it.unipi.mcsn.pad.client;
 
-import java.awt.DisplayMode;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -8,14 +7,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
-import java.util.zip.CRC32;
 
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 import org.json.JSONException;
 
-import it.unipi.mcsn.pad.core.communication.client.ClientCommunicationManager;
 import it.unipi.mcsn.pad.core.message.GetMessage;
 //import it.unipi.mcsn.pad.core.message.ListMessage;
 import it.unipi.mcsn.pad.core.message.Message;
@@ -23,16 +19,12 @@ import it.unipi.mcsn.pad.core.message.NodeMessage;
 import it.unipi.mcsn.pad.core.message.PutMessage;
 import it.unipi.mcsn.pad.core.message.RemoveMessage;
 
-public class ClientRunner {
-	
-	
-	
-	
-	public static void main (String args[]){
-		
-		
-		try {						
-			
+public class ClientRunner 
+{	
+	public static void main (String args[])
+	{	
+		try
+		{			
 			CommandLineManager clm = new CommandLineManager(args); 
 			
 			// If asked help, show help message and quit
@@ -50,7 +42,7 @@ public class ClientRunner {
 			else{
 				configFile = new File ("src/main/resources/client.conf");
 			}
-			//System.out.println("Configuration file exists? " + configFile.exists()); // TODO throw exception if config file does not exist?
+			
 			ClientConfig cc = new ClientConfig(configFile);
 			Client c = new RandomClient(cc); 
 						
@@ -101,8 +93,9 @@ public class ClientRunner {
 							else				 
 							    System.out.println(formatReply(msg, reply));							
 						}
-						else
-							System.out.println("No reply has been received from the service");						
+						else{
+							System.out.println("No reply has been received from the service"); 
+						}													
 					}					 
 				 }
 			}
@@ -129,24 +122,12 @@ public class ClientRunner {
 					}
 					else
 						System.out.println("No reply has been received");
-			}
-			
-			 
-			 	
-			
-			
-			
-			
-			
+			}			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 			System.out.println(e.getMessage());
 			System.out.println("Use \"--help\" to show general usage information about client's command line");
 		}
@@ -174,6 +155,4 @@ public class ClientRunner {
 				"- remove              to remove a url \n" +
 				"- quit                to quit the interactive session \n");
 	}
-
-
 }

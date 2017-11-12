@@ -20,9 +20,9 @@
 \newlabel{fig:architecture}{{1}{5}}
 \@writefile{toc}{\contentsline {paragraph}{communication}{5}}
 \@writefile{toc}{\contentsline {subparagraph}{client}{5}}
+\@writefile{toc}{\contentsline {subparagraph}{node}{5}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces UML class diagram, showing up relationships among classes in the core.communication.client subpackage\relax }}{6}}
 \newlabel{fig:class_diag_core.communication.client }{{2}{6}}
-\@writefile{toc}{\contentsline {subparagraph}{node}{6}}
 \@writefile{toc}{\contentsline {paragraph}{message}{6}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces UML class diagram, showing up relationships among classes in the core.communication.node subpackage\relax }}{7}}
 \newlabel{fig:class_diag_core.communication.node }{{3}{7}}
@@ -30,29 +30,24 @@
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces UML class diagram, showing up relationships among classes in the core.message subpackage\relax }}{8}}
 \newlabel{fig:class_diag_core.message}{{4}{8}}
 \@writefile{toc}{\contentsline {paragraph}{utils}{8}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}The client module}{9}}
-\@writefile{toc}{\contentsline {paragraph}{Client}{9}}
-\@writefile{toc}{\contentsline {paragraph}{RandomClient}{9}}
-\@writefile{toc}{\contentsline {paragraph}{ClientConfig}{9}}
-\@writefile{toc}{\contentsline {paragraph}{CommandLineManager}{9}}
-\@writefile{toc}{\contentsline {paragraph}{ClientRunner}{9}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}The client module}{8}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Use cases}{9}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Processing of a PUT request}{9}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Uml Class Diagram of the core module. It is shown the internal composition of the node, which is the building block of the cluster. A node is made of a NodeCommunicationService, a ClientCommunicationService and a StorageService. In turn, these services rely on proper managers, who actually implement the functionalities of the services. Where omitted, cardinalities are 1.\relax }}{10}}
 \newlabel{fig:class_diag}{{5}{10}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Test}{11}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.1}Replication of data}{11}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.2}Primary failure}{11}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.3}Primary re-joins cluster after failure}{11}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Sequence diagram for the processing of a PUT request, when the node contacted by the client is not the primary.\relax }}{12}}
-\newlabel{fig:sequence_diagram_complete}{{6}{12}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Sequence diagram for the processing of a PUT request, when the node contacted by the client is not the primary.\relax }}{11}}
+\newlabel{fig:sequence_diagram_complete}{{6}{11}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Test}{12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.1}Replication of data}{12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.2}Primary failure}{12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.3}Primary re-joins cluster after failure}{12}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.4}Conflict Resolution}{12}}
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Behaviour of the system in absence of failures: the request is processed by the primary.\relax }}{13}}
 \newlabel{fig:conflict1}{{7}{13}}
 \@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Behaviour of the system in case of failure of the primary: the requests are processed by its backup node.\relax }}{13}}
 \newlabel{fig:conflict2}{{8}{13}}
 \@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces The failed node is recovered and re-joins the cluster. The backup node discovers that the primary is alive again as soon as it receives an UpdateMessage from it. At this point the database received from the primary is discarded by the backup node, because it contains outdated information. Instead, the backup node sends to the primary the collection of urls that from now on will be managed by the primary.\relax }}{13}}
 \newlabel{fig:conflict3}{{9}{13}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.0.4}Conflict Resolution}{13}}
 \@writefile{toc}{\contentsline {paragraph}{Birth of a conflict}{13}}
 \@writefile{toc}{\contentsline {paragraph}{Conflict management}{13}}
 \@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Algorithm run by backup node\relax }}{14}}

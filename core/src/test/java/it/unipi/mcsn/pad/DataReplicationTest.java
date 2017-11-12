@@ -33,18 +33,19 @@ public class DataReplicationTest{
 	@BeforeClass
 	public static void setupCluster(){		
 		try {
-			List<Integer> virtualInstances=null;	    	
-	    	Map<String, Integer> ports= null;
+			List<Integer> virtualInstances=null;
 	    	File configFile = new File ("src/main/resources/core.conf");
 	    	List<String> addresses;
 			addresses = NodeRunner.getAddressesFromFile(configFile);
 			virtualInstances = NodeRunner.getVirtualInstancesFromFile(configFile);
 			backupIntervals =  NodeRunner.getBackupIntervalsFromFile(configFile);
-			ports = NodeRunner.getPortsFromFile(configFile);
-			int gossipPort = ports.get("gossip_port");
-			int clientPort = ports.get("client_port");
-			int nodePort = ports.get("node_port");			    		
-			GossipSettings settings = new GossipSettings();			
+			Map<String, Integer> confs = NodeRunner.getConfFromFile(configFile);
+    		int gossipPort = confs.get("gossip_port");
+    		int clientPort = confs.get("client_port");
+    		int nodePort = confs.get("node_port");    		
+    		int gossipInterval = confs.get("gossip_interval");
+    		int cleanupInterval = confs.get("cleanup_interval");
+    		GossipSettings settings = new GossipSettings(gossipInterval, cleanupInterval); 			
 			List<GossipMember> startupMembers = new ArrayList<>();
 			for (int i = 0; i < addresses.size(); ++i) {
 				startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); 
@@ -55,7 +56,8 @@ public class DataReplicationTest{
 						LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
 						virtualInstances.get(i), backupIntervals.get(i));
 				node.start();
-				nodes.add(node);    				   
+				nodes.add(node);  
+				Thread.sleep(5000);
 			} 
 		}		
 		catch (IOException e) {
@@ -87,7 +89,7 @@ public class DataReplicationTest{
 			String surl = manager.getShortUrl(cmsg);
 			int primaryId = manager.findPrimary(surl);			
 			String primaryUrl = nodes.get(primaryId).getStorageService().getStorageManager().read(surl).getValue();	
-			Thread.sleep(backupIntervals.get(primaryId));
+			Thread.sleep(8000);
 			int backupId = (primaryId + 1) % nodes.size();		
 			String backupUrl = nodes.get(backupId).getStorageService().getStorageManager().readBackup(surl).getValue();
 			assertEquals("The Backup node must have a copy of the url"

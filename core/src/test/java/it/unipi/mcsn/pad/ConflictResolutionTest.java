@@ -41,18 +41,19 @@ public class ConflictResolutionTest {
 	@Before
 	public  void setupCluster(){		
 		try {
-			List<Integer> virtualInstances=null;	    	
-	    	Map<String, Integer> ports= null;
+			List<Integer> virtualInstances=null;
 	    	File configFile = new File ("src/main/resources/core.conf");
 	    	List<String> addresses;
 			addresses = NodeRunner.getAddressesFromFile(configFile);
 			virtualInstances = NodeRunner.getVirtualInstancesFromFile(configFile);
 			backupIntervals =  NodeRunner.getBackupIntervalsFromFile(configFile);
-			ports = NodeRunner.getPortsFromFile(configFile);
-			int gossipPort = ports.get("gossip_port");
-			int clientPort = ports.get("client_port");
-			int nodePort = ports.get("node_port");			    		
-			GossipSettings settings = new GossipSettings();			
+			Map<String, Integer> confs = NodeRunner.getConfFromFile(configFile);
+    		int gossipPort = confs.get("gossip_port");
+    		int clientPort = confs.get("client_port");
+    		int nodePort = confs.get("node_port");    		
+    		int gossipInterval = confs.get("gossip_interval");
+    		int cleanupInterval = confs.get("cleanup_interval");
+    		GossipSettings settings = new GossipSettings(gossipInterval, cleanupInterval); 						
 			List<GossipMember> startupMembers = new ArrayList<>();
 			for (int i = 0; i < addresses.size(); ++i) {
 				startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); //TODO: fix the id
@@ -63,7 +64,8 @@ public class ConflictResolutionTest {
 						LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
 						virtualInstances.get(i), backupIntervals.get(i));
 				node.start();
-				nodes.add(node);    				   
+				nodes.add(node);  
+				Thread.sleep(5000);
 			} 
 		}		
 		catch (IOException e) {			
@@ -117,7 +119,7 @@ public class ConflictResolutionTest {
 			nodes.get(primaryId).getStorageService().getStorageManager().store(updated);
 			underTest.restart();
 			System.out.println("Primary node restarted...");		
-			Thread.sleep(30000); //20000
+			Thread.sleep(40000); //20000
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			cmsg = new GetMessage(surl);	
@@ -169,7 +171,7 @@ public class ConflictResolutionTest {
 			manager.processClientMessage(remove);
 			underTest.restart();
 			System.out.println("Primary node restarted...");		
-			Thread.sleep(30000); //20000
+			Thread.sleep(40000); //20000
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			cmsg = new GetMessage(surl);	

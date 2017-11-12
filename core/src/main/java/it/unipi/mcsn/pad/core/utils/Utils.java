@@ -12,16 +12,6 @@ import com.google.common.hash.Hashing;
 
 public class Utils {
 	
-	/*
-	public static int getIntegerIpAddress (String ipAddress) throws NumberFormatException
-	{		
-		StringTokenizer tokenizer = new StringTokenizer(ipAddress, ".");
-		StringBuffer stringId=null;
-		while(tokenizer.hasMoreTokens())
-			stringId.append(tokenizer.nextToken());
-		return Integer.parseInt(stringId.toString());		
-	}*/
-	
 	/**
 	 * Returns the byte representation of an arbitrary object
 	 * @throws IOException
@@ -49,8 +39,6 @@ public class Utils {
 	 public static String generateShortUrl (String longUrl){
 		 String prefix = "pad.ly/";
 		 String id = Hashing.murmur3_32().hashString(longUrl, StandardCharsets.UTF_8).toString();
-		//byte [] bid = StandardCharsets.US_ASCII).asBytes();
-		// String id = new String(bid, StandardCharsets.US_ASCII);
 		 return prefix + id;
 	 }
 }

@@ -37,18 +37,19 @@ public class PrimaryFailureTest {
 	@Before
 	public  void setupCluster(){		
 		try {
-			List<Integer> virtualInstances=null;	    	
-	    	Map<String, Integer> ports= null;
+			List<Integer> virtualInstances=null;
 	    	File configFile = new File ("src/main/resources/core.conf");
 	    	List<String> addresses;
 			addresses = NodeRunner.getAddressesFromFile(configFile);
 			virtualInstances = NodeRunner.getVirtualInstancesFromFile(configFile);
 			backupIntervals =  NodeRunner.getBackupIntervalsFromFile(configFile);
-			ports = NodeRunner.getPortsFromFile(configFile);
-			int gossipPort = ports.get("gossip_port");
-			int clientPort = ports.get("client_port");
-			int nodePort = ports.get("node_port");			    		
-			GossipSettings settings = new GossipSettings();			
+			Map<String, Integer> confs = NodeRunner.getConfFromFile(configFile);
+    		int gossipPort = confs.get("gossip_port");
+    		int clientPort = confs.get("client_port");
+    		int nodePort = confs.get("node_port");    		
+    		int gossipInterval = confs.get("gossip_interval");
+    		int cleanupInterval = confs.get("cleanup_interval");
+    		GossipSettings settings = new GossipSettings(gossipInterval, cleanupInterval); 			
 			List<GossipMember> startupMembers = new ArrayList<>();
 			for (int i = 0; i < addresses.size(); ++i) {
 				startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + ""));
@@ -59,7 +60,8 @@ public class PrimaryFailureTest {
 						LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
 						virtualInstances.get(i), backupIntervals.get(i));
 				node.start();
-				nodes.add(node);    				   
+				nodes.add(node);    
+				Thread.sleep(5000);
 			} 
 		}		
 		catch (IOException e) {			
@@ -91,16 +93,18 @@ public class PrimaryFailureTest {
 			manager.processClientMessage(cmsg);				
 			String surl = manager.getShortUrl(cmsg);
 			int primaryId = manager.findPrimary(surl);	
-			Thread.sleep(12000);
-			nodes.get(primaryId).shutdown();						
+			Thread.sleep(7000);
+			nodes.get(primaryId).shutdownWithFailure();						
 			nodes.remove(primaryId); 
-			Thread.sleep(26000);
+			Thread.sleep(15000);
 			cmsg = new GetMessage(surl);		
 			randomId = new Random().nextInt(nodes.size());			
 			manager = nodes.get(randomId).getNodeCommService().getCommunicationManager();
-			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);			
+			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);	
+			//nodes.add(off);
 			assertEquals("In case of primary failure, the system should automatically react"
 					+ "by using the backup node to answer the request", url, reply.getLongUrl());
+			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (MessageTypeException e) {
@@ -120,7 +124,7 @@ public class PrimaryFailureTest {
 			int primaryId = manager.findPrimary(surl);	
 			System.out.println("Primary node before crashing = " + primaryId);
 			Thread.sleep(12000); //12
-			nodes.get(primaryId).shutdown();
+			nodes.get(primaryId).shutdownWithFailure();
 			Node underTest = nodes.remove(primaryId);
 			Thread.sleep(25000); //25
 			cmsg = new GetMessage(surl);		
@@ -130,7 +134,7 @@ public class PrimaryFailureTest {
 			System.out.println("Primary node after crashing = " + primaryId);
 			underTest.restart();			
 			nodes.add(underTest);
-			Thread.sleep(30000); 
+			Thread.sleep(40000); 
 			primaryId = manager.findPrimary(surl);
 			System.out.println("Primary node after re-joining of crashed node = " + primaryId);
 			NodeMessage reply = (NodeMessage) manager.processClientMessage(cmsg);			

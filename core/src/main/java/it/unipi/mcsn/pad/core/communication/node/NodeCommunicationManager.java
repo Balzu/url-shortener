@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.log4j.Logger;
+
 import com.google.code.gossip.GossipMember;
 import com.google.code.gossip.LocalGossipMember;
 import com.google.code.gossip.manager.GossipManager;
@@ -15,8 +17,11 @@ import it.unipi.mcsn.pad.consistent.ConsistentHasher;
 import it.unipi.mcsn.pad.consistent.ConsistentHasher.HashFunction;
 import it.unipi.mcsn.pad.core.message.ClientMessage;
 import it.unipi.mcsn.pad.core.message.Message;
+import it.unipi.mcsn.pad.core.message.MessageStatus;
 import it.unipi.mcsn.pad.core.message.MessageType;
 import it.unipi.mcsn.pad.core.message.NodeMessage;
+import it.unipi.mcsn.pad.core.message.SizedBackupMessage;
+import it.unipi.mcsn.pad.core.message.UpdateMessage;
 import it.unipi.mcsn.pad.core.message.VersionedMessage;
 import it.unipi.mcsn.pad.core.storage.StorageService;
 import it.unipi.mcsn.pad.core.utils.MessageHandler;
@@ -33,7 +38,7 @@ public class NodeCommunicationManager {
 	private RequestManager requestManager;
 	public NodeCommunicationService nodeCommunicationService;
 	// I identify the buckets(= nodes) with a unique integer (node id) 
-	// and the members(=long_urls) with a String (their content).
+	// and the members(= urls) with a String (their content).
 	private Partitioner<Integer, String> partitioner;
 	private VectorClock vectorClock;
 	private int nodeId;
@@ -61,7 +66,7 @@ public class NodeCommunicationManager {
 				createBuckets(members));
 		vectorClock = vt;
 		nodeId = nid;
-		storageService = ss;
+		storageService = ss;		
 		
 		try {
 			replicaManager = new ReplicaManager(storageService, 3000, ipAddress, this, nid, backupInterval);
@@ -80,9 +85,29 @@ public class NodeCommunicationManager {
 	}
 	
 	public void shutdown() {
+		try {
+			replicaManager.sendBackupDB();
+			if (!replicaManager.isLast()){
+				informLeaving();
+				storageService.getStorageManager().emptyPrimary();
+			}			
+			requestManager.shutdown();
+			replicaManager.shutdown();
+		} catch (NullPointerException e) {
+			Logger.getLogger("myLogger").info("The last node of the cluster has been shut down");;
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}				
+	}	
+	
+	public void shutdownWithFailure() {
 		requestManager.shutdown();
 		replicaManager.shutdown();
-	}	
+	}
 	
 	/**
 	 * Processes the message: finds the primary node and sends the message to it
@@ -158,8 +183,7 @@ public class NodeCommunicationManager {
 		members.add(gManager.getMyself());
 		List<Integer> buckets = createBuckets(members);
 		return partitioner.findPrimary(key, buckets);		
-	}
-	
+	}	
 	
 	private List<Integer> createBuckets(List<LocalGossipMember> members){
 		List<Integer> buckets = new ArrayList<>();
@@ -198,9 +222,6 @@ public class NodeCommunicationManager {
 		return surl;
 	}
 	
-	public int getClusterSize(){
-		return nodeCommunicationService.getGossipService().get_gossipManager().getMemberList().size()+1;
-	}
 	
 	public RequestManager getRequestManager(){
 	 	return requestManager;
@@ -214,4 +235,23 @@ public class NodeCommunicationManager {
 		public NodeCommunicationService getNodeCommunicationService() {
 			return nodeCommunicationService;
 		}		
+		
+		public void informLeaving() throws NullPointerException, UnknownHostException, InterruptedException, ExecutionException{
+			UpdateMessage leave = new SizedBackupMessage(0, nodeId, false, MessageStatus.SUCCESS, MessageType.LEAVE);	
+			int replica = replicaManager.findBackup();
+			String replicaAddress = getMemberFromId(replica).getHost();
+			replicaManager.addMemberToGossipListIfDead(replica);
+			int replicaPort = requestManager.getPort();
+			UpdateMessage informed = (UpdateMessage)requestManager.sendMessage(leave, replicaAddress, replicaPort);			
+			if (informed == null){ //either is the last node in the cluster or the gossip protocol is giving temporary wrong results
+				int c = 0;
+				while (c < 3 && informed == null){
+					replica = replicaManager.findBackup();
+					replicaAddress = getMemberFromId(replica).getHost();
+					replicaManager.addMemberToGossipListIfDead(replica);
+					informed = (UpdateMessage)requestManager.sendMessage(leave, replicaAddress, replicaPort);	
+					c++;
+				}
+			}
+		}
 }

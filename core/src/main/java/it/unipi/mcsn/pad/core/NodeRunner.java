@@ -34,6 +34,12 @@ public class NodeRunner
 				clm.printHelp();
 				System.exit(0);
 			}
+			
+			if (!clm.hasNode()){
+				System.err.println("Have to specify the id of the node you want to start \n");
+				clm.printHelp();
+				System.exit(-1);
+			}
     		
 			File configFile;
 			if (clm.hasConfigFile()){
@@ -46,25 +52,28 @@ public class NodeRunner
     		List<String> addresses =  getAddressesFromFile(configFile);
     		List<Integer> virtualInstances = getVirtualInstancesFromFile(configFile);
     		List<Integer> backupIntervals =  getBackupIntervalsFromFile(configFile);
-    		Map<String, Integer> ports = getPortsFromFile(configFile);
-    		int gossipPort = ports.get("gossip_port");
-    		int clientPort = ports.get("client_port");
-    		int nodePort = ports.get("node_port");    		
-    		    		
-    		GossipSettings settings = new GossipSettings();    		
+    		Map<String, Integer> confs = getConfFromFile(configFile);
+    		int gossipPort = confs.get("gossip_port");
+    		int clientPort = confs.get("client_port");
+    		int nodePort = confs.get("node_port");    		
+    		int gossipInterval = confs.get("gossip_interval");
+    		int cleanupInterval = confs.get("cleanup_interval");
+    		GossipSettings settings = new GossipSettings(gossipInterval, cleanupInterval);    		
     		List<GossipMember> startupMembers = new ArrayList<>();
     		for (int i = 0; i < addresses.size(); ++i) {
     			startupMembers.add(new RemoteGossipMember(addresses.get(i), gossipPort, i + "")); 
-    		}    		
-    		List<Node> nodes = new ArrayList<>();
-    		for (int i = 0; i < addresses.size(); ++i) {	    			
-    			Node node = new Node(clientPort, 50, addresses.get(i), gossipPort, i+"" , 
-    					LogLevel.DEBUG,	startupMembers, settings, null,  i, nodePort,
-    					virtualInstances.get(i), backupIntervals.get(i));
-    			node.start();
-    			nodes.add(node);    				   
-    		}       	    		
-    		System.out.println("url-shortener service is running... ");
+    		}
+    		int nid = Integer.parseInt(clm.getNode());
+    		if (nid < 0 || nid >= addresses.size()){
+    			System.err.println("Invalid node id provided: the ids of the nodes in the cluster"
+    					+ " range from 1 to" + addresses.size() + " \n");
+    			System.exit(1);
+    		}
+    			Node node = new Node(clientPort, 50, addresses.get(nid), gossipPort, nid+"" , 
+    					LogLevel.DEBUG,	startupMembers, settings, null,  nid, nodePort,
+    					virtualInstances.get(nid), backupIntervals.get(nid));
+    			node.start();      	    		
+    		System.out.println("Node " + nid + " is running the url-shortener service... ");
     		BufferedReader stdIn = new BufferedReader(
 					new InputStreamReader(System.in));	
 		    String input;
@@ -72,10 +81,8 @@ public class NodeRunner
     			displayUsageMessage();
     			input = stdIn.readLine();
     			if (input.equals("quit")){
-    				System.out.println("Shutting down the service... ");
-    				for (Node node : nodes){
-    					node.shutdown();
-    				}
+    				System.out.println("Shutting down the service... ");    			
+    				node.shutdown();
     				System.exit(0);
     			}
     		}
@@ -159,7 +166,7 @@ public class NodeRunner
  
  
     
-    public static Map<String, Integer> getPortsFromFile(File configFile) throws IOException, JSONException{
+    public static Map<String, Integer> getConfFromFile(File configFile) throws IOException, JSONException{
     	
     	Map<String, Integer> map = new HashMap<String, Integer>();
 		BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -173,9 +180,13 @@ public class NodeRunner
 		int gossipPort = jsonObject.getInt("gossip_port");
 		int clientPort = jsonObject.getInt("client_port");
 		int nodePort = jsonObject.getInt("node_port");
+		int gossipInterval = jsonObject.getInt("gossip_interval");
+		int cleanupInterval = jsonObject.getInt("cleanup_interval");
 		map.put("gossip_port", gossipPort);
 		map.put("client_port", clientPort);
 		map.put("node_port", nodePort);
+		map.put("gossip_interval", gossipInterval);
+		map.put("cleanup_interval", cleanupInterval);
 		
 		return map;
     }
