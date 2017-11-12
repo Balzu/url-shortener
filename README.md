@@ -58,6 +58,6 @@ There are two main limitations above the others:
 * **eventual consistency**: in some cases, especially in case of failure of some node, the system takes a lot of time to reach consistency. This is what happens in the tests: usually they work as expected, but when they fail it is because the system has not reached consistency yet
 
 ## TODO
-Although the system works quite well, last changes broke some test. There is also some minor bug that still has to be fixes.
+Although the system works quite well, last changes broke some tests. There is also some minor bugs that still has to be fixed.
 
 
