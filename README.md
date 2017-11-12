@@ -53,8 +53,11 @@ where
 
 There are two main limitations above the others:
 
-* **Replica management**: I designated the project with scalability in mind, that's why I avoided a replication strategy based on multicast. Anyway the solution I devised offers no way to solve replication problems in a general way, so I had to patch all the bugs by hand. This made the code dirtier in some parts and does not provide strong guarantees that the system is bug-free, although now it seems to work smoothly;
+* **Replica management**: I designated the project with scalability in mind, that's why I avoided a replication strategy based on multicast. Anyway the solution I devised offers no way to solve replication problems in a general way, so I had to patch all the bugs by hand.
 
 * **eventual consistency**: in some cases, especially in case of failure of some node, the system takes a lot of time to reach consistency. This is what happens in the tests: usually they work as expected, but when they fail it is because the system has not reached consistency yet
+
+## TODO
+Although the system works quite well, last changes broke some test. There is also some minor bug that still has to be fixes.
 
 
